@@ -109,20 +109,7 @@ double Drive::GetDistance(){
 	return EncoderAverage(m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
 }
 
-void Drive::ResetDriveSpeed(){
-	m_driveSpeed = 0;
-}
-
-void Drive::ResetEncoders(){
-	m_lEncoder->Reset();
-	m_rEncoder->Reset();
-}
-
-void Drive::ResetGyro(){
-	m_rotateGyro->Reset();
-}
-
-bool Drive::Run(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, float JoyRotate){	
+bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, float JoyRotate){	
 	static int			AimCount = 0;
 	static double		LastDistance = 0;
 	static int			NoMoveCount = 0;
@@ -249,6 +236,19 @@ bool Drive::Run(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, float Joy
 	}
 	MecanumDrive(vDrive, vStrafe, vRotate, driveAll);
 	return vReturn;
+}
+
+void Drive::ResetDriveSpeed(){
+	m_driveSpeed = 0;
+}
+
+void Drive::ResetEncoders(){
+	m_lEncoder->Reset();
+	m_rEncoder->Reset();
+}
+
+void Drive::ResetGyro(){
+	m_rotateGyro->Reset();
 }
 
 void Drive::SetAngle(float Angle){

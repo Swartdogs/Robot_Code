@@ -393,7 +393,8 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/CFCode2013++.o:  \
   C:/WindRiver/workspace/CFHS_2013_Robot++/PIDLoop.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/SmartDashboard\SmartDashboard.h \
   C:/WindRiver/workspace/CFHS_2013_Robot++/DiskShooter.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Relay.h
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
 
@@ -1182,3 +1183,5 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/SmartDashboard\SmartDashboard.h:
 C:/WindRiver/workspace/CFHS_2013_Robot++/DiskShooter.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Relay.h:

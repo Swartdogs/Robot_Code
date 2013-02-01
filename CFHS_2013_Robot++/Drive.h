@@ -42,7 +42,7 @@ public:
     void	ResetDriveSpeed();
     void	ResetEncoders();
     void	ResetGyro();
-    bool	Run(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, float JoyRotate);
+    bool	Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, float JoyRotate);
     void	SetAngle(float Angle);
     void	SetDistance(double Distance);
     void	SetMaxSpeed(float Speed);

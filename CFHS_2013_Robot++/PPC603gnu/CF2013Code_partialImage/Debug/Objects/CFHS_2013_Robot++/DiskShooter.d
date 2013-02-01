@@ -139,7 +139,10 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/DiskShooter.o:  \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/PWM.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITableListener.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/SpeedController.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/PIDOutput.h
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/PIDOutput.h \
+  C:/WindRiver/workspace/CFHS_2013_Robot++/PIDLoop.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Relay.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h
 
 C:/WindRiver/workspace/CFHS_2013_Robot++/DiskShooter.h:
 
@@ -420,3 +423,9 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITableListener.h:
 C:/WindRiver/vxworks-6.3/target/h/WPILib/SpeedController.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/PIDOutput.h:
+
+C:/WindRiver/workspace/CFHS_2013_Robot++/PIDLoop.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Relay.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h:

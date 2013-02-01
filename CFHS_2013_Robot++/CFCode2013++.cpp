@@ -83,11 +83,14 @@ public:
 		
 		m_DiskShooter = new DiskShooter(1, 7,		//Shoot Motor PWM 7
 										1, 8,		//Tilt Motor PWM 8
+										1, 1,		//Tension Motor Relay 1
 										1, 3,		//Shoot Pot AM: 3
 										1, 4,		//Tilt Pot AM: 4
+										1, 5,		//Tension Pot AM: 5
 										1, 6,		//Disk Sensor DM: 6
 										0,			//Shoot Idle Pot Value
 										0,			//Tilt Zero Position
+										0,			//Tension Pot Zero Position
 										this, 3);	
 		
 		Team525::SetPeriod(0.02);
@@ -171,7 +174,7 @@ public:
 		static int  GoalFound = 0;
 			static bool buttonPressed = false;
 			
-			m_Drive->Run(Drive::dJoystick, m_joystick->GetY(), m_joystick->GetX(), m_joystick->GetZ());
+			m_Drive->Periodic(Drive::dJoystick, m_joystick->GetY(), m_joystick->GetX(), m_joystick->GetZ());
 			
 			if(m_joystick->GetRawButton(11)){
 				if(!buttonPressed){
@@ -220,7 +223,7 @@ public:
 		
 		if(Auto.StartDelay > 0){
 			Auto.StartDelay--;
-			m_Drive->Run(Drive::dStop, 0, 0, 0);
+			m_Drive->Periodic(Drive::dStop, 0, 0, 0);
 			m_Pickup->FeedSafety();
 			
 			PeriodicCount++;
@@ -228,7 +231,7 @@ public:
 		}
 		
 		if(Auto.StepIndex >= Auto.StepCount){
-			m_Drive->Run(Drive::dStop, 0, 0, 0);
+			m_Drive->Periodic(Drive::dStop, 0, 0, 0);
 			m_Pickup->FeedSafety();
 			
 			PeriodicCount++;
@@ -298,28 +301,28 @@ public:
 		}else{
 			switch(AutoStep[Auto.StepIndex].Action){
 				case actionDrive:
-					AutoStepDone = m_Drive->Run(Drive::dAutoDrive, 0, 0, 0);
+					AutoStepDone = m_Drive->Periodic(Drive::dAutoDrive, 0, 0, 0);
 					break;
 					
 				case actionTurn:
-					AutoStepDone = m_Drive->Run(Drive::dAutoRotate, 0, 0, 0);
+					AutoStepDone = m_Drive->Periodic(Drive::dAutoRotate, 0, 0, 0);
 					break;
 					
 				case actionShoot:
 					//ADD STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					m_Drive->Run(Drive::dStop, 0, 0, 0);
+					m_Drive->Periodic(Drive::dStop, 0, 0, 0);
 					
 				case actionShootCamera:
 					
 					break;
 					
 				case actionFrisbeePickup:
-					m_Drive->Run(Drive::dStop, 0, 0, 0);
+					m_Drive->Periodic(Drive::dStop, 0, 0, 0);
 					//ADD STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					break;
 					
 				case actionDumpFrisbees:
-					m_Drive->Run(Drive::dStop, 0, 0, 0);
+					m_Drive->Periodic(Drive::dStop, 0, 0, 0);
 					//ADD STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					break;
 					
@@ -330,10 +333,10 @@ public:
 		
 		if(AutoStepDone){
 			if(AutoStep[Auto.StepIndex].StopRobot){
-				m_Drive->Run(Drive::dStop, 0, 0, 0);
+				m_Drive->Periodic(Drive::dStop, 0, 0, 0);
 				m_Drive->ResetDriveSpeed();
 			}else{
-				m_Drive->Run(Drive::dCoast, 0, 0, 0);
+				m_Drive->Periodic(Drive::dCoast, 0, 0, 0);
 			}
 			
 			fprintf(LogFile, "%5d: Step %d Done  Time = %5.0f \n", PeriodicCount, Auto.StepIndex, TimeNow - PeriodBeginTime);
