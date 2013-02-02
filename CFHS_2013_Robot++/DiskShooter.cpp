@@ -33,20 +33,17 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 	
 	m_diskSensor = new DigitalInput(diskSensorModule, diskSensorChannel);
 	
-	m_shootIdlePosition = c_shootIdlePosition;	
-	m_tiltZeroOffset= c_tiltZeroOffset;
+	m_tiltTarget = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
+	m_tensionTarget = m_tensionPot->GetAverageValue() - c_tensionZeroOffset;
 	
-	m_tiltTarget = m_tiltPot->GetAverageValue() - m_tiltZeroOffset;
-	m_tensionTarget = m_tensionPot->GetAverageValue() - m_tensionZeroOffset;
-	
-	if(m_shootPot->GetAverageValue() > m_shootIdlePosition + 20){
+	if(m_shootPot->GetAverageValue() > c_shootIdlePosition + 20){
 		m_shootState = sShootReady;
 	}else{
 		m_shootState = sIdle;
 	}
 	
-	m_shootReadyPosition = m_shootIdlePosition + 500;
-	m_RELEASETHEFRISBEEPOSITION = m_shootIdlePosition + 250;
+	m_shootReadyPosition = c_shootIdlePosition + 500;
+	m_RELEASETHEFRISBEEPOSITION = c_shootIdlePosition + 250;
 	
 	m_tiltPID = new PIDLoop(0.025, 0, 0.02);
 	m_tiltPID->SetInputRange(0, (float)c_tiltRange);
@@ -106,7 +103,7 @@ INT32 DiskShooter::GetShooterPotValue(){
 }
 
 INT32 DiskShooter::GetTiltPosition(){
-	return m_tiltPot->GetAverageValue() - m_tiltZeroOffset;
+	return m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 }
 
 void DiskShooter::Load(){
@@ -117,13 +114,13 @@ void DiskShooter::Load(){
 
 bool DiskShooter::Periodic(){
 	static INT32 		curTiltTarget = m_tiltTarget;
-	INT32		 		curTiltPosition = m_tiltPot->GetAverageValue() - m_tiltZeroOffset;
+	INT32		 		curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 	static float 		tiltSpeed = 0.0;
 	float				shootSpeed = 0.0;
 	INT32				curShootPosition = GetShooterPotValue();
 	static bool			loadingFlag;
 	static INT32		curTensionTarget = m_tensionTarget;
-	INT32				curTensionPosition = m_tensionPot->GetAverageValue() - m_tensionZeroOffset;
+	INT32				curTensionPosition = m_tensionPot->GetAverageValue() - c_tensionZeroOffset;
 	static float		tensionSpeed = 0.0;
 	
 //----------------------------Tilt Related Stuff-------------------------------------
@@ -181,7 +178,7 @@ bool DiskShooter::Periodic(){
 			}
 		}
 	}else if(m_shootState == sShoot){
-		if(curShootPosition >= m_shootIdlePosition && curShootPosition < m_shootReadyPosition){
+		if(curShootPosition >= c_shootIdlePosition && curShootPosition < m_shootReadyPosition){
 			shootSpeed = 0.0;
 			m_shootState = sIdle;
 			loadingFlag = false;
@@ -196,7 +193,7 @@ bool DiskShooter::Periodic(){
 	
 	m_shootMotor->Set(shootSpeed);
 	
-	return (m_shootState == sShootReady && tiltSpeed == 0.0 && m_diskSensor->Get());
+	return (m_shootState == sShootReady && tiltSpeed == 0.0 && m_diskSensor->Get() == 0);
 }
 
 void DiskShooter::Shoot(){

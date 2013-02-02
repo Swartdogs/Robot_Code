@@ -42,7 +42,6 @@ private:
 	UINT8		   m_eventSourceId;
 	char		   m_Log[100];
 	INT32		   m_RELEASETHEFRISBEEPOSITION;
-	INT32		   m_shootIdlePosition;
 	Jaguar 		  *m_shootMotor;
 	PIDLoop		  *m_shootPID;
 	AnalogChannel *m_shootPot;
@@ -51,12 +50,10 @@ private:
 	Relay		  *m_tensionMotor;
 	INT32		   m_tensionTarget;
 	AnalogChannel *m_tensionPot;
-	INT32		   m_tensionZeroOffset;
 	Jaguar 		  *m_tiltMotor;
 	PIDLoop		  *m_tiltPID;
 	AnalogChannel *m_tiltPot;
 	INT32		   m_tiltTarget;
-	INT32		   m_tiltZeroOffset;
 	
 	INT32 		   GetShooterPotValue();
 };

@@ -94,7 +94,7 @@ public:
 						 	  1,10,  				//Hopper Gate Servo     PWM 10
 						 	  1,11,  				//Hopper Tilt Moter     PWM 11
 						 	  1,6,  			 	//Tilt Pot              AM: 6
-						 	  1,7,   				//Disk Sensor           DM: 7s
+						 	  1,7,   				//Disk Sensor           DM: 7
 						 	  this,4);
 		
 		Team525::SetPeriod(0.02);
@@ -176,33 +176,34 @@ public:
 	
 	void TestPeriodic(void){
 		static int  GoalFound = 0;
-			static bool buttonPressed = false;
-			
-			m_Drive->Periodic(Drive::dJoystick, m_joystick->GetY(), m_joystick->GetX(), m_joystick->GetZ());
-			
-			if(m_joystick->GetRawButton(11)){
-				if(!buttonPressed){
-					GoalFound = m_FindGoals->Find(0);
-					buttonPressed = true;
-					printf("Looking For Wall Targets\n");
-				}
-			}else if(m_joystick->GetRawButton(12)){
-				if(!buttonPressed){
-					GoalFound = m_FindGoals->Find(1);
-					buttonPressed = true;
-					printf("Looking For Pyramid Goal\n");
-				}
-			}else if(GoalFound != -1){
-				buttonPressed = false;
+		static bool buttonPressed = false;
+		
+		m_Hopper->Periodic();
+		m_Drive->Periodic(Drive::dJoystick, m_joystick->GetY(), m_joystick->GetX(), m_joystick->GetZ());
+		
+		if(m_joystick->GetRawButton(11)){
+			if(!buttonPressed){
+				GoalFound = m_FindGoals->Find(0);
+				buttonPressed = true;
+				printf("Looking For Wall Targets\n");
 			}
-			
-			if(GoalFound < 0){
-				GoalFound = m_FindGoals->Find();
-				if(GoalFound == 1){
-					GoalFound = 0;
-					printf("Distance = %d \nAngle = %f\n", m_FindGoals->GetDistance(), m_FindGoals->GetAngle());
-				}
+		}else if(m_joystick->GetRawButton(12)){
+			if(!buttonPressed){
+				GoalFound = m_FindGoals->Find(1);
+				buttonPressed = true;
+				printf("Looking For Pyramid Goal\n");
 			}
+		}else if(GoalFound != -1){
+			buttonPressed = false;
+		}
+		
+		if(GoalFound < 0){
+			GoalFound = m_FindGoals->Find();
+			if(GoalFound == 1){
+				GoalFound = 0;
+				printf("Distance = %d \nAngle = %f\n", m_FindGoals->GetDistance(), m_FindGoals->GetAngle());
+			}
+		}
 	}
 
 	void AutonomousPeriodic(void) {

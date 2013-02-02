@@ -27,13 +27,17 @@ Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 	m_event = eventHandler;
 	m_eventSourceId = eventSourceId;
 	
-	if(m_diskSensor->Get() == 0){
+	if(m_diskSensor->Get() == 1){
 		m_hopState = hLoad;
 	}else{
 		m_hopState = hStore;
 	}
 	
+	printf("State = %d \n", m_hopState);
+	
 	m_tiltTarget = m_hopperTiltPot->GetAverageValue();
+	
+	printf("Tilt Target = %d \n", m_tiltTarget);
 }
 
 Hopper::~Hopper(){
@@ -64,7 +68,7 @@ void Hopper::Enable(){
 }
 
 void Hopper::PELICANMOVE(bool pelicanStateEnabled){
-	if(m_diskSensor->Get() == 1){
+	if(m_diskSensor->Get() == 0){
 		m_pelicanStateEnabled = false;
 	}else{
 		m_pelicanStateEnabled = pelicanStateEnabled;
@@ -78,7 +82,9 @@ void Hopper::Periodic(){
 	INT32			deadband = 25;
 	static int		periodicCounter;
 	
-	if(m_pelicanStateEnabled == false || m_diskSensor->Get() == 1){
+	printf("Tilt Target = %d \n", curHopTiltPosition);
+
+	if(m_pelicanStateEnabled == false || m_diskSensor->Get() == 0){
 		m_pelicanStateEnabled = false;
 		if(curHopTiltTarget != m_tiltTarget){
 			curHopTiltTarget = m_tiltTarget;
@@ -113,7 +119,7 @@ void Hopper::Periodic(){
 		case hLoad:
 			m_shootGate->Set(c_shootGateClosed);
 			m_hopperGate->Set(c_hopGateOpen);
-			if(m_diskSensor->Get() == 1){
+			if(m_diskSensor->Get() == 0){
 				m_hopState = hStore;
 			}
 			break;
@@ -121,7 +127,7 @@ void Hopper::Periodic(){
 		case hShoot:
 			m_shootGate->Set(c_shootGateOpen);
 			m_hopperGate->Set(c_hopGateClosed);
-			if(m_diskSensor->Get() == 0){
+			if(m_diskSensor->Get() == 1){
 				m_hopState = hLoad;
 			}
 			break;
@@ -136,7 +142,7 @@ void Hopper::Periodic(){
 }
 
 void Hopper::RELEASETHEFRISBEES(){	
-	if(m_diskSensor->Get() == 1){
+	if(m_diskSensor->Get() == 0){
 		m_hopState = hShoot;
 	}
 }
