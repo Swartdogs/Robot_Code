@@ -60,37 +60,34 @@ class Team525: public IterativeRobot, public Events
 public:
 
 	Team525(void)	{
-		m_Drive = new Drive(1, 1,					//Left Front Motor PWM 1
-							1, 2,					//Left Rear Motor PWM 2
-							1, 3,					//Right Front Motor PWM 3
-							1, 4, 					//Right Rear Motor PWM 4
-							1, 1, 					//Left Encoder A DM: 1
-							1, 2,					//Left Encoder B DM: 2
-							1, 3,					//Right Encoder A DM: 3
-							1, 4,					//Right Encoder B DM: 4
-							1, 1,					//Rotational Gyro AM: 1
+		m_Drive = new Drive(1, 1,					//Left Front Motor 		PWM 1
+							1, 2,					//Left Rear Motor 		PWM 2
+							1, 3,					//Right Front Motor 	PWM 3
+							1, 4, 					//Right Rear Motor 		PWM 4
+							1, 1, 					//Left Encoder A 		DM: 1
+							1, 2,					//Left Encoder B 		DM: 2
+							1, 3,					//Right Encoder A 		DM: 3
+							1, 4,					//Right Encoder B 		DM: 4
+							1, 1,					//Rotational Gyro 		AM: 1
 							ROTATE_Deadband,
 							this, 1);
 		m_FindGoals = new FindGoals();
 		m_CameraLED = new Solenoid(1, 5);
-		m_Pickup = new Pickup(1, 5, 				//Pickup Motor PWM 5
-							  1, 6, 				//Flip Motor PWM 6
-							  1, 5, 				//Light Sensor DM: 5
-							  1, 2, 				//Pot AM: 2
+		m_Pickup = new Pickup(1, 5, 				//Pickup Motor 			PWM 5
+							  1, 6, 				//Flip Motor 			PWM 6
+							  1, 5, 				//Light Sensor 			DM: 5
+							  1, 2, 				//Pot 					AM: 2
 							  this, 2);
 		
 		m_joystick = new Joystick(1);
 		
-		m_DiskShooter = new DiskShooter(1, 7,		//Shoot Motor PWM 7
-										1, 8,		//Tilt Motor PWM 8
-										1, 1,		//Tension Motor Relay 1
-										1, 3,		//Shoot Pot AM: 3
-										1, 4,		//Tilt Pot AM: 4
-										1, 5,		//Tension Pot AM: 5
-										1, 6,		//Disk Sensor DM: 6
-										0,			//Shoot Idle Pot Value
-										0,			//Tilt Zero Position
-										0,			//Tension Pot Zero Position
+		m_DiskShooter = new DiskShooter(1, 7,		//Shoot Motor 			PWM 7
+										1, 8,		//Tilt Motor 			PWM 8
+										1, 1,		//Tension Motor 		Relay 1
+										1, 3,		//Shoot Pot 			AM: 3
+										1, 4,		//Tilt Pot 				AM: 4
+										1, 5,		//Tension Pot 			AM: 5
+										1, 6,		//Disk Sensor 			DM: 6
 										this, 3);	
 		
 		Team525::SetPeriod(0.02);
