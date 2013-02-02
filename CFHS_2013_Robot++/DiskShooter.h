@@ -40,26 +40,26 @@ public:
 private:
 	typedef enum{sIdle, sLoad, sShootReady, sShoot}ShootState;
 	
-	Jaguar 		  *m_shootMotor;
-	Jaguar 		  *m_tiltMotor;
-	AnalogChannel *m_shootPot;
-	AnalogChannel *m_tiltPot;
 	DigitalInput  *m_diskSensor;
 	Events		  *m_event;
-	char		   m_Log[100];
 	UINT8		   m_eventSourceId;
-	INT32		   m_shootIdlePosition;
-	INT32		   m_shootReadyPosition;
+	char		   m_Log[100];
 	INT32		   m_RELEASETHEFRISBEEPOSITION;
-	INT32		   m_tiltZeroOffset;
-	INT32		   m_tiltTarget;
-	ShootState 	   m_shootState;
-	PIDLoop		  *m_tiltPID;
+	INT32		   m_shootIdlePosition;
+	Jaguar 		  *m_shootMotor;
 	PIDLoop		  *m_shootPID;
+	AnalogChannel *m_shootPot;
+	INT32		   m_shootReadyPosition;
+	ShootState 	   m_shootState;
 	Relay		  *m_tensionMotor;
-	AnalogChannel *m_tensionPot;
 	INT32		   m_tensionTarget;
+	AnalogChannel *m_tensionPot;
 	INT32		   m_tensionZeroOffset;
+	Jaguar 		  *m_tiltMotor;
+	PIDLoop		  *m_tiltPID;
+	AnalogChannel *m_tiltPot;
+	INT32		   m_tiltTarget;
+	INT32		   m_tiltZeroOffset;
 	
 	INT32 		   GetShooterPotValue();
 };

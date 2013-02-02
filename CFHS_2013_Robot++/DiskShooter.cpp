@@ -60,16 +60,16 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 }
 
 DiskShooter::~DiskShooter(){
-	delete m_shootMotor;
-	delete m_tiltMotor;
-	delete m_shootPot;
-	delete m_tiltPot;
 	delete m_diskSensor;
 	delete m_event;
-	delete m_tiltPID;
+	delete m_shootMotor;
 	delete m_shootPID;
-	delete m_tensionPot;
+	delete m_shootPot;
 	delete m_tensionMotor;
+	delete m_tensionPot;
+	delete m_tiltMotor;
+	delete m_tiltPID;
+	delete m_tiltPot;
 }
 
 void DiskShooter::Disable(){
@@ -91,8 +91,8 @@ void DiskShooter::Enable(){
 }
 
 INT32 DiskShooter::GetShooterPotValue(){
-	static INT32 lastReading = 0;
 	INT32 		 curReading = 0;
+	static INT32 lastReading = 0;
 	
 	curReading = m_shootPot->GetAverageValue();
 	if(curReading < lastReading){
