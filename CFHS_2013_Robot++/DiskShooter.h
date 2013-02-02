@@ -20,9 +20,6 @@ public:
 				UINT8   tiltPotModule,		UINT32 tiltPotChannel,
 				UINT8   tensionPotModule,	UINT32 tensionPotChannel,
 				UINT8   diskSensorModule,	UINT32 diskSensorChannel,
-				INT32   shootIdlePosition,	
-				INT32   tiltZeroOffset,
-				INT32	tensionZeroOffset,
 				Events *eventHandler,		UINT8  eventSourceId);
 	
 	~DiskShooter();
