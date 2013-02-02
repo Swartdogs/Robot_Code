@@ -70,23 +70,15 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 	}
 }
 
-void Hopper::Periodic(){
+void Hopper::Periodic(float joyValue){
 	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 	static float	tiltSpeed = 0.0;
 	static int		periodicCounter;
 	
-	if(m_pelicanStateEnabled == false || m_diskSensor->Get() == 1){
-		m_pelicanStateEnabled = false;
-		
-		if(curTiltPosition < m_tiltTarget - c_tiltDeadband){
-			tiltSpeed = 1.0;
-		}else if(curTiltPosition > m_tiltTarget + c_tiltDeadband) {
-			tiltSpeed = -1.0;
-		}else{
-			tiltSpeed = 0.0;
-		}
-	
-	}else{
+	if(joyValue != 0){
+		tiltSpeed = joyValue;
+		m_tiltTarget = curTiltPosition;
+	}else if(m_pelicanStateEnabled == true && m_diskSensor->Get() == 0){
 		periodicCounter++;
 		if(periodicCounter <= 10){
 			tiltSpeed = 1.0;
@@ -98,6 +90,15 @@ void Hopper::Periodic(){
 			tiltSpeed = 0;
 		}else{
 			periodicCounter = 0;
+		}
+	}else{
+		m_pelicanStateEnabled = false;
+		if(curTiltPosition < m_tiltTarget - c_tiltDeadband){
+			tiltSpeed = 1.0;
+		}else if(curTiltPosition > m_tiltTarget + c_tiltDeadband) {
+			tiltSpeed = -1.0;
+		}else{
+			tiltSpeed = 0.0;
 		}
 	}
 	
@@ -135,6 +136,20 @@ void Hopper::RELEASETHEFRISBEES(){
 	}
 }
 
-void Hopper::SetTiltTarget(INT32 Target){
-	m_tiltTarget = Target;
+void Hopper::SetTiltTarget(HopTarget Target){
+	switch(Target){
+		case hFeeder:
+			m_tiltTarget = 50;
+			break;
+			
+		case hDrive:
+			m_tiltTarget = 25;
+			break;
+			
+		case hPyramid:
+			m_tiltTarget = 0;
+			break;
+			
+		default:;
+	}
 }

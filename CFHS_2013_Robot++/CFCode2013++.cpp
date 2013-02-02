@@ -1,3 +1,25 @@
+//ButtonBox:
+//	1 - Toggle Switch for Tilt Joystick (false = Hopper, true = Shooter)
+//  2 - Move Hopper to feeder position
+//  3 - Move Hopper to drive position
+//  4 - Move Hopper to pyramid position
+//  5 - Move Shooter bed to long position
+//  6 - Move Shooter bed to short position
+//  7 - Move Shooter bed to flop position 
+//  8 - 
+//  9 - 
+//  10- 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 #include "WPILib.h"
 #include "Events.h"
 #include "FindGoals.h"
@@ -38,7 +60,9 @@ class Team525: public IterativeRobot, public Events
 	DiskPickup	   *m_pickup;
 	FindGoals 	   *m_findGoals;
 	Hopper         *m_hopper;
-	Joystick  	   *m_joystick;
+	Joystick  	   *m_driveJoystick;
+	Joystick       *m_tiltJoystick;
+	Joystick	   *m_buttonBox;
 	Solenoid  	   *m_cameraLED;
 	StructAuto 		m_auto;
 	StructAutoStep *m_autoStep;
@@ -80,7 +104,9 @@ public:
 							      1, 2, 			// Flip Pot 			AM 1: Analog 2
 							      this, 2);
 		
-		m_joystick = new Joystick(1);
+		m_driveJoystick = new Joystick(1);
+		m_tiltJoystick = new Joystick(2);
+		m_buttonBox = new Joystick(3);
 		
 		m_shooter = new DiskShooter(1, 7,			// Shoot Motor 			DM 1: PWM 7
 									1, 8,			// Tilt Motor 			DM 1: PWM 8
@@ -104,9 +130,9 @@ public:
 		
 		m_periodicCount = -1;
 		WriteToLog("");
-		WriteToLog("525 Constructor");
+		WriteToLog("525 2013 Constructor");
 		
-		printf("525 Constructor \n");
+		printf("525 2013 Constructor \n");
 	}
 	
 	void RobotInit(void) {
@@ -118,7 +144,6 @@ public:
 		m_autoModeId0 = 0;
 		m_autoModeId1 = 1;
 		m_autoModeId2 = 2;
-		m_periodicCount = -1;
 		
 		BootFile = fopen("Boot525.txt", "rb");
 			if (!feof(BootFile)) fread(&BootCount, sizeof(int), 1, BootFile);
@@ -130,11 +155,11 @@ public:
 			fwrite (&BootCount, sizeof(int), 1, BootFile);
 		fclose(BootFile);
 		
-		WriteToLog("525 Robot Init (Build 1)");
-		sprintf(m_log, "525 Robot Boot %d", BootCount);
+		WriteToLog("525 2013 Robot Init (Build 1)");
+		sprintf(m_log, "525 2013 Robot Boot %d", BootCount);
 		WriteToLog(m_log);
 		
-		printf("525 Robot Init \n");
+		printf("525 2013 Robot Init \n");
 	}
 	
 /**************************************** DISABLED *******************************************/
@@ -142,11 +167,12 @@ public:
 	void DisabledInit(void) {
 		m_cameraLED->Set(false);
 		m_drive->Disable();
+		m_periodicCount = -1;
 		
-		WriteToLog("525 Disabled Init");
+		WriteToLog("525 2013 Disabled Init");
 		fclose(m_logFile);
 		
-		printf("525 Disabled Init \n");
+		printf("525 2013 Disabled Init \n");
 	}
 
 	void DisabledPeriodic(void)  {
@@ -186,7 +212,7 @@ public:
 		sprintf(m_log, "Autonomous Init: AutoMode=%d  Delay=%d", AutoMode, AutoDelay);
 		WriteToLog("m_log");
 		
-		printf("525 Auto Init: Mode=%d  Delay=%d \n", AutoMode, AutoDelay);
+		printf("525 2013 Auto Init: Mode=%d  Delay=%d \n", AutoMode, AutoDelay);
 	}
 
 	void AutonomousPeriodic(void) {
@@ -201,13 +227,14 @@ public:
 		double TimeNow;
 		
 		TimeNow = GetClock() * 1000;
-		m_lastPeriodStart = TimeNow;
 		
 		if((TimeNow - m_lastPeriodStart) > 100){
 			fprintf(m_logFile, "%5d:	Loop Delay	Start=%f  End=%f \n", m_periodicCount, TimeNow - m_lastPeriodStart,
 					TimeNow - m_lastPeriodicEnd);
 			printf("Loop Delay:  Start=%f  End=%f \n", TimeNow - m_lastPeriodStart, TimeNow - m_lastPeriodicEnd);
 		}
+		
+		m_lastPeriodStart = TimeNow;
 		
 		if(m_auto.StartDelay > 0){
 			m_auto.StartDelay--;
@@ -411,9 +438,66 @@ public:
 	}
 
 	void TeleopPeriodic(void) {
-	
+		float  tiltValue = m_tiltJoystick->GetY();
+		bool   shootReady;
+		double TimeNow;
+				
+		TimeNow = GetClock() * 1000;
+		
+		if((TimeNow - m_lastPeriodStart) > 100){
+			fprintf(m_logFile, "%5d:	Loop Delay	Start=%f  End=%f \n", m_periodicCount, TimeNow - m_lastPeriodStart,
+					TimeNow - m_lastPeriodicEnd);
+			printf("Loop Delay:  Start=%f  End=%f \n", TimeNow - m_lastPeriodStart, TimeNow - m_lastPeriodicEnd);
+		}
+		
+		m_lastPeriodStart = TimeNow;
+		
+		
+		//CODE GOES HERE!
+//--------------------------------Drive Stuff-------------------------------------------------------
+		if(m_driveJoystick->GetRawButton(3) || m_driveJoystick->GetRawButton(4)){
+			m_drive->Periodic(Drive::dStrafe, m_driveJoystick->GetY(), m_driveJoystick->GetX(), 0);
+		}else{
+			m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
+		}
+		
+//--------------------------------Hopper Stuff------------------------------------------------------		
+		if(fabs(tiltValue) > 0.1){
+			if(m_buttonBox->GetRawButton(1)){
+				m_hopper->Periodic(0);
+				shootReady = m_shooter->Periodic(tiltValue);
+			}else{
+				m_hopper->Periodic(tiltValue);
+				shootReady = m_shooter->Periodic(0);
+			}
+		}else{
+				m_hopper->Periodic(0);	
+				shootReady = m_shooter->Periodic(0);
+		}
+
+		if(m_buttonBox->GetRawButton(2)) {
+			m_hopper->SetTiltTarget(Hopper::hFeeder);
+		} else if (m_buttonBox->GetRawButton(3)) {
+			m_hopper->SetTiltTarget(Hopper::hDrive);
+		} else if (m_buttonBox->GetRawButton(4)) {
+			m_hopper->SetTiltTarget(Hopper::hPyramid);
+		}
+//--------------------------------Shooter Stuff----------------------------------------------------
+		
+		if(m_buttonBox->GetRawButton(5)) {
+			m_shooter->SetTiltTarget(DiskShooter::sLong);
+		} else if (m_buttonBox->GetRawButton(6)) {
+			m_shooter->SetTiltTarget(DiskShooter::sShort);
+		} else if (m_buttonBox->GetRawButton(7)) {
+			m_shooter->SetTiltTarget(DiskShooter::sFlop);
+		}
+		
+		m_periodicCount++;
+		m_lastPeriodicEnd = GetClock() * 1000;
 	}
 
+	
+	
 /****************************************** TEST *********************************************/
 
 	void TestInit(void){
@@ -427,16 +511,16 @@ public:
 		static int  GoalFound = 0;
 		static bool buttonPressed = false;
 		
-		m_hopper->Periodic();
-		m_drive->Periodic(Drive::dJoystick, m_joystick->GetY(), m_joystick->GetX(), m_joystick->GetZ());
+		m_hopper->Periodic(0);
+		m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
 		
-		if(m_joystick->GetRawButton(11)){
+		if(m_driveJoystick->GetRawButton(11)){
 			if(!buttonPressed){
 				GoalFound = m_findGoals->Find(0);
 				buttonPressed = true;
 				printf("Looking For Wall Targets\n");
 			}
-		}else if(m_joystick->GetRawButton(12)){
+		}else if(m_driveJoystick->GetRawButton(12)){
 			if(!buttonPressed){
 				GoalFound = m_findGoals->Find(1);
 				buttonPressed = true;

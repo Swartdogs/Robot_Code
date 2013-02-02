@@ -116,8 +116,7 @@ void DiskShooter::Load(){
 	}
 }
 
-bool DiskShooter::Periodic(){
-	static INT32 		curTiltTarget = m_tiltTarget;
+bool DiskShooter::Periodic(float joyValue){
 	INT32		 		curTiltPosition = GetTiltPosition();
 	static float 		tiltSpeed = 0.0;
 	float				shootSpeed = 0.0;
@@ -128,7 +127,10 @@ bool DiskShooter::Periodic(){
 	
 //----------------------------Tilt Related Stuff-------------------------------------
 	
-	if(curTiltTarget == 0 && curTiltPosition < 20){
+	if(joyValue != 0){
+		tiltSpeed = joyValue;
+		m_tiltTarget = curTiltPosition;
+	}else if(m_tiltTarget == 0 && curTiltPosition < 20){
 		tiltSpeed = 0.0;
 	}else{
 		tiltSpeed = m_tiltPID->Calculate((float)curTiltPosition);
@@ -194,11 +196,25 @@ void DiskShooter::Shoot(){
 	}
 }
 
-void DiskShooter::SetTensionTarget(INT32 Target){
-	m_tensionTarget = Target;
+void DiskShooter::SetTensionTarget(){
+	m_tensionTarget = m_tiltTarget;			//CHANGE THIS!!!
 }
 
-void DiskShooter::SetTiltTarget(INT32 Target){
-	m_tiltTarget = Target;
-	m_tiltPID->SetSetpoint((float)Target);
+void DiskShooter::SetTiltTarget(ShootTarget Target){
+	switch(Target){
+		case sLong:
+			m_tiltTarget = 50;				//CHANGE THIS!!!!!
+			break;
+			
+		case sShort:
+			m_tiltTarget = 25;				//CHANGE THIS!!!!!
+			break;
+			
+		case sFlop:
+			m_tiltTarget = 0;				//CHANGE THIS!!!!!
+			break;
+			
+		default:;
+	}
+	m_tiltPID->SetSetpoint((float)m_tiltTarget);
 }

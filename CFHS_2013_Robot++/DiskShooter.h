@@ -11,6 +11,7 @@
 class DiskShooter{
 	
 public:
+	typedef enum{sLong, sShort, sFlop}ShootTarget;
 	DiskShooter(UINT8   shootMotorModule,	UINT32 shootMotorChannel,
 				UINT8   tiltMotorModule,	UINT32 tiltMotorChannel,
 				UINT8	tensionMotorModule, UINT32 tensionMotorChannel,
@@ -26,9 +27,9 @@ public:
 	void  Disable();
 	INT32 GetTiltPosition();
 	void  Load();
-	bool  Periodic();
-	void  SetTensionTarget(INT32 Target);
-	void  SetTiltTarget(INT32 Target);
+	bool  Periodic(float joyValue);
+	void  SetTensionTarget();
+	void  SetTiltTarget(ShootTarget Target);
 	void  Shoot();
 	
 private:

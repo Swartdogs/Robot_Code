@@ -9,6 +9,7 @@
 
 class Hopper{
 public:
+	typedef enum{hFeeder, hDrive, hPyramid}HopTarget;
 	 Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 			UINT8 	loadGateModule,   UINT32 loadGateChannel,
 			UINT8 	tiltMotorModule,  UINT32 tiltMotorChannel,
@@ -20,9 +21,9 @@ public:
 	void Disable();
 	void Enable();
 	void PELICANMOVE(bool pelicanStateEnabled);
-	void Periodic();
+	void Periodic(float joyValue);
 	void RELEASETHEFRISBEES();
-	void SetTiltTarget(INT32 Target);
+	void SetTiltTarget(HopTarget Target);
 	
 private:
 	typedef enum{hLoad, hStore, hShoot}HopState;
