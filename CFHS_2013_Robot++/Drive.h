@@ -31,7 +31,6 @@ public:
 			UINT8 raEncoderModule,  UINT32 raEncoderChannel,	//Right Encoder A
 			UINT8 rbEncoderModule,  UINT32 rbEncoderChannel,	//Right Encoder B
 			UINT8 rotateGyroModule, UINT32 rotateGyroChannel,	//Rotational Gyro
-			float rotateDeadband,
 			Events *eventHandler,	UINT8  eventSourceId);
     ~Drive();
     

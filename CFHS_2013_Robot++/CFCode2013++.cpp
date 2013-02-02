@@ -1,6 +1,7 @@
 #include "WPILib.h"
 #include "Events.h"
 #include "FindGoals.h"
+#include "Hopper.h"
 #include "Pickup.h"
 #include "Drive.h"
 #include "DiskShooter.h"
@@ -37,6 +38,7 @@ class Team525: public IterativeRobot, public Events
 	DiskShooter	   *m_DiskShooter;
 	Pickup	  	   *m_Pickup;
 	FindGoals 	   *m_FindGoals;
+	Hopper         *m_Hopper;
 	Joystick  	   *m_joystick;
 	Solenoid  	   *m_CameraLED;
 	StructAuto 		Auto;
@@ -69,7 +71,6 @@ public:
 							1, 3,					//Right Encoder A 		DM: 3
 							1, 4,					//Right Encoder B 		DM: 4
 							1, 1,					//Rotational Gyro 		AM: 1
-							ROTATE_Deadband,
 							this, 1);
 		m_FindGoals = new FindGoals();
 		m_CameraLED = new Solenoid(1, 5);
@@ -89,6 +90,12 @@ public:
 										1, 5,		//Tension Pot 			AM: 5
 										1, 6,		//Disk Sensor 			DM: 6
 										this, 3);	
+		m_Hopper = new Hopper(1,9,   				//Shoot Gate Servo	    PWM 9
+						 	  1,10,  				//Hopper Gate Servo     PWM 10
+						 	  1,11,  				//Hopper Tilt Moter     PWM 11
+						 	  1,6,  			 	//Tilt Pot              AM: 6
+						 	  1,7,   				//Disk Sensor           DM: 7s
+						 	  this,4);
 		
 		Team525::SetPeriod(0.02);
 		

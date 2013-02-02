@@ -4,6 +4,8 @@
 
 #include "Drive.h"
 
+INT32 const c_rotateDeadband = 0;
+
 Drive::Drive(
 		UINT8 lfJagModule,		  UINT32 lfJagChannel,		//Left Front Jag
 		UINT8 lrJagModule,		  UINT32 lrJagChannel,		//Left Rear Jag
@@ -14,7 +16,6 @@ Drive::Drive(
 		UINT8 raEncoderModule,    UINT32 raEncoderChannel,	//Right Encoder A
 		UINT8 rbEncoderModule,    UINT32 rbEncoderChannel,	//Right Encoder B
 		UINT8 rotateGyroModule,   UINT32 rotateGyroChannel,	//Rotational Gyro
-		float rotateDeadband,
 		Events *eventHandler,	  UINT8  eventSourceId)
 {
 	
@@ -42,8 +43,6 @@ Drive::Drive(
 	m_rotatePID = new PIDLoop(0.075, 0.005, 0.40);
 	m_rotatePID->SetInputRange(-360.0, 360.0);
 	m_rotatePID->SetOutputRange(-0.6, 0.6);
-	
-	m_rotateDeadband = rotateDeadband;
 	
 	//Initialization Settings
 	
@@ -168,7 +167,7 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			GyroAngle = m_rotateGyro->GetAngle();
 			vRotate = m_rotatePID->Calculate(GyroAngle);
 			
-			if(fabs(m_targetAngle - GyroAngle) < m_rotateDeadband){
+			if(fabs(m_targetAngle - GyroAngle) < c_rotateDeadband){
 				if(AimCount < 5) AimCount++; 
 			}else{
 				AimCount = 0;

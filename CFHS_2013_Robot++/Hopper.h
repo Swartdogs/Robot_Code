@@ -15,9 +15,6 @@ public:
 			UINT8 	hopperGateModule, UINT32 hopperGateChannel,
 			UINT8 	hopperTiltModule, UINT32 hopperTiltChannel,
 			UINT8 	tiltPotModule,	  UINT32 tiltPotChannel,
-			UINT8   storagePosition,
-			float	shootGateClosed,  float  shootGateOpen,
-			float   hopGateClosed,    float  hopGateOpen,
 			UINT8 	diskSensorModule, UINT32 diskSensorChannel,
 			Events *eventHandler,	  UINT8  eventSourceId);
 	~Hopper();
@@ -40,13 +37,8 @@ private:
 	Events		  *m_event;
 	char		   m_Log[100];
 	UINT8		   m_eventSourceId;
-	UINT8		   m_storagePosition;
 	INT32		   m_tiltTarget;
 	HopState	   m_hopState;
-	float		   m_shootGateClosedPos;
-	float		   m_shootGateOpenPos;
-	float          m_hopGateClosedPos;
-	float		   m_hopGateOpenPos;
 	bool		   m_pelicanStateEnabled;
 };
 

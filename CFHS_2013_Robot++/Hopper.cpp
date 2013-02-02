@@ -1,13 +1,16 @@
 
 #include "Hopper.h"
 
+INT32 const c_storagePosition = 0;
+float const c_shootGateClosed = 1;
+float const c_shootGateOpen = 0;
+float const c_hopGateClosed = 1;
+float const c_hopGateOpen = 0;
+
 Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 			   UINT8 	hopperGateModule, UINT32 hopperGateChannel,
 			   UINT8 	hopperTiltModule, UINT32 hopperTiltChannel,
 			   UINT8 	tiltPotModule,	  UINT32 tiltPotChannel,
-			   UINT8    storagePosition,
-			   float	shootGateClosed,  float  shootGateOpen,
-			   float    hopGateClosed,    float  hopGateOpen,
 			   UINT8 	diskSensorModule, UINT32 diskSensorChannel,
 			   Events  *eventHandler,	  UINT8  eventSourceId)
 {
@@ -19,18 +22,10 @@ Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 	m_hopperTiltPot->SetAverageBits(2);
 	m_hopperTiltPot->SetOversampleBits(0);
 	
-	m_storagePosition = storagePosition;
-	
 	m_diskSensor = new DigitalInput(diskSensorModule, diskSensorChannel);
 	
 	m_event = eventHandler;
 	m_eventSourceId = eventSourceId;
-	
-	m_shootGateClosedPos = shootGateClosed;
-	m_shootGateOpenPos = shootGateOpen;
-	
-	m_hopGateClosedPos = hopGateClosed;
-	m_hopGateOpenPos = hopGateOpen;
 	
 	if(m_diskSensor->Get() == 0){
 		m_hopState = hLoad;
@@ -78,7 +73,7 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 
 void Hopper::Periodic(){
 	static INT32	curHopTiltTarget = m_tiltTarget;
-	INT32			curHopTiltPosition = m_hopperTiltPot->GetAverageValue() - m_storagePosition;
+	INT32			curHopTiltPosition = m_hopperTiltPot->GetAverageValue() - c_storagePosition;
 	static float	tiltSpeed = 0.0;
 	INT32			deadband = 25;
 	static int		periodicCounter;
@@ -116,24 +111,24 @@ void Hopper::Periodic(){
 		
 	switch(m_hopState){
 		case hLoad:
-			m_shootGate->Set(m_shootGateClosedPos);
-			m_hopperGate->Set(m_hopGateOpenPos);
+			m_shootGate->Set(c_shootGateClosed);
+			m_hopperGate->Set(c_hopGateOpen);
 			if(m_diskSensor->Get() == 1){
 				m_hopState = hStore;
 			}
 			break;
 			
 		case hShoot:
-			m_shootGate->Set(m_shootGateOpenPos);
-			m_hopperGate->Set(m_hopGateClosedPos);
+			m_shootGate->Set(c_shootGateOpen);
+			m_hopperGate->Set(c_hopGateClosed);
 			if(m_diskSensor->Get() == 0){
 				m_hopState = hLoad;
 			}
 			break;
 			
 		case hStore:
-			m_shootGate->Set(m_shootGateClosedPos);
-			m_hopperGate->Set(m_hopGateClosedPos);
+			m_shootGate->Set(c_shootGateClosed);
+			m_hopperGate->Set(c_hopGateClosed);
 			break;
 			
 		default:;

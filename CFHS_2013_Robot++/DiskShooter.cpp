@@ -1,10 +1,6 @@
 #include "DiskShooter.h"
 
-INT32 const c_tiltRange = 500;
-INT32 const c_shootIdlePosition = 0;
-INT32 const c_tiltZeroOffset = 0;
-INT32 const c_tensionZeroOffset = 0;
-INT32 const c_tensionDeadband = 0;
+INT32 const tiltRange = 500;
 
 DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 						 UINT8   tiltMotorModule,		UINT32 tiltMotorChannel,
@@ -13,6 +9,9 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 						 UINT8   tiltPotModule,			UINT32 tiltPotChannel,
 						 UINT8   tensionPotModule,		UINT32 tensionPotChannel,
 						 UINT8   diskSensorModule,		UINT32 diskSensorChannel,
+						 INT32   shootIdlePosition,	
+						 INT32   tiltZeroOffset,
+						 INT32	 tensionZeroOffset,
 						 Events *eventHandler,			UINT8  eventSourceId)
 {
 	m_shootMotor = new Jaguar(shootMotorModule, shootMotorChannel);
@@ -33,8 +32,8 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 	
 	m_diskSensor = new DigitalInput(diskSensorModule, diskSensorChannel);
 	
-	m_shootIdlePosition = c_shootIdlePosition;	
-	m_tiltZeroOffset= c_tiltZeroOffset;
+	m_shootIdlePosition = shootIdlePosition;	
+	m_tiltZeroOffset= tiltZeroOffset;
 	
 	m_tiltTarget = m_tiltPot->GetAverageValue() - m_tiltZeroOffset;
 	m_tensionTarget = m_tensionPot->GetAverageValue() - m_tensionZeroOffset;
@@ -49,7 +48,7 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 	m_RELEASETHEFRISBEEPOSITION = m_shootIdlePosition + 250;
 	
 	m_tiltPID = new PIDLoop(0.025, 0, 0.02);
-	m_tiltPID->SetInputRange(0, (float)c_tiltRange);
+	m_tiltPID->SetInputRange(0, (float)tiltRange);
 	m_tiltPID->SetOutputRange(-1.0, 1.0);
 	
 	m_shootPID = new PIDLoop(0.025, 0, 0.02);
@@ -122,6 +121,7 @@ bool DiskShooter::Periodic(){
 	float				shootSpeed = 0.0;
 	INT32				curShootPosition = GetShooterPotValue();
 	static bool			loadingFlag;
+	INT32				deadband = 25;
 	static INT32		curTensionTarget = m_tensionTarget;
 	INT32				curTensionPosition = m_tensionPot->GetAverageValue() - m_tensionZeroOffset;
 	static float		tensionSpeed = 0.0;
@@ -154,9 +154,9 @@ bool DiskShooter::Periodic(){
 //------------------------------Tension Stuff-----------------------------------------
 	if(curTensionTarget != m_tensionTarget){
 		curTensionTarget = m_tensionTarget;
-		if(curTensionPosition > curTensionTarget + c_tensionDeadband){
+		if(curTensionPosition > curTensionTarget + deadband){
 			tensionSpeed = -1.0;
-		}else if(curTensionPosition < curTensionTarget - c_tensionDeadband){
+		}else if(curTensionPosition < curTensionTarget - deadband){
 			tensionSpeed = 1.0;
 		}else{
 			tensionSpeed = 0.0;
