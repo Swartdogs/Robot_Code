@@ -166,6 +166,10 @@ CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/CFCode2013++.o : $
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
+CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/DiskPickup.o : $(PRJ_ROOT_DIR)/DiskPickup.cpp $(FORCE_FILE_BUILD)
+	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
+
+
 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/DiskShooter.o : $(PRJ_ROOT_DIR)/DiskShooter.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
@@ -186,17 +190,13 @@ CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/PIDLoop.o : $(PRJ_
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Pickup.o : $(PRJ_ROOT_DIR)/Pickup.cpp $(FORCE_FILE_BUILD)
-	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
-
-
 OBJECTS_CF2013Code_partialImage = CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/CFCode2013++.o \
+	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/DiskPickup.o \
 	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/DiskShooter.o \
 	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Drive.o \
 	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/FindGoals.o \
 	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Hopper.o \
-	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/PIDLoop.o \
-	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Pickup.o
+	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/PIDLoop.o
 
 CF2013Code_partialImage/$(MODE_DIR)/CF2013Code_partialImage.o : $(OBJECTS_CF2013Code_partialImage)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc -r -nostdlib -Wl,-X  -o "$@" $(OBJECTS_CF2013Code_partialImage) $(LIBPATH) $(LIBS) $(ADDED_LIBPATH) $(ADDED_LIBS)  && if [ "$(EXPAND_DBG)" = "1" ]; then plink "$@";fi
@@ -210,9 +210,9 @@ CF2013Code_partialImage/$(MODE_DIR)/CF2013Code_partialImage_clean :
 
 force : 
 
-DEP_FILES := CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/CFCode2013++.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/DiskShooter.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Drive.d \
-	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/FindGoals.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Hopper.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/PIDLoop.d \
-	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Pickup.d
+DEP_FILES := CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/CFCode2013++.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/DiskPickup.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/DiskShooter.d \
+	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Drive.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/FindGoals.d CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/Hopper.d \
+	 CF2013Code_partialImage/$(MODE_DIR)/Objects/CFHS_2013_Robot++/PIDLoop.d
 -include $(DEP_FILES)
 
 

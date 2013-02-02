@@ -11,8 +11,7 @@
 #include "Gyro.h"
 #include "PIDLoop.h"
 #include "SmartDashboard\SmartDashboard.h"
-
-class Events;
+#include "Events.h"
 
 class Drive
 {
@@ -63,7 +62,7 @@ private:
     double	       m_targetDistance;
     PIDLoop 	  *m_rotatePID;
     Events  	  *m_Event;
-    char		   m_Log[100];
+    char		   m_log[100];
     
     float	ApplyDeadband(float RawValue, float Deadband);
     double	EncoderAverage(double Value1, double Value2);

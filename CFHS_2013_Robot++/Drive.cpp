@@ -4,18 +4,18 @@
 
 #include "Drive.h"
 
-INT32 const c_rotateDeadband = 0;
+float const c_rotateDeadband = 0.75;
 
 Drive::Drive(
-		UINT8 lfJagModule,		  UINT32 lfJagChannel,		//Left Front Jag
-		UINT8 lrJagModule,		  UINT32 lrJagChannel,		//Left Rear Jag
-		UINT8 rfJagModule,		  UINT32 rfJagChannel,		//Right Front Jag
-		UINT8 rrJagModule,		  UINT32 rrJagChannel,		//Right Rear Jag
-		UINT8 laEncoderModule,    UINT32 laEncoderChannel,	//Left Encoder A
-		UINT8 lbEncoderModule,    UINT32 lbEncoderChannel,	//Left Encoder B
-		UINT8 raEncoderModule,    UINT32 raEncoderChannel,	//Right Encoder A
-		UINT8 rbEncoderModule,    UINT32 rbEncoderChannel,	//Right Encoder B
-		UINT8 rotateGyroModule,   UINT32 rotateGyroChannel,	//Rotational Gyro
+		UINT8 lfJagModule,		  UINT32 lfJagChannel,		// Left Front Jag
+		UINT8 lrJagModule,		  UINT32 lrJagChannel,		// Left Rear Jag
+		UINT8 rfJagModule,		  UINT32 rfJagChannel,		// Right Front Jag
+		UINT8 rrJagModule,		  UINT32 rrJagChannel,		// Right Rear Jag
+		UINT8 laEncoderModule,    UINT32 laEncoderChannel,	// Left Encoder A
+		UINT8 lbEncoderModule,    UINT32 lbEncoderChannel,	// Left Encoder B
+		UINT8 raEncoderModule,    UINT32 raEncoderChannel,	// Right Encoder A
+		UINT8 rbEncoderModule,    UINT32 rbEncoderChannel,	// Right Encoder B
+		UINT8 rotateGyroModule,   UINT32 rotateGyroChannel,	// Rotational Gyro
 		Events *eventHandler,	  UINT8  eventSourceId)
 {
 	
@@ -181,9 +181,9 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				Distance = EncoderAverage(m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
 				
 				if(fabs(Distance) >= fabs(m_targetDistance)){
-					//sprintf(m_Log, "At Target Distance=%6.1f	(Left=%6.1f	Right=%6.1f)", Distance,
+					//sprintf(m_log, "At Target Distance=%6.1f	(Left=%6.1f	Right=%6.1f)", Distance,
 					//		  m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
-					//m_event->WriteToLog(m_Log);
+					//m_event->WriteToLog(m_log);
 					vRotate = 0;
 					vReturn = true;
 				}else if(fabs(Distance) > 5.0){
@@ -191,8 +191,8 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 						if(NoMoveCount < 5){
 							NoMoveCount++;
 							if(NoMoveCount == 5){
-								//sprintf(m_Log, "No Movement Detected	(Distance=%6.1f)", Distance);
-								//m_event->WriteToLog(m_Log);
+								//sprintf(m_log, "No Movement Detected	(Distance=%6.1f)", Distance);
+								//m_event->WriteToLog(m_log);
 								vReturn = true;
 							}
 						}
@@ -220,8 +220,8 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				if(AimCount < 5){
 					AimCount++;
 					if(AimCount == 5){
-						//sprintf(m_Log, "Turn Completed: Gyro=%5.1f \n", GyroAngle);
-						//m_event->WriteToLog(m_Log);
+						//sprintf(m_log, "Turn Completed: Gyro=%5.1f \n", GyroAngle);
+						//m_event->WriteToLog(m_log);
 						vRotate = 0;
 						vReturn = true;
 					}

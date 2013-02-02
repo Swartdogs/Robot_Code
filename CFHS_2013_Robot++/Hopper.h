@@ -7,13 +7,11 @@
 #include "AnalogChannel.h"
 #include "Events.h"
 
-class Events;
-
 class Hopper{
 public:
 	 Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
-			UINT8 	hopperGateModule, UINT32 hopperGateChannel,
-			UINT8 	hopperTiltModule, UINT32 hopperTiltChannel,
+			UINT8 	loadGateModule,   UINT32 loadGateChannel,
+			UINT8 	tiltMotorModule,  UINT32 tiltMotorChannel,
 			UINT8 	tiltPotModule,	  UINT32 tiltPotChannel,
 			UINT8 	diskSensorModule, UINT32 diskSensorChannel,
 			Events *eventHandler,	  UINT8  eventSourceId);
@@ -24,18 +22,18 @@ public:
 	void PELICANMOVE(bool pelicanStateEnabled);
 	void Periodic();
 	void RELEASETHEFRISBEES();
-	void SetHopperTiltTarget(INT32 Target);
+	void SetTiltTarget(INT32 Target);
 	
 private:
-	typedef enum{hShoot, hStore, hLoad}HopState;
+	typedef enum{hLoad, hStore, hShoot}HopState;
 	
 	Servo 		  *m_shootGate;
-	Servo 		  *m_hopperGate;
-	Jaguar 		  *m_hopperTiltMotor;
-	AnalogChannel *m_hopperTiltPot;
+	Servo 		  *m_loadGate;
+	Jaguar 		  *m_tiltMotor;
+	AnalogChannel *m_tiltPot;
 	DigitalInput  *m_diskSensor;
 	Events		  *m_event;
-	char		   m_Log[100];
+	char		   m_log[100];
 	UINT8		   m_eventSourceId;
 	INT32		   m_tiltTarget;
 	HopState	   m_hopState;

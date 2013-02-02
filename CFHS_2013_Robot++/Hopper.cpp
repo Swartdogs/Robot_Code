@@ -1,26 +1,27 @@
 
 #include "Hopper.h"
 
-INT32 const c_storagePosition = 0;
-float const c_shootGateClosed = 1;
-float const c_shootGateOpen = 0;
-float const c_hopGateClosed = 1;
-float const c_hopGateOpen = 0;
+INT32 const c_tiltZeroOffset = 0;
+INT32 const c_tiltDeadband = 25;
+float const c_shootGateClosed = 1.0;
+float const c_shootGateOpen = 0.0;
+float const c_loadGateClosed = 1.0;
+float const c_loadGateOpen = 0.0;
 
 Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
-			   UINT8 	hopperGateModule, UINT32 hopperGateChannel,
-			   UINT8 	hopperTiltModule, UINT32 hopperTiltChannel,
+			   UINT8 	loadGateModule,   UINT32 loadGateChannel,
+			   UINT8 	tiltMotorModule,  UINT32 tiltMotorChannel,
 			   UINT8 	tiltPotModule,	  UINT32 tiltPotChannel,
 			   UINT8 	diskSensorModule, UINT32 diskSensorChannel,
 			   Events  *eventHandler,	  UINT8  eventSourceId)
 {
 	m_shootGate = new Servo(shootGateModule, shootGateChannel);
-	m_hopperGate = new Servo(hopperGateModule, hopperGateChannel);
+	m_loadGate = new Servo(loadGateModule, loadGateChannel);
 	
-	m_hopperTiltMotor = new Jaguar(hopperTiltModule, hopperTiltChannel);
-	m_hopperTiltPot = new AnalogChannel(tiltPotModule, tiltPotChannel);
-	m_hopperTiltPot->SetAverageBits(2);
-	m_hopperTiltPot->SetOversampleBits(0);
+	m_tiltMotor = new Jaguar(tiltMotorModule, tiltMotorChannel);
+	m_tiltPot = new AnalogChannel(tiltPotModule, tiltPotChannel);
+	m_tiltPot->SetAverageBits(2);
+	m_tiltPot->SetOversampleBits(0);
 	
 	m_diskSensor = new DigitalInput(diskSensorModule, diskSensorChannel);
 	
@@ -33,42 +34,36 @@ Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 		m_hopState = hStore;
 	}
 	
-	printf("State = %d \n", m_hopState);
-	
-	m_tiltTarget = m_hopperTiltPot->GetAverageValue();
-	
-	printf("Tilt Target = %d \n", m_tiltTarget);
+	m_tiltTarget = m_tiltPot->GetAverageValue();
 }
 
 Hopper::~Hopper(){
 	delete m_shootGate;
-	delete m_hopperGate;
-	delete m_hopperTiltMotor;
-	delete m_hopperTiltPot;
+	delete m_loadGate;
+	delete m_tiltMotor;
+	delete m_tiltPot;
 	delete m_diskSensor;
 	delete m_event;
 }
 
 void Hopper::Disable(){
 	m_shootGate->SetSafetyEnabled(false);
+	m_loadGate->SetSafetyEnabled(false);
 	
-	m_hopperGate->SetSafetyEnabled(false);
-	
-	m_hopperTiltMotor->Set(0);
-	m_hopperTiltMotor->SetSafetyEnabled(false);
+	m_tiltMotor->Set(0);
+	m_tiltMotor->SetSafetyEnabled(false);
 }
 
 void Hopper::Enable(){
 	m_shootGate->SetSafetyEnabled(true);
+	m_loadGate->SetSafetyEnabled(true);
 	
-	m_hopperGate->SetSafetyEnabled(true);
-	
-	m_hopperTiltMotor->Set(0);
-	m_hopperTiltMotor->SetSafetyEnabled(true);
+	m_tiltMotor->Set(0);
+	m_tiltMotor->SetSafetyEnabled(true);
 }
 
 void Hopper::PELICANMOVE(bool pelicanStateEnabled){
-	if(m_diskSensor->Get() == 0){
+	if(m_diskSensor->Get() == 1){
 		m_pelicanStateEnabled = false;
 	}else{
 		m_pelicanStateEnabled = pelicanStateEnabled;
@@ -76,28 +71,21 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 }
 
 void Hopper::Periodic(){
-	static INT32	curHopTiltTarget = m_tiltTarget;
-	INT32			curHopTiltPosition = m_hopperTiltPot->GetAverageValue() - c_storagePosition;
+	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 	static float	tiltSpeed = 0.0;
-	INT32			deadband = 25;
 	static int		periodicCounter;
 	
-	printf("Tilt Target = %d \n", curHopTiltPosition);
-
-	if(m_pelicanStateEnabled == false || m_diskSensor->Get() == 0){
+	if(m_pelicanStateEnabled == false || m_diskSensor->Get() == 1){
 		m_pelicanStateEnabled = false;
-		if(curHopTiltTarget != m_tiltTarget){
-			curHopTiltTarget = m_tiltTarget;
-			if(curHopTiltPosition < curHopTiltTarget - deadband){
-				tiltSpeed = 1.0;
-			}else if(curHopTiltPosition > curHopTiltTarget + deadband){
-				tiltSpeed = -1.0;
-			}
-		}else if(tiltSpeed > 0.0){
-			if(curHopTiltPosition >= curHopTiltTarget) tiltSpeed = 0.0;
-		}else if(tiltSpeed < 0.0){
-			if(curHopTiltPosition <= curHopTiltTarget) tiltSpeed = 0.0;
+		
+		if(curTiltPosition < m_tiltTarget - c_tiltDeadband){
+			tiltSpeed = 1.0;
+		}else if(curTiltPosition > m_tiltTarget + c_tiltDeadband) {
+			tiltSpeed = -1.0;
+		}else{
+			tiltSpeed = 0.0;
 		}
+	
 	}else{
 		periodicCounter++;
 		if(periodicCounter <= 10){
@@ -113,12 +101,12 @@ void Hopper::Periodic(){
 		}
 	}
 	
-	m_hopperTiltMotor->Set(tiltSpeed);
+	m_tiltMotor->Set(tiltSpeed);
 		
 	switch(m_hopState){
 		case hLoad:
 			m_shootGate->Set(c_shootGateClosed);
-			m_hopperGate->Set(c_hopGateOpen);
+			m_loadGate->Set(c_loadGateOpen);
 			if(m_diskSensor->Get() == 0){
 				m_hopState = hStore;
 			}
@@ -126,7 +114,7 @@ void Hopper::Periodic(){
 			
 		case hShoot:
 			m_shootGate->Set(c_shootGateOpen);
-			m_hopperGate->Set(c_hopGateClosed);
+			m_loadGate->Set(c_loadGateClosed);
 			if(m_diskSensor->Get() == 1){
 				m_hopState = hLoad;
 			}
@@ -134,7 +122,7 @@ void Hopper::Periodic(){
 			
 		case hStore:
 			m_shootGate->Set(c_shootGateClosed);
-			m_hopperGate->Set(c_hopGateClosed);
+			m_loadGate->Set(c_loadGateClosed);
 			break;
 			
 		default:;
@@ -147,6 +135,6 @@ void Hopper::RELEASETHEFRISBEES(){
 	}
 }
 
-void Hopper::SetHopperTiltTarget(INT32 Target){
+void Hopper::SetTiltTarget(INT32 Target){
 	m_tiltTarget = Target;
 }

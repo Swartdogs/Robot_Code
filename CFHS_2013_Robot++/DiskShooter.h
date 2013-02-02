@@ -8,11 +8,9 @@
 #include "PIDLoop.h"
 #include "Relay.h"
 
-class Events;
-
 class DiskShooter{
-public:
 	
+public:
 	DiskShooter(UINT8   shootMotorModule,	UINT32 shootMotorChannel,
 				UINT8   tiltMotorModule,	UINT32 tiltMotorChannel,
 				UINT8	tensionMotorModule, UINT32 tensionMotorChannel,
@@ -23,7 +21,6 @@ public:
 				Events *eventHandler,		UINT8  eventSourceId);
 	
 	~DiskShooter();
-	
 
 	void  Enable();
 	void  Disable();
@@ -40,7 +37,7 @@ private:
 	DigitalInput  *m_diskSensor;
 	Events		  *m_event;
 	UINT8		   m_eventSourceId;
-	char		   m_Log[100];
+	char		   m_log[100];
 	INT32		   m_RELEASETHEFRISBEEPOSITION;
 	Jaguar 		  *m_shootMotor;
 	PIDLoop		  *m_shootPID;
@@ -55,7 +52,7 @@ private:
 	AnalogChannel *m_tiltPot;
 	INT32		   m_tiltTarget;
 	
-	INT32 		   GetShooterPotValue();
+	INT32 		   GetShooterPosition();
 };
 
 #endif
