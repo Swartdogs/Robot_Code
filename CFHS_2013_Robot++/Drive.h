@@ -6,7 +6,7 @@
 #define DRIVE_H_
 
 #include <math.h>
-#include "Talon.h"
+#include "Victor.h"
 #include "Encoder.h"
 #include "Gyro.h"
 #include "PIDLoop.h"
@@ -48,10 +48,10 @@ public:
 private:
     enum EnumDrive {driveAll, driveRear, driveFront};
     
-    Talon  		  *m_motorLF;
-    Talon  		  *m_motorLR;
-    Talon  		  *m_motorRF;
-    Talon  	      *m_motorRR;
+    Victor  	  *m_motorLF;
+    Victor        *m_motorLR;
+    Victor        *m_motorRF;
+    Victor  	  *m_motorRR;
     Encoder 	  *m_lEncoder;
     Encoder		  *m_rEncoder;
     Gyro		  *m_rotateGyro;

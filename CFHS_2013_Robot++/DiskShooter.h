@@ -4,14 +4,13 @@
 #include "AnalogChannel.h"
 #include "DigitalInput.h"
 #include "Events.h"
-#include "Jaguar.h"
+#include "Victor.h"
 #include "PIDLoop.h"
 #include "Relay.h"
 
 class DiskShooter{
 	
 public:
-	typedef enum{sLong, sShort, sFlop}ShootTarget;
 	DiskShooter(UINT8   shootMotorModule,	UINT32 shootMotorChannel,
 				UINT8   tiltMotorModule,	UINT32 tiltMotorChannel,
 				UINT8	tensionMotorModule, UINT32 tensionMotorChannel,
@@ -29,7 +28,7 @@ public:
 	void  Load();
 	bool  Periodic(float joyValue);
 	void  SetTensionTarget();
-	void  SetTiltTarget(ShootTarget Target);
+	void  SetTiltTarget(INT32 Target);
 	void  Shoot();
 	
 private:
@@ -40,7 +39,7 @@ private:
 	UINT8		   m_eventSourceId;
 	char		   m_log[100];
 	INT32		   m_RELEASETHEFRISBEEPOSITION;
-	Jaguar 		  *m_shootMotor;
+	Victor 		  *m_shootMotor;
 	PIDLoop		  *m_shootPID;
 	AnalogChannel *m_shootPot;
 	INT32		   m_shootReadyPosition;
@@ -48,7 +47,7 @@ private:
 	Relay		  *m_tensionMotor;
 	INT32		   m_tensionTarget;
 	AnalogChannel *m_tensionPot;
-	Jaguar 		  *m_tiltMotor;
+	Victor 		  *m_tiltMotor;
 	PIDLoop		  *m_tiltPID;
 	AnalogChannel *m_tiltPot;
 	INT32		   m_tiltTarget;

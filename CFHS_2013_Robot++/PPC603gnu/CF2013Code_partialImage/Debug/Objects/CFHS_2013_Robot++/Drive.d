@@ -12,7 +12,7 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/Drive.o:  \
   C:/WindRiver/vxworks-6.3/target/h/types/vxParams.h \
   C:/WindRiver/vxworks-6.3/target/h/types/vxTypesBase.h \
   c:\windriver\gnu\3.4.4-vxworks-6.3\x86-win32\bin\../lib/gcc/powerpc-wrs-vxworks/3.4.4/include/stddef.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Talon.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/MotorSafety.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/PWM.h \
@@ -180,7 +180,7 @@ C:/WindRiver/vxworks-6.3/target/h/types/vxTypesBase.h:
 
 c:\windriver\gnu\3.4.4-vxworks-6.3\x86-win32\bin\../lib/gcc/powerpc-wrs-vxworks/3.4.4/include/stddef.h:
 
-C:/WindRiver/vxworks-6.3/target/h/WPILib/Talon.h:
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h:
 

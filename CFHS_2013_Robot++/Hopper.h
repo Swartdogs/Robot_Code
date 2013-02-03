@@ -1,7 +1,7 @@
 #ifndef HOPPER_H_
 #define HOPPER_H_
 
-#include "Jaguar.h"
+#include "Victor.h"
 #include "DigitalInput.h"
 #include "Servo.h"
 #include "AnalogChannel.h"
@@ -9,7 +9,6 @@
 
 class Hopper{
 public:
-	typedef enum{hFeeder, hDrive, hPyramid}HopTarget;
 	 Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 			UINT8 	loadGateModule,   UINT32 loadGateChannel,
 			UINT8 	tiltMotorModule,  UINT32 tiltMotorChannel,
@@ -23,14 +22,14 @@ public:
 	void PELICANMOVE(bool pelicanStateEnabled);
 	void Periodic(float joyValue);
 	void RELEASETHEFRISBEES();
-	void SetTiltTarget(HopTarget Target);
-	
+	void SetTiltTarget(INT32 Target);
+
 private:
 	typedef enum{hLoad, hStore, hShoot}HopState;
 	
 	Servo 		  *m_shootGate;
 	Servo 		  *m_loadGate;
-	Jaguar 		  *m_tiltMotor;
+	Victor 		  *m_tiltMotor;
 	AnalogChannel *m_tiltPot;
 	DigitalInput  *m_diskSensor;
 	Events		  *m_event;
@@ -39,6 +38,7 @@ private:
 	INT32		   m_tiltTarget;
 	HopState	   m_hopState;
 	bool		   m_pelicanStateEnabled;
+	bool		   m_sendTiltEvent;
 };
 
 #endif

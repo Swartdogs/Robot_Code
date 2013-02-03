@@ -1,7 +1,7 @@
 CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/Hopper.o:  \
  C:/WindRiver/workspace/CFHS_2013_Robot++/Hopper.cpp \
   C:/WindRiver/workspace/CFHS_2013_Robot++/Hopper.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/MotorSafety.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/PWM.h \
@@ -144,7 +144,7 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/Hopper.o:  \
 
 C:/WindRiver/workspace/CFHS_2013_Robot++/Hopper.h:
 
-C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h:
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h:
 

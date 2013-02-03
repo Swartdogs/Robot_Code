@@ -16,8 +16,8 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 						 UINT8   diskSensorModule,		UINT32 diskSensorChannel,
 						 Events *eventHandler,			UINT8  eventSourceId)
 {
-	m_shootMotor = new Jaguar(shootMotorModule, shootMotorChannel);
-	m_tiltMotor = new Jaguar(tiltMotorModule, tiltMotorChannel);
+	m_shootMotor = new Victor(shootMotorModule, shootMotorChannel);
+	m_tiltMotor = new Victor(tiltMotorModule, tiltMotorChannel);
 	m_tensionMotor = new Relay(tensionMotorModule, tensionMotorChannel, Relay::kBothDirections);
 	
 	m_shootPot = new AnalogChannel(shootPotModule, shootPotChannel);
@@ -209,21 +209,12 @@ void DiskShooter::SetTensionTarget(){
 	m_tensionTarget = m_tiltTarget;			//CHANGE THIS!!!
 }
 
-void DiskShooter::SetTiltTarget(ShootTarget Target){
-	switch(Target){
-		case sLong:
-			m_tiltTarget = 50;				//CHANGE THIS!!!!!
-			break;
-			
-		case sShort:
-			m_tiltTarget = 300;				//CHANGE THIS!!!!!
-			break;
-			
-		case sFlop:
-			m_tiltTarget = 600;				//CHANGE THIS!!!!!
-			break;
-			
-		default:;
+void DiskShooter::SetTiltTarget(INT32 Target){
+	if(Target < 0){
+		Target = 0;
+	}else if(Target > c_tiltRange){
+		Target = c_tiltRange;
 	}
+	m_tiltTarget = Target;
 	m_tiltPID->SetSetpoint((float)m_tiltTarget);
 }

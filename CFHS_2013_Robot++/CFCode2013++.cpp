@@ -68,6 +68,7 @@ class Team525: public IterativeRobot, public Events
 	StructAutoStep *m_autoStep;
 	FILE		   *m_logFile;
 	bool			m_cameraShot;
+	bool            m_loadingShooter;
 	
 	char	   		m_autoModeId0;
 	char	   		m_autoModeId1;
@@ -140,6 +141,8 @@ public:
 		int BootCount = 0;
 		
 		GetWatchdog().SetEnabled(false);
+		
+		m_loadingShooter = false;
 		
 		m_autoModeId0 = 0;
 		m_autoModeId1 = 1;
@@ -441,6 +444,7 @@ public:
 		float  tiltValue = m_tiltJoystick->GetY();
 		bool   shootReady;
 		double TimeNow;
+		static bool	shooterLoadButton = false;
 				
 		TimeNow = GetClock() * 1000;
 		
@@ -451,35 +455,55 @@ public:
 		}
 		
 		m_lastPeriodStart = TimeNow;
+		if(m_loadingShooter){
+			if(m_tiltJoystick->GetRawButton(8) && m_tiltJoystick->GetRawButton(9)){
+				m_loadingShooter = false;
+			}
+		}
 		
-		
-		//--------------------------------Drive Stuff-------------------------------------------------------
-		
-		if(m_driveJoystick->GetRawButton(3) || m_driveJoystick->GetRawButton(4)){
-			m_drive->Periodic(Drive::dStrafe, m_driveJoystick->GetY(), m_driveJoystick->GetX(), 0);
+//--------------------------------Drive Stuff-------------------------------------------------------
+		if(!m_loadingShooter){
+			if(m_driveJoystick->GetRawButton(3) || m_driveJoystick->GetRawButton(4)){
+				m_drive->Periodic(Drive::dStrafe, m_driveJoystick->GetY(), m_driveJoystick->GetX(), 0);
+			}else{
+				m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
+			}
+		}
+//--------------------------------Hopper Stuff------------------------------------------------------		
+		if(!m_loadingShooter){
+			if(m_buttonBox->GetRawButton(2)) {
+				m_hopper->SetTiltTarget(50);							//Load frisbee position
+			} else if (m_buttonBox->GetRawButton(3)) {
+				m_hopper->SetTiltTarget(25);							//Position for driving 
+			} else if (m_buttonBox->GetRawButton(4)) {
+				m_hopper->SetTiltTarget(0);								//Position to get under the pyramid
+			}
+		}
+		if(m_buttonBox->GetRawButton(8)){
+			if(!shooterLoadButton && !m_loadingShooter){
+				shooterLoadButton = true;
+				m_loadingShooter = true;
+				if(m_shooter->GetTiltPosition() < 300){
+					m_hopper->SetTiltTarget(600);
+				}else{
+					m_hopper->SetTiltTarget(400);
+				}
+			}
 		}else{
-			m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
+			shooterLoadButton = false;
+		}
+//--------------------------------Shooter Stuff------------------------------------------------------	
+		if(!m_loadingShooter){
+			if(m_buttonBox->GetRawButton(5)) {
+				m_shooter->SetTiltTarget(50);							//Long shot mode
+			} else if (m_buttonBox->GetRawButton(6)) {
+				m_shooter->SetTiltTarget(300);							//Short shot mode
+			} else if (m_buttonBox->GetRawButton(7)) {
+				m_shooter->SetTiltTarget(600);							//Pyramid flop mode
+			}
 		}
 		
-		//--------------------------------Hopper Stuff------------------------------------------------------		
-		
-		if(m_buttonBox->GetRawButton(2)) {
-			m_hopper->SetTiltTarget(Hopper::hFeeder);
-		} else if (m_buttonBox->GetRawButton(3)) {
-			m_hopper->SetTiltTarget(Hopper::hDrive);
-		} else if (m_buttonBox->GetRawButton(4)) {
-			m_hopper->SetTiltTarget(Hopper::hPyramid);
-		}
-
-		if(m_buttonBox->GetRawButton(5)) {
-			m_shooter->SetTiltTarget(DiskShooter::sLong);
-		} else if (m_buttonBox->GetRawButton(6)) {
-			m_shooter->SetTiltTarget(DiskShooter::sShort);
-		} else if (m_buttonBox->GetRawButton(7)) {
-			m_shooter->SetTiltTarget(DiskShooter::sFlop);
-		}
-
-		if(fabs(tiltValue) > 0.1){
+		if(fabs(tiltValue) > 0.1 && !m_loadingShooter){
 			if(m_buttonBox->GetRawButton(1)){
 				m_hopper->Periodic(0);
 				shootReady = m_shooter->Periodic(tiltValue);
@@ -490,6 +514,11 @@ public:
 		}else{
 			m_hopper->Periodic(0);	
 			shootReady = m_shooter->Periodic(0);
+		}
+		
+		if(shootReady && m_loadingShooter){
+			m_shooter->Shoot();
+			m_loadingShooter = false;
 		}
 		
 		m_periodicCount++;
@@ -543,9 +572,15 @@ public:
 	
 	void RaiseEvent(UINT8 EventSourceId, UINT32 EventNumber){
 		
-		if (EventSourceId == 3) {			// DISK SHOOTER EVENT
-			if (EventNumber == 1) {			// Shooter ready for disk
-				
+		if (EventSourceId == 3) {					// DISK SHOOTER EVENT
+			if (EventNumber == 1) {					// Shooter ready for disk
+				m_hopper->RELEASETHEFRISBEES();
+			}
+		}else if(EventSourceId == 4){				// HOPPER EVENT	
+			if(EventNumber == 1){					// Hopper at tilt position
+				if(m_loadingShooter){
+					m_shooter->Load();
+				}
 			}
 		}
 	}

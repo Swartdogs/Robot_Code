@@ -384,7 +384,7 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/CFCode2013++.o:  \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/AxisCamera.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
   C:/WindRiver/workspace/CFHS_2013_Robot++/Hopper.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/DigitalInput.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Servo.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/AnalogChannel.h \
@@ -1166,7 +1166,7 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
 
 C:/WindRiver/workspace/CFHS_2013_Robot++/Hopper.h:
 
-C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h:
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/DigitalInput.h:
 

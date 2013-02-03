@@ -133,7 +133,7 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/DiskShooter.o:  \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/InterruptableSensorBase.h \
   C:/WindRiver/workspace/CFHS_2013_Robot++/Events.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Base.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/MotorSafety.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/PWM.h \
@@ -410,7 +410,7 @@ C:/WindRiver/workspace/CFHS_2013_Robot++/Events.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Base.h:
 
-C:/WindRiver/vxworks-6.3/target/h/WPILib/Jaguar.h:
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h:
 

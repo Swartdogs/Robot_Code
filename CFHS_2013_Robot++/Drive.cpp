@@ -19,16 +19,16 @@ Drive::Drive(
 		Events *eventHandler,	  UINT8  eventSourceId)
 {
 	
-	m_motorLF = new Talon(lfJagModule, lfJagChannel);
+	m_motorLF = new Victor(lfJagModule, lfJagChannel);
 	m_motorLF->SetExpiration(1.0);
 
-	m_motorLR = new Talon(lrJagModule, lrJagChannel);
+	m_motorLR = new Victor(lrJagModule, lrJagChannel);
 	m_motorLR->SetExpiration(1.0);
 	
-	m_motorRF = new Talon(rfJagModule, rfJagChannel);
+	m_motorRF = new Victor(rfJagModule, rfJagChannel);
 	m_motorRF->SetExpiration(1.0);
 	
-	m_motorRR = new Talon(rrJagModule, rrJagChannel);
+	m_motorRR = new Victor(rrJagModule, rrJagChannel);
 	m_motorRR->SetExpiration(1.0);
 	
 	m_lEncoder = new Encoder(laEncoderModule, laEncoderChannel, lbEncoderModule, lbEncoderChannel, true);

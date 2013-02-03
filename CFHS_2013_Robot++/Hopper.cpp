@@ -19,7 +19,7 @@ Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 	m_shootGate = new Servo(shootGateModule, shootGateChannel);
 	m_loadGate = new Servo(loadGateModule, loadGateChannel);
 	
-	m_tiltMotor = new Jaguar(tiltMotorModule, tiltMotorChannel);
+	m_tiltMotor = new Victor(tiltMotorModule, tiltMotorChannel);
 	m_tiltPot = new AnalogChannel(tiltPotModule, tiltPotChannel);
 	m_tiltPot->SetAverageBits(2);
 	m_tiltPot->SetOversampleBits(0);
@@ -34,6 +34,8 @@ Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 	}else{
 		m_hopState = hStore;
 	}
+	
+	m_sendTiltEvent = false;
 	
 	m_tiltTarget = m_tiltPot->GetAverageValue();
 }
@@ -109,6 +111,10 @@ void Hopper::Periodic(float joyValue){
 			tiltSpeed = -1.0;
 		}else{
 			tiltSpeed = 0.0;
+			if(m_sendTiltEvent){
+				m_sendTiltEvent = false;
+				m_event->RaiseEvent(m_eventSourceId, 1);
+			}
 		}
 	}
 	
@@ -146,20 +152,12 @@ void Hopper::RELEASETHEFRISBEES(){
 	}
 }
 
-void Hopper::SetTiltTarget(HopTarget Target){
-	switch(Target){
-		case hFeeder:
-			m_tiltTarget = 50;
-			break;
-			
-		case hDrive:
-			m_tiltTarget = 25;
-			break;
-			
-		case hPyramid:
-			m_tiltTarget = 0;
-			break;
-			
-		default:;
+void Hopper::SetTiltTarget(INT32 Target){
+	if(Target < 0){
+		Target = 0;
+	}else if(Target > c_tiltSpan){
+		Target = c_tiltSpan;
 	}
+	m_sendTiltEvent = true;
+	m_tiltTarget = Target;
 }
