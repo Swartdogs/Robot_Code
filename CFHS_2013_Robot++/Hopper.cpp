@@ -1,12 +1,13 @@
 
 #include "Hopper.h"
 
-INT32 const c_tiltZeroOffset = 0;
-INT32 const c_tiltDeadband = 25;
-float const c_shootGateClosed = 1.0;
-float const c_shootGateOpen = 0.0;
 float const c_loadGateClosed = 1.0;
 float const c_loadGateOpen = 0.0;
+float const c_shootGateClosed = 1.0;
+float const c_shootGateOpen = 0.0;
+INT32 const c_tiltDeadband = 25;
+INT32 const c_tiltSpan = 600;
+INT32 const c_tiltZeroOffset = 0;
 
 Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 			   UINT8 	loadGateModule,   UINT32 loadGateChannel,
@@ -76,8 +77,16 @@ void Hopper::Periodic(float joyValue){
 	static int		periodicCounter;
 	
 	if(joyValue != 0){
-		tiltSpeed = joyValue;
 		m_tiltTarget = curTiltPosition;
+
+		if (joyValue > 0 && curTiltPosition > c_tiltSpan - c_tiltDeadband) {
+			tiltSpeed = 0.0;
+		}else if(joyValue < 0 && curTiltPosition < c_tiltDeadband) {
+			tiltSpeed = 0.0;
+		}else{
+			tiltSpeed = joyValue;
+		}
+		
 	}else if(m_pelicanStateEnabled == true && m_diskSensor->Get() == 0){
 		periodicCounter++;
 		if(periodicCounter <= 10){
@@ -91,6 +100,7 @@ void Hopper::Periodic(float joyValue){
 		}else{
 			periodicCounter = 0;
 		}
+	
 	}else{
 		m_pelicanStateEnabled = false;
 		if(curTiltPosition < m_tiltTarget - c_tiltDeadband){

@@ -3,8 +3,9 @@
 INT32 const c_shootIdlePosition = 0;
 INT32 const c_tensionZeroOffset = 0;
 INT32 const c_tensionDeadband = 50;
+INT32 const c_tiltDeadband = 25;
+INT32 const c_tiltRange = 600;
 INT32 const c_tiltZeroOffset = 0;
-INT32 const c_tiltRange = 500;
 
 DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 						 UINT8   tiltMotorModule,		UINT32 tiltMotorChannel,
@@ -125,12 +126,20 @@ bool DiskShooter::Periodic(float joyValue){
 	INT32				curTensionPosition = m_tensionPot->GetAverageValue() - c_tensionZeroOffset;
 	Relay::Value        tensionState;
 	
-//----------------------------Tilt Related Stuff-------------------------------------
+	//----------------------------Tilt Related Stuff-------------------------------------
 	
 	if(joyValue != 0){
-		tiltSpeed = joyValue;
 		m_tiltTarget = curTiltPosition;
-	}else if(m_tiltTarget == 0 && curTiltPosition < 20){
+
+		if(joyValue > 0 && curTiltPosition > c_tiltRange - c_tiltDeadband) {
+			tiltSpeed = 0.0;
+		}else if(joyValue < 0 && curTiltPosition < c_tiltDeadband) {
+			tiltSpeed = 0.0;
+		}else{
+			tiltSpeed = joyValue;
+		}
+		
+	}else if(m_tiltTarget == 0 && curTiltPosition < c_tiltDeadband){
 		tiltSpeed = 0.0;
 	}else{
 		tiltSpeed = m_tiltPID->Calculate((float)curTiltPosition);
@@ -138,7 +147,7 @@ bool DiskShooter::Periodic(float joyValue){
 
 	m_tiltMotor->Set(tiltSpeed);
 	
-//------------------------------Tension Stuff-----------------------------------------
+	//------------------------------Tension Stuff-----------------------------------------
 
 	if(curTensionPosition < m_tensionTarget - c_tensionDeadband) {
 		tensionState = Relay::kForward;
@@ -150,7 +159,7 @@ bool DiskShooter::Periodic(float joyValue){
 	
 	m_tensionMotor->Set(tensionState);
 	
-//----------------------------Shoot Arm Stuff-----------------------------------------
+	//----------------------------Shoot Arm Stuff-----------------------------------------
 	
 	switch(m_shootState){
 		case sLoad:
@@ -207,11 +216,11 @@ void DiskShooter::SetTiltTarget(ShootTarget Target){
 			break;
 			
 		case sShort:
-			m_tiltTarget = 25;				//CHANGE THIS!!!!!
+			m_tiltTarget = 300;				//CHANGE THIS!!!!!
 			break;
 			
 		case sFlop:
-			m_tiltTarget = 0;				//CHANGE THIS!!!!!
+			m_tiltTarget = 600;				//CHANGE THIS!!!!!
 			break;
 			
 		default:;

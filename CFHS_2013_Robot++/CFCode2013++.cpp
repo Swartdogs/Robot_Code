@@ -453,15 +453,32 @@ public:
 		m_lastPeriodStart = TimeNow;
 		
 		
-		//CODE GOES HERE!
-//--------------------------------Drive Stuff-------------------------------------------------------
+		//--------------------------------Drive Stuff-------------------------------------------------------
+		
 		if(m_driveJoystick->GetRawButton(3) || m_driveJoystick->GetRawButton(4)){
 			m_drive->Periodic(Drive::dStrafe, m_driveJoystick->GetY(), m_driveJoystick->GetX(), 0);
 		}else{
 			m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
 		}
 		
-//--------------------------------Hopper Stuff------------------------------------------------------		
+		//--------------------------------Hopper Stuff------------------------------------------------------		
+		
+		if(m_buttonBox->GetRawButton(2)) {
+			m_hopper->SetTiltTarget(Hopper::hFeeder);
+		} else if (m_buttonBox->GetRawButton(3)) {
+			m_hopper->SetTiltTarget(Hopper::hDrive);
+		} else if (m_buttonBox->GetRawButton(4)) {
+			m_hopper->SetTiltTarget(Hopper::hPyramid);
+		}
+
+		if(m_buttonBox->GetRawButton(5)) {
+			m_shooter->SetTiltTarget(DiskShooter::sLong);
+		} else if (m_buttonBox->GetRawButton(6)) {
+			m_shooter->SetTiltTarget(DiskShooter::sShort);
+		} else if (m_buttonBox->GetRawButton(7)) {
+			m_shooter->SetTiltTarget(DiskShooter::sFlop);
+		}
+
 		if(fabs(tiltValue) > 0.1){
 			if(m_buttonBox->GetRawButton(1)){
 				m_hopper->Periodic(0);
@@ -471,25 +488,8 @@ public:
 				shootReady = m_shooter->Periodic(0);
 			}
 		}else{
-				m_hopper->Periodic(0);	
-				shootReady = m_shooter->Periodic(0);
-		}
-
-		if(m_buttonBox->GetRawButton(2)) {
-			m_hopper->SetTiltTarget(Hopper::hFeeder);
-		} else if (m_buttonBox->GetRawButton(3)) {
-			m_hopper->SetTiltTarget(Hopper::hDrive);
-		} else if (m_buttonBox->GetRawButton(4)) {
-			m_hopper->SetTiltTarget(Hopper::hPyramid);
-		}
-//--------------------------------Shooter Stuff----------------------------------------------------
-		
-		if(m_buttonBox->GetRawButton(5)) {
-			m_shooter->SetTiltTarget(DiskShooter::sLong);
-		} else if (m_buttonBox->GetRawButton(6)) {
-			m_shooter->SetTiltTarget(DiskShooter::sShort);
-		} else if (m_buttonBox->GetRawButton(7)) {
-			m_shooter->SetTiltTarget(DiskShooter::sFlop);
+			m_hopper->Periodic(0);	
+			shootReady = m_shooter->Periodic(0);
 		}
 		
 		m_periodicCount++;
