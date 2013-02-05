@@ -35,12 +35,11 @@ Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 		m_hopState = hStore;
 	}
 	
-	m_sendTiltEvent = false;
-	
 	m_tiltTarget = m_tiltPot->GetAverageValue();
 }
 
 Hopper::~Hopper(){
+	
 	delete m_shootGate;
 	delete m_loadGate;
 	delete m_tiltMotor;
@@ -50,6 +49,7 @@ Hopper::~Hopper(){
 }
 
 void Hopper::Disable(){
+	
 	m_shootGate->SetSafetyEnabled(false);
 	m_loadGate->SetSafetyEnabled(false);
 	
@@ -58,6 +58,7 @@ void Hopper::Disable(){
 }
 
 void Hopper::Enable(){
+	
 	m_shootGate->SetSafetyEnabled(true);
 	m_loadGate->SetSafetyEnabled(true);
 	
@@ -66,6 +67,7 @@ void Hopper::Enable(){
 }
 
 void Hopper::PELICANMOVE(bool pelicanStateEnabled){
+
 	if(m_diskSensor->Get() == 1){
 		m_pelicanStateEnabled = false;
 	}else{
@@ -73,10 +75,16 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 	}
 }
 
-void Hopper::Periodic(float joyValue){
-	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
-	static float	tiltSpeed = 0.0;
+int Hopper::Periodic(float joyValue){
+
+	// hopperFlags:  Bit 0 = Hopper Tilt completed
+	//                   1 = Shoot Gate Open
+	
 	static int		periodicCounter;
+	static float	tiltSpeed = 0.0;
+
+	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
+	int             hopperFlags = 0;
 	
 	if(joyValue != 0){
 		m_tiltTarget = curTiltPosition;
@@ -105,16 +113,14 @@ void Hopper::Periodic(float joyValue){
 	
 	}else{
 		m_pelicanStateEnabled = false;
+		
 		if(curTiltPosition < m_tiltTarget - c_tiltDeadband){
 			tiltSpeed = 1.0;
 		}else if(curTiltPosition > m_tiltTarget + c_tiltDeadband) {
 			tiltSpeed = -1.0;
 		}else{
 			tiltSpeed = 0.0;
-			if(m_sendTiltEvent){
-				m_sendTiltEvent = false;
-				m_event->RaiseEvent(m_eventSourceId, 1);
-			}
+			hopperFlags += 1;
 		}
 	}
 	
@@ -122,6 +128,8 @@ void Hopper::Periodic(float joyValue){
 		
 	switch(m_hopState){
 		case hLoad:
+			printf("Load Hop State \n");
+			
 			m_shootGate->Set(c_shootGateClosed);
 			m_loadGate->Set(c_loadGateOpen);
 			if(m_diskSensor->Get() == 0){
@@ -144,20 +152,26 @@ void Hopper::Periodic(float joyValue){
 			
 		default:;
 	}
+	
+	if (m_hopState == hShoot) hopperFlags += 2;
+	
+	return hopperFlags;
 }
 
-void Hopper::RELEASETHEFRISBEES(){	
+void Hopper::RELEASETHEFRISBEE(){	
+	
 	if(m_diskSensor->Get() == 0){
 		m_hopState = hShoot;
 	}
 }
 
 void Hopper::SetTiltTarget(INT32 Target){
+	
 	if(Target < 0){
 		Target = 0;
 	}else if(Target > c_tiltSpan){
 		Target = c_tiltSpan;
 	}
-	m_sendTiltEvent = true;
+	
 	m_tiltTarget = Target;
 }

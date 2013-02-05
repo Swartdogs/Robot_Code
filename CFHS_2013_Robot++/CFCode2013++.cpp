@@ -29,7 +29,7 @@
 #include "DiskShooter.h"
 
 enum EnumAction{actionNone, actionDrive, actionTurn, actionShoot, actionShootCamera, actionFrisbeePickup, actionDumpFrisbees};
-enum EnumShoot{shootOff, shootCamera, shootFront, shootBack};
+enum EnumShootSeq{seqIdle, seqPositionHopper, seqLoad, seqFire};
 
 typedef struct {									// Autonomous
 	bool        InitStep;							//    Initialize Step
@@ -68,7 +68,6 @@ class Team525: public IterativeRobot, public Events
 	StructAutoStep *m_autoStep;
 	FILE		   *m_logFile;
 	bool			m_cameraShot;
-	bool            m_loadingShooter;
 	
 	char	   		m_autoModeId0;
 	char	   		m_autoModeId1;
@@ -84,6 +83,7 @@ class Team525: public IterativeRobot, public Events
 public:
 
 	Team525(void)	{
+		
 		m_drive = new Drive(1, 1,					// Left Front Motor 	DM 1: PWM 1
 							1, 2,					// Left Rear Motor 		DM 1: PWM 2
 							1, 3,					// Right Front Motor 	DM 1: PWM 3
@@ -137,12 +137,11 @@ public:
 	}
 	
 	void RobotInit(void) {
+		
 		FILE *BootFile;
 		int BootCount = 0;
 		
 		GetWatchdog().SetEnabled(false);
-		
-		m_loadingShooter = false;
 		
 		m_autoModeId0 = 0;
 		m_autoModeId1 = 1;
@@ -168,9 +167,13 @@ public:
 /**************************************** DISABLED *******************************************/
 
 	void DisabledInit(void) {
+		
 		m_cameraLED->Set(false);
 		m_drive->Disable();
 		m_periodicCount = -1;
+		
+		m_hopper->Disable();
+		m_shooter->Disable();
 		
 		WriteToLog("525 2013 Disabled Init");
 		fclose(m_logFile);
@@ -209,6 +212,9 @@ public:
 		AutoStepLoad(AutoMode);
 		m_auto.StepIndex = 0;
 		m_auto.InitStep = true;
+		
+		m_hopper->Enable();
+		m_shooter->Enable();
 		
 		m_logFile = fopen("Log525.txt", "a");
 		
@@ -376,6 +382,7 @@ public:
 	}
 
 	void AutoStepInit(int NumberOfSteps){
+		
 		m_auto.StepCount = NumberOfSteps;
 		m_autoStep = new StructAutoStep[m_auto.StepCount];
 		
@@ -434,6 +441,9 @@ public:
 
 	void TeleopInit(void) {
 		
+		m_hopper->Enable();
+		m_shooter->Enable();
+		
 		m_logFile = fopen("Log525.txt", "a");
 		WriteToLog("525 Teleop Init");
 		
@@ -441,10 +451,13 @@ public:
 	}
 
 	void TeleopPeriodic(void) {
+		
+		static int          hopperFlags = 0;
+		static int          shooterFlags = 0;
+		static EnumShootSeq shootSeq = seqIdle;
+		
 		float  tiltValue = m_tiltJoystick->GetY();
-		bool   shootReady;
 		double TimeNow;
-		static bool	shooterLoadButton = false;
 				
 		TimeNow = GetClock() * 1000;
 		
@@ -455,70 +468,97 @@ public:
 		}
 		
 		m_lastPeriodStart = TimeNow;
-		if(m_loadingShooter){
-			if(m_tiltJoystick->GetRawButton(8) && m_tiltJoystick->GetRawButton(9)){
-				m_loadingShooter = false;
-			}
-		}
 		
-//--------------------------------Drive Stuff-------------------------------------------------------
-		if(!m_loadingShooter){
+		//--------------------------------Drive Stuff-------------------------------------------------------
+		
+		if(shootSeq != seqFire){
 			if(m_driveJoystick->GetRawButton(3) || m_driveJoystick->GetRawButton(4)){
 				m_drive->Periodic(Drive::dStrafe, m_driveJoystick->GetY(), m_driveJoystick->GetX(), 0);
 			}else{
 				m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
 			}
 		}
-//--------------------------------Hopper Stuff------------------------------------------------------		
-		if(!m_loadingShooter){
-			if(m_buttonBox->GetRawButton(2)) {
-				m_hopper->SetTiltTarget(50);							//Load frisbee position
-			} else if (m_buttonBox->GetRawButton(3)) {
-				m_hopper->SetTiltTarget(25);							//Position for driving 
-			} else if (m_buttonBox->GetRawButton(4)) {
-				m_hopper->SetTiltTarget(0);								//Position to get under the pyramid
-			}
-		}
-		if(m_buttonBox->GetRawButton(8)){
-			if(!shooterLoadButton && !m_loadingShooter){
-				shooterLoadButton = true;
-				m_loadingShooter = true;
-				if(m_shooter->GetTiltPosition() < 300){
+		//--------------------------------Hopper Stuff------------------------------------------------------
+		
+		if(shootSeq == seqIdle){
+			if(m_buttonBox->GetRawButton(8) && shooterFlags >= 3){		// Shoot button pressed, Shooter Tilt and Tension completed 
+				shootSeq = seqPositionHopper;
+				
+				if(m_shooter->GetTiltPosition() < 300){					// Move hopper to load position
 					m_hopper->SetTiltTarget(600);
 				}else{
 					m_hopper->SetTiltTarget(400);
 				}
+				
+			} else if(m_buttonBox->GetRawButton(2)) {					
+				m_hopper->SetTiltTarget(50);							// Feeder load position
+			} else if (m_buttonBox->GetRawButton(3)) {
+				m_hopper->SetTiltTarget(25);							// Position for driving 
+			} else if (m_buttonBox->GetRawButton(4)) {
+				m_hopper->SetTiltTarget(0);								// Position to get under the pyramid
 			}
-		}else{
-			shooterLoadButton = false;
 		}
-//--------------------------------Shooter Stuff------------------------------------------------------	
-		if(!m_loadingShooter){
+
+		//--------------------------------Shooter Stuff------------------------------------------------------	
+		
+		if(shootSeq == seqIdle){
 			if(m_buttonBox->GetRawButton(5)) {
-				m_shooter->SetTiltTarget(50);							//Long shot mode
+				m_shooter->SetTiltTarget(50);							// Long shot mode
+				m_shooter->SetTensionTarget(400);
 			} else if (m_buttonBox->GetRawButton(6)) {
-				m_shooter->SetTiltTarget(300);							//Short shot mode
+				m_shooter->SetTiltTarget(300);							// Short shot mode
+				m_shooter->SetTensionTarget(250);
 			} else if (m_buttonBox->GetRawButton(7)) {
-				m_shooter->SetTiltTarget(600);							//Pyramid flop mode
+				m_shooter->SetTiltTarget(600);							// Pyramid flop mode
+				m_shooter->SetTensionTarget(100);
+			}
+
+		} else {
+			if(m_tiltJoystick->GetRawButton(8) && m_tiltJoystick->GetRawButton(9)){
+				shootSeq = seqIdle;
 			}
 		}
 		
-		if(fabs(tiltValue) > 0.1 && !m_loadingShooter){
-			if(m_buttonBox->GetRawButton(1)){
-				m_hopper->Periodic(0);
-				shootReady = m_shooter->Periodic(tiltValue);
-			}else{
-				m_hopper->Periodic(tiltValue);
-				shootReady = m_shooter->Periodic(0);
+		//--------------------------------Call Periodic Functions--------------------------------------------	
+		
+		if(fabs(tiltValue) > 0.1 && shootSeq == seqIdle){				// Use Tilt Joystick		
+			if(m_buttonBox->GetRawButton(1)){							// Manual Shooter Tilt
+				hopperFlags = m_hopper->Periodic(0);
+				shooterFlags = m_shooter->Periodic(tiltValue);
+			}else{														// Manual Hopper Tilt
+				hopperFlags = m_hopper->Periodic(tiltValue);
+				shooterFlags = m_shooter->Periodic(0);
 			}
-		}else{
-			m_hopper->Periodic(0);	
-			shootReady = m_shooter->Periodic(0);
+			
+		}else{															// Ignore Joystick
+			hopperFlags = m_hopper->Periodic(0);	
+			shooterFlags = m_shooter->Periodic(0);
 		}
 		
-		if(shootReady && m_loadingShooter){
-			m_shooter->Shoot();
-			m_loadingShooter = false;
+		//--------------------------------Frisbee Shoot Sequence---------------------------------------------	
+		
+		switch(shootSeq) {
+			case seqPositionHopper:
+				if ((hopperFlags & 1) == 1) {							// Hopper in position
+					shootSeq = seqLoad;
+					m_shooter->Load();									// Initiate Shooter Arm movement
+				}
+				break;
+
+			case seqLoad:
+				if ((shooterFlags & 4) == 4 && (hopperFlags & 2) == 0) {	// Shooter arm ready for load and Hopper Shoot Gate closed
+					m_hopper->RELEASETHEFRISBEE();						// Open Hopper Shoot Gate
+				}
+				
+				if (shooterFlags == 31) {								// Shooter loaded and Ready
+					shootSeq = seqFire;
+					m_shooter->Shoot();									// Fire Frisbee
+				}
+				break;
+				
+			case seqFire:
+				if ((shooterFlags & 16) == 0) shootSeq = seqIdle;		// No Frisbee in Shooter
+			default:;
 		}
 		
 		m_periodicCount++;
@@ -530,6 +570,7 @@ public:
 /****************************************** TEST *********************************************/
 
 	void TestInit(void){
+		
 		m_cameraLED->Set(true);
 		m_drive->Enable();
 		
@@ -537,6 +578,7 @@ public:
 	}
 	
 	void TestPeriodic(void){
+		
 		static int  GoalFound = 0;
 		static bool buttonPressed = false;
 		
@@ -572,21 +614,11 @@ public:
 	
 	void RaiseEvent(UINT8 EventSourceId, UINT32 EventNumber){
 		
-		if (EventSourceId == 3) {					// DISK SHOOTER EVENT
-			if (EventNumber == 1) {					// Shooter ready for disk
-				m_hopper->RELEASETHEFRISBEES();
-			}
-		}else if(EventSourceId == 4){				// HOPPER EVENT	
-			if(EventNumber == 1){					// Hopper at tilt position
-				if(m_loadingShooter){
-					m_shooter->Load();
-				}
-			}
-		}
 	}
 	
 	
 	void WriteToLog(char *LogEntry){
+		
 		if (m_periodicCount >= 0) {
 			fprintf(m_logFile, "%5d: %s \r\n", m_periodicCount, LogEntry);
 		} else {

@@ -26,8 +26,8 @@ public:
 	void  Disable();
 	INT32 GetTiltPosition();
 	void  Load();
-	bool  Periodic(float joyValue);
-	void  SetTensionTarget();
+	int   Periodic(float joyValue);
+	void  SetTensionTarget(INT32 Target);
 	void  SetTiltTarget(INT32 Target);
 	void  Shoot();
 	

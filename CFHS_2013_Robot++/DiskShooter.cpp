@@ -1,8 +1,9 @@
 #include "DiskShooter.h"
 
 INT32 const c_shootIdlePosition = 0;
-INT32 const c_tensionZeroOffset = 0;
 INT32 const c_tensionDeadband = 50;
+INT32 const c_tensionRange = 600;
+INT32 const c_tensionZeroOffset = 0;
 INT32 const c_tiltDeadband = 25;
 INT32 const c_tiltRange = 600;
 INT32 const c_tiltZeroOffset = 0;
@@ -59,6 +60,7 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 }
 
 DiskShooter::~DiskShooter(){
+	
 	delete m_diskSensor;
 	delete m_event;
 	delete m_shootMotor;
@@ -72,6 +74,7 @@ DiskShooter::~DiskShooter(){
 }
 
 void DiskShooter::Disable(){
+	
 	m_shootMotor->Set(0);
 	m_shootMotor->SetSafetyEnabled(false);
 	
@@ -83,6 +86,7 @@ void DiskShooter::Disable(){
 }
 
 void DiskShooter::Enable(){
+	
 	m_shootMotor->Set(0);
 	m_shootMotor->SetSafetyEnabled(true);
 	
@@ -91,6 +95,7 @@ void DiskShooter::Enable(){
 }
 
 INT32 DiskShooter::GetShooterPosition(){
+	
 	INT32 		 curReading = 0;
 	static INT32 lastReading = 0;
 	INT32        vReturn = 0;
@@ -108,23 +113,33 @@ INT32 DiskShooter::GetShooterPosition(){
 }
 
 INT32 DiskShooter::GetTiltPosition(){
+	
 	return m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 }
 
 void DiskShooter::Load(){
+	
 	if(m_shootState == sIdle){
 		m_shootState = sLoad;
 	}
 }
 
-bool DiskShooter::Periodic(float joyValue){
-	INT32		 		curTiltPosition = GetTiltPosition();
+int DiskShooter::Periodic(float joyValue){
+	
+	// shooterFlags:  Bit 0 = Shooter Tilt completed
+	//                    1 = Shooter Tension completed
+	//                    2 = Shooter Arm ready for Load
+	//                    3 = Shooter Arm ready to Shoot
+	//                    4 = Disc Loaded
+	
 	static float 		tiltSpeed = 0.0;
-	float				shootSpeed = 0.0;
+
 	INT32				curShootPosition = GetShooterPosition();
-	static bool			loadingFlag = false;
 	INT32				curTensionPosition = m_tensionPot->GetAverageValue() - c_tensionZeroOffset;
+	INT32		 		curTiltPosition = GetTiltPosition();
+	float				shootSpeed = 0.0;
 	Relay::Value        tensionState;
+	int                 shooterFlags = 0;
 	
 	//----------------------------Tilt Related Stuff-------------------------------------
 	
@@ -133,16 +148,20 @@ bool DiskShooter::Periodic(float joyValue){
 
 		if(joyValue > 0 && curTiltPosition > c_tiltRange - c_tiltDeadband) {
 			tiltSpeed = 0.0;
+			shooterFlags += 1;
 		}else if(joyValue < 0 && curTiltPosition < c_tiltDeadband) {
 			tiltSpeed = 0.0;
+			shooterFlags += 1;
 		}else{
 			tiltSpeed = joyValue;
 		}
 		
 	}else if(m_tiltTarget == 0 && curTiltPosition < c_tiltDeadband){
 		tiltSpeed = 0.0;
+		shooterFlags += 1;
 	}else{
 		tiltSpeed = m_tiltPID->Calculate((float)curTiltPosition);
+		if (abs(curTiltPosition - m_tiltTarget) < c_tiltDeadband) shooterFlags += 1;
 	}
 
 	m_tiltMotor->Set(tiltSpeed);
@@ -155,6 +174,7 @@ bool DiskShooter::Periodic(float joyValue){
 		tensionState = Relay::kReverse;
 	}else{
 		tensionState = Relay::kOff;
+		shooterFlags += 2;
 	}
 	
 	m_tensionMotor->Set(tensionState);
@@ -167,24 +187,22 @@ bool DiskShooter::Periodic(float joyValue){
 				shootSpeed = 0.0;
 				m_shootState = sShootReady;
 				m_shootPID->SetSetpoint((float)curShootPosition);
+				shooterFlags += 12;
 			}else{
 				shootSpeed = 1.0;
-				if(curShootPosition >= m_RELEASETHEFRISBEEPOSITION && !loadingFlag){
-					loadingFlag = true;
-					m_event->RaiseEvent(m_eventSourceId, 1);
-				}
+				if(curShootPosition >= m_RELEASETHEFRISBEEPOSITION) shooterFlags += 4; 
 			}
 			break;
 
 		case sShootReady:
 			shootSpeed = m_shootPID->Calculate(curShootPosition);
+			shooterFlags += 12;
 			break;
 
 		case sShoot:
 			if(curShootPosition >= c_shootIdlePosition && curShootPosition < m_shootReadyPosition){
 				shootSpeed = 0.0;
 				m_shootState = sIdle;
-				loadingFlag = false;
 			}else{
 				shootSpeed = 1.0;
 			}
@@ -196,25 +214,37 @@ bool DiskShooter::Periodic(float joyValue){
 	
 	m_shootMotor->Set(shootSpeed);
 	
-	return (m_shootState == sShootReady && tiltSpeed == 0.0 && m_diskSensor->Get() == 0);
+	if (m_diskSensor->Get() == 0) shooterFlags += 16;
+	
+	return shooterFlags;
 }
 
 void DiskShooter::Shoot(){
+	
 	if(m_shootState == sShootReady){
 		m_shootState = sShoot;
 	}
 }
 
-void DiskShooter::SetTensionTarget(){
-	m_tensionTarget = m_tiltTarget;			//CHANGE THIS!!!
+void DiskShooter::SetTensionTarget(INT32 Target){
+	
+	if(Target < 0){
+		Target = 0;
+	}else if (Target > c_tensionRange) {
+		Target = c_tensionRange;
+	}
+	
+	m_tensionTarget = Target;
 }
 
 void DiskShooter::SetTiltTarget(INT32 Target){
+	
 	if(Target < 0){
 		Target = 0;
 	}else if(Target > c_tiltRange){
 		Target = c_tiltRange;
 	}
+
 	m_tiltTarget = Target;
 	m_tiltPID->SetSetpoint((float)m_tiltTarget);
 }
