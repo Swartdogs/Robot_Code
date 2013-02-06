@@ -24,16 +24,16 @@ public:
 
 	void  Enable();
 	void  Disable();
-	INT32 GetTiltPosition();
+	INT32 GetTiltTarget();
 	void  Load();
 	int   Periodic(float joyValue);
 	void  SetTensionTarget(INT32 Target);
 	void  SetTiltTarget(INT32 Target);
-	void  Shoot();
+	void  FIREINTHEHOLE();
 	
 private:
 	typedef enum{sIdle, sLoad, sShootReady, sShoot}ShootState;
-	
+
 	DigitalInput  *m_diskSensor;
 	Events		  *m_event;
 	UINT8		   m_eventSourceId;
@@ -53,6 +53,7 @@ private:
 	INT32		   m_tiltTarget;
 	
 	INT32 		   GetShooterPosition();
+	INT32 		   GetTiltPosition();
 };
 
 #endif

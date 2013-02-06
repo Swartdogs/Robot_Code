@@ -17,12 +17,12 @@ public:
 			Events *eventHandler,	  UINT8  eventSourceId);
 	~Hopper();
 	
-	void Disable();
-	void Enable();
-	void PELICANMOVE(bool pelicanStateEnabled);
-	int  Periodic(float joyValue);
-	void RELEASETHEFRISBEE();
-	void SetTiltTarget(INT32 Target);
+	void  Disable();
+	void  Enable();
+	void  PELICANMOVE(bool pelicanStateEnabled);
+	int   Periodic(float joyValue);
+	void  RELEASETHEFRISBEE();
+	void  SetTiltTarget(INT32 Target);
 
 private:
 	typedef enum{hLoad, hStore, hShoot}HopState;

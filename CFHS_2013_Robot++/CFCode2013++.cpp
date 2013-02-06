@@ -6,19 +6,20 @@
 //  5 - Move Shooter bed to long position
 //  6 - Move Shooter bed to short position
 //  7 - Move Shooter bed to flop position 
-//  8 - 
-//  9 - 
+//  8 - Start Shoot Sequence
+//  9 - Move Hopper to Load Position
 //  10- 
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
+//Tilt Joystick Buttons:
+//	1 - 
+//	2 - 
+//  3 - 
+//  4 - 
+//	5 -
+//	6 - 
+//	7 - 
+//  8 - Cancel Shoot (w/ button 9)
+//	9 - Cancel Shoot (w/ button 8)
 
 #include "WPILib.h"
 #include "Events.h"
@@ -443,6 +444,7 @@ public:
 		
 		m_hopper->Enable();
 		m_shooter->Enable();
+		m_drive->Enable();
 		
 		m_logFile = fopen("Log525.txt", "a");
 		WriteToLog("525 Teleop Init");
@@ -481,21 +483,22 @@ public:
 		//--------------------------------Hopper Stuff------------------------------------------------------
 		
 		if(shootSeq == seqIdle){
-			if(m_buttonBox->GetRawButton(8) && shooterFlags >= 3){		// Shoot button pressed, Shooter Tilt and Tension completed 
-				shootSeq = seqPositionHopper;
-				
-				if(m_shooter->GetTiltPosition() < 300){					// Move hopper to load position
-					m_hopper->SetTiltTarget(600);
+			if(m_buttonBox->GetRawButton(8) && shooterFlags >= 3 && (hopperFlags & 4) == 4){		// Shoot button pressed, Shooter Tilt and Tension completed 
+				if((shooterFlags & 16) == 16){
+					shootSeq = seqFire;
 				}else{
-					m_hopper->SetTiltTarget(400);
+					shootSeq = seqPositionHopper;
+					
+					READYTHEHOPPER();
 				}
-				
 			} else if(m_buttonBox->GetRawButton(2)) {					
 				m_hopper->SetTiltTarget(50);							// Feeder load position
 			} else if (m_buttonBox->GetRawButton(3)) {
 				m_hopper->SetTiltTarget(25);							// Position for driving 
 			} else if (m_buttonBox->GetRawButton(4)) {
 				m_hopper->SetTiltTarget(0);								// Position to get under the pyramid
+			} else if (m_buttonBox->GetRawButton(9)){
+				READYTHEHOPPER();
 			}
 		}
 
@@ -552,7 +555,7 @@ public:
 				
 				if (shooterFlags == 31) {								// Shooter loaded and Ready
 					shootSeq = seqFire;
-					m_shooter->Shoot();									// Fire Frisbee
+					m_shooter->FIREINTHEHOLE();									// Fire Frisbee
 				}
 				break;
 				
@@ -607,6 +610,16 @@ public:
 				GoalFound = 0;
 				printf("Distance = %d \nAngle = %f\n", m_findGoals->GetDistance(), m_findGoals->GetAngle());
 			}
+		}
+	}
+	
+	void READYTHEHOPPER(){
+		if(m_shooter->GetTiltTarget() < 300){					// Move hopper to load position
+			m_hopper->SetTiltTarget(600);
+		}else if (m_shooter->GetTiltTarget() < 600){
+			m_hopper->SetTiltTarget(400);
+		}else {
+			m_hopper->SetTiltTarget(200);
 		}
 	}
 

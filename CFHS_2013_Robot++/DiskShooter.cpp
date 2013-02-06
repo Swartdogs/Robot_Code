@@ -18,7 +18,11 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 						 Events *eventHandler,			UINT8  eventSourceId)
 {
 	m_shootMotor = new Victor(shootMotorModule, shootMotorChannel);
+	m_shootMotor->SetExpiration(1.0);
+	
 	m_tiltMotor = new Victor(tiltMotorModule, tiltMotorChannel);
+	m_tiltMotor->SetExpiration(1.0);
+	
 	m_tensionMotor = new Relay(tensionMotorModule, tensionMotorChannel, Relay::kBothDirections);
 	
 	m_shootPot = new AnalogChannel(shootPotModule, shootPotChannel);
@@ -117,6 +121,10 @@ INT32 DiskShooter::GetTiltPosition(){
 	return m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 }
 
+INT32 DiskShooter::GetTiltTarget(){
+	return m_tiltTarget;
+}
+
 void DiskShooter::Load(){
 	
 	if(m_shootState == sIdle){
@@ -126,11 +134,11 @@ void DiskShooter::Load(){
 
 int DiskShooter::Periodic(float joyValue){
 	
-	// shooterFlags:  Bit 0 = Shooter Tilt completed
-	//                    1 = Shooter Tension completed
-	//                    2 = Shooter Arm ready for Load
-	//                    3 = Shooter Arm ready to Shoot
-	//                    4 = Disc Loaded
+	// shooterFlags:  Bit 1 = Shooter Tilt completed
+	//                    2 = Shooter Tension completed
+	//                    4 = Shooter Arm ready for Load
+	//                    8 = Shooter Arm ready to Shoot
+	//                    16 = Disc Loaded
 	
 	static float 		tiltSpeed = 0.0;
 
@@ -219,7 +227,7 @@ int DiskShooter::Periodic(float joyValue){
 	return shooterFlags;
 }
 
-void DiskShooter::Shoot(){
+void DiskShooter::FIREINTHEHOLE(){
 	
 	if(m_shootState == sShootReady){
 		m_shootState = sShoot;

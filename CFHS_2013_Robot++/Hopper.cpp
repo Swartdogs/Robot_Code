@@ -17,9 +17,12 @@ Hopper::Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
 			   Events  *eventHandler,	  UINT8  eventSourceId)
 {
 	m_shootGate = new Servo(shootGateModule, shootGateChannel);
+	
 	m_loadGate = new Servo(loadGateModule, loadGateChannel);
 	
 	m_tiltMotor = new Victor(tiltMotorModule, tiltMotorChannel);
+	m_tiltMotor->SetExpiration(1.0);
+	
 	m_tiltPot = new AnalogChannel(tiltPotModule, tiltPotChannel);
 	m_tiltPot->SetAverageBits(2);
 	m_tiltPot->SetOversampleBits(0);
@@ -48,20 +51,12 @@ Hopper::~Hopper(){
 	delete m_event;
 }
 
-void Hopper::Disable(){
-	
-	m_shootGate->SetSafetyEnabled(false);
-	m_loadGate->SetSafetyEnabled(false);
-	
+void Hopper::Disable(){	
 	m_tiltMotor->Set(0);
 	m_tiltMotor->SetSafetyEnabled(false);
 }
 
-void Hopper::Enable(){
-	
-	m_shootGate->SetSafetyEnabled(true);
-	m_loadGate->SetSafetyEnabled(true);
-	
+void Hopper::Enable(){	
 	m_tiltMotor->Set(0);
 	m_tiltMotor->SetSafetyEnabled(true);
 }
@@ -77,14 +72,18 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 
 int Hopper::Periodic(float joyValue){
 
-	// hopperFlags:  Bit 0 = Hopper Tilt completed
-	//                   1 = Shoot Gate Open
+	// hopperFlags:  Bit 1 = Hopper Tilt Completed
+	//                   2 = Shoot Gate Open
+	// 					 4 = Frisbee Stored
 	
-	static int		periodicCounter;
+	static int		pelicanCounter = 0;
+	static int      periodicCounter = 0;
 	static float	tiltSpeed = 0.0;
 
+	
 	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 	int             hopperFlags = 0;
+	
 	
 	if(joyValue != 0){
 		m_tiltTarget = curTiltPosition;
@@ -98,17 +97,17 @@ int Hopper::Periodic(float joyValue){
 		}
 		
 	}else if(m_pelicanStateEnabled == true && m_diskSensor->Get() == 0){
-		periodicCounter++;
-		if(periodicCounter <= 10){
+		pelicanCounter++;
+		if(pelicanCounter <= 10){
 			tiltSpeed = 1.0;
-		}else if(periodicCounter <= 15){
+		}else if(pelicanCounter <= 15){
 			tiltSpeed = 0.0;
-		}else if(periodicCounter <= 25){
+		}else if(pelicanCounter <= 25){
 			tiltSpeed = -1.0;
-		}else if(periodicCounter <= 30){
+		}else if(pelicanCounter <= 30){
 			tiltSpeed = 0;
 		}else{
-			periodicCounter = 0;
+			pelicanCounter = 0;
 		}
 	
 	}else{
@@ -125,14 +124,12 @@ int Hopper::Periodic(float joyValue){
 	}
 	
 	m_tiltMotor->Set(tiltSpeed);
-		
+	
 	switch(m_hopState){
-		case hLoad:
-			printf("Load Hop State \n");
-			
+		case hLoad:			
 			m_shootGate->Set(c_shootGateClosed);
 			m_loadGate->Set(c_loadGateOpen);
-			if(m_diskSensor->Get() == 0){
+			if(m_diskSensor->Get() == 0){					// Yes frisbee
 				m_hopState = hStore;
 			}
 			break;
@@ -140,8 +137,12 @@ int Hopper::Periodic(float joyValue){
 		case hShoot:
 			m_shootGate->Set(c_shootGateOpen);
 			m_loadGate->Set(c_loadGateClosed);
-			if(m_diskSensor->Get() == 1){
-				m_hopState = hLoad;
+			if(m_diskSensor->Get() == 1){					// No frisbee
+				periodicCounter++;
+				if(periodicCounter >=5){
+					m_hopState = hLoad;
+					periodicCounter = 0;
+				}
 			}
 			break;
 			
@@ -154,6 +155,7 @@ int Hopper::Periodic(float joyValue){
 	}
 	
 	if (m_hopState == hShoot) hopperFlags += 2;
+	if (m_diskSensor->Get() == 0) hopperFlags += 4;
 	
 	return hopperFlags;
 }
