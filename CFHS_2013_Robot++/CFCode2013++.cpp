@@ -112,19 +112,19 @@ public:
 		
 		m_shooter = new DiskShooter(1, 7,			// Shoot Motor 			DM 1: PWM 7
 									1, 8,			// Tilt Motor 			DM 1: PWM 8
-									1, 1,			// Tension Motor 	    DM 1: Relay 1
+									1, 2,			// Tension Motor 	    DM 1: Relay 2
 									1, 3,			// Shoot Pot 			AM 1: Analog 3
 									1, 4,			// Tilt Pot 			AM 1: Analog 4
 									1, 5,			// Tension Pot 			AM 1: Analog 5
 									1, 6,			// Disk Sensor 			DM 1: Digital 6
 									this, 3);	
 		
-		m_hopper = new Hopper(1,9,   				// Shoot Gate Servo	    DM 1: PWM 9
-						 	  1,10,  				// Load Gate Servo      DM 1: PWM 10
-						 	  2,1,  				// Tilt Motor		    DM 2: PWM 1
-						 	  1,6,  			 	// Tilt Pot             AM 1: Analog 6
-						 	  1,7,   				// Disk Sensor          DM 1: Digital 7
-						 	  this,4);
+		m_hopper = new Hopper(1, 1,   				// Shoot Gate Servo	    DM 1: Relay 1
+						 	  2, 1,  				// Tilt Motor		    DM 2: PWM 1
+						 	  1, 6,  			 	// Tilt Pot             AM 1: Analog 6
+						 	  1, 7,   				// Before Sensor        DM 1: Digital 7
+						 	  1, 8,                 // After Sensor         DM 1: Digital 8  
+						 	  this, 4);
 		
 		Team525::SetPeriod(0.02);
 		

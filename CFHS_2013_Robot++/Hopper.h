@@ -3,18 +3,18 @@
 
 #include "Victor.h"
 #include "DigitalInput.h"
-#include "Servo.h"
+#include "Relay.h"
 #include "AnalogChannel.h"
 #include "Events.h"
 
 class Hopper{
 public:
-	 Hopper(UINT8 	shootGateModule,  UINT32 shootGateChannel,
-			UINT8 	loadGateModule,   UINT32 loadGateChannel,
-			UINT8 	tiltMotorModule,  UINT32 tiltMotorChannel,
-			UINT8 	tiltPotModule,	  UINT32 tiltPotChannel,
-			UINT8 	diskSensorModule, UINT32 diskSensorChannel,
-			Events *eventHandler,	  UINT8  eventSourceId);
+	 Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
+			UINT8 	tiltMotorModule,    UINT32 tiltMotorChannel,
+			UINT8 	tiltPotModule,	    UINT32 tiltPotChannel,
+			UINT8 	beforeSensorModule, UINT32 beforeSensorChannel,
+			UINT8   afterSensorModule,  UINT32 afterSensorChannel,
+			Events *eventHandler,	    UINT8  eventSourceId);
 	~Hopper();
 	
 	void  Disable();
@@ -25,20 +25,19 @@ public:
 	void  SetTiltTarget(INT32 Target);
 
 private:
-	typedef enum{hLoad, hStore, hShoot}HopState;
+	typedef enum{hLoad, hStore, hShoot, hEmpty}HopState;
 	
-	Servo 		  *m_shootGate;
-	Servo 		  *m_loadGate;
+	Relay		  *m_hopperGate; 		   
 	Victor 		  *m_tiltMotor;
 	AnalogChannel *m_tiltPot;
-	DigitalInput  *m_diskSensor;
+	DigitalInput  *m_beforeSensor;
+	DigitalInput  *m_afterSensor;
 	Events		  *m_event;
 	char		   m_log[100];
 	UINT8		   m_eventSourceId;
 	INT32		   m_tiltTarget;
 	HopState	   m_hopState;
 	bool		   m_pelicanStateEnabled;
-//	bool		   m_sendTiltEvent;
 };
 
 #endif
