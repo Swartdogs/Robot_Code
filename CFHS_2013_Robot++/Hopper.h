@@ -5,6 +5,7 @@
 #include "DigitalInput.h"
 #include "Relay.h"
 #include "AnalogChannel.h"
+#include "PIDLoop.h"
 #include "Events.h"
 
 class Hopper{
@@ -25,7 +26,7 @@ public:
 	void  SetTiltTarget(INT32 Target);
 
 private:
-	typedef enum{hLoad, hStore, hShoot, hEmpty}HopState;
+	typedef enum{hEmpty, hLoad, hStore, hShoot}HopState;
 	
 	Relay		  *m_hopperGate; 		   
 	Victor 		  *m_tiltMotor;
@@ -33,11 +34,14 @@ private:
 	DigitalInput  *m_beforeSensor;
 	DigitalInput  *m_afterSensor;
 	Events		  *m_event;
+	PIDLoop       *m_tiltPID;
+	
 	char		   m_log[100];
 	UINT8		   m_eventSourceId;
 	INT32		   m_tiltTarget;
 	HopState	   m_hopState;
 	bool		   m_pelicanStateEnabled;
+	bool           m_newTiltTarget;
 };
 
 #endif

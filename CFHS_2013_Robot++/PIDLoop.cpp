@@ -31,21 +31,23 @@ float PIDLoop::Calculate(float input) 							// CALCULATE OUTPUT
 	
 	m_error = m_setpoint - input;								// Current Error
 
-	if (m_error < 0) {											// Reset Total Error when Error changes direction
-		if (m_totalError > 0) m_totalError = 0;
-	} else if (m_error > 0) {
-		if (m_totalError < 0) m_totalError = 0;
-	}
-	
-	potentialIGain = (m_totalError + m_error) * m_I;			// Calculate potential Integral gain
-	
-	if (potentialIGain < m_maximumOutput) {						// I Gain < Max Output
-		if (potentialIGain > m_minimumOutput)					// I Gain > Min Output
-			m_totalError += m_error;							// Integrate current Error
-		else
-			m_totalError = m_minimumOutput / m_I;				// Set I Gain = Min Output
-	} else {
-		m_totalError = m_maximumOutput / m_I;					// Set I Gain = Max Output
+	if (m_I != 0) {
+		if (m_error < 0) {											// Reset Total Error when Error changes direction
+			if (m_totalError > 0) m_totalError = 0;
+		} else if (m_error > 0) {
+			if (m_totalError < 0) m_totalError = 0;
+		}
+		
+		potentialIGain = (m_totalError + m_error) * m_I;			// Calculate potential Integral gain
+		
+		if (potentialIGain < m_maximumOutput) {						// I Gain < Max Output
+			if (potentialIGain > m_minimumOutput)					// I Gain > Min Output
+				m_totalError += m_error;							// Integrate current Error
+			else
+				m_totalError = m_minimumOutput / m_I;				// Set I Gain = Min Output
+		} else {
+			m_totalError = m_maximumOutput / m_I;					// Set I Gain = Max Output
+		}
 	}
 
 	m_result = m_P * m_error + m_I * m_totalError + m_D * (m_error - m_prevError);	// Calculate Result

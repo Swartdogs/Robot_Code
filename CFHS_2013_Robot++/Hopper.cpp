@@ -1,9 +1,9 @@
 
 #include "Hopper.h"
 
-INT32 const c_tiltDeadband = 25;
-INT32 const c_tiltSpan = 600;
-INT32 const c_tiltZeroOffset = 0;
+INT32 const c_tiltDeadband = 5;
+INT32 const c_tiltSpan = 390;
+INT32 const c_tiltZeroOffset = 300;
 
 Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
 			   UINT8 	tiltMotorModule,    UINT32 tiltMotorChannel,
@@ -12,7 +12,7 @@ Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
 			   UINT8    afterSensorModule,  UINT32  afterSensorChannel,
 			   Events  *eventHandler,	    UINT8  eventSourceId)
 {
-	m_hopperGate = new Relay(hopperGateModule, hopperGateChannel, Relay::kForwardOnly);
+	m_hopperGate = new Relay(hopperGateModule, hopperGateChannel, Relay::kReverseOnly);
 	
 	m_tiltMotor = new Victor(tiltMotorModule, tiltMotorChannel);
 	m_tiltMotor->SetExpiration(1.0);
@@ -20,22 +20,21 @@ Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
 	m_tiltPot = new AnalogChannel(tiltPotModule, tiltPotChannel);
 	m_tiltPot->SetAverageBits(2);
 	m_tiltPot->SetOversampleBits(0);
-	
+
 	m_beforeSensor = new DigitalInput(beforeSensorModule, beforeSensorChannel);
 	m_afterSensor = new DigitalInput(afterSensorModule, afterSensorChannel);
 	
 	m_event = eventHandler;
 	m_eventSourceId = eventSourceId;
 	
-	if(m_afterSensor->Get() == 0){
-		m_hopState = hStore;
-	}else if(m_beforeSensor->Get() == 0){
-		m_hopState = hLoad;
-	} else {
-		m_hopState = hEmpty;
-	}
-	
-	m_tiltTarget = m_tiltPot->GetAverageValue();
+	m_tiltPID = new PIDLoop(0.02, 0.002, 0.0);
+	m_tiltPID->SetInputRange(0, (float) c_tiltSpan);
+	m_tiltPID->SetOutputRange(-1.0, 1.0);
+
+	m_tiltTarget = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
+	m_newTiltTarget = true;
+	m_hopState =hEmpty;
+	m_pelicanStateEnabled = false;
 }
 
 Hopper::~Hopper(){
@@ -44,22 +43,33 @@ Hopper::~Hopper(){
 	delete m_tiltMotor;
 	delete m_tiltPot;
 	delete m_beforeSensor;
+	delete m_afterSensor;
+	delete m_tiltPID;
 	delete m_event;
 }
 
-void Hopper::Disable(){	
+void Hopper::Disable(){
+	
 	m_tiltMotor->Set(0);
 	m_tiltMotor->SetSafetyEnabled(false);
 }
 
-void Hopper::Enable(){	
+void Hopper::Enable(){
+	
+	m_hopState = hEmpty;
+	m_hopperGate->Set(Relay::kOff);
+
+	m_tiltTarget = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
+	m_newTiltTarget = true;
+
 	m_tiltMotor->Set(0);
 	m_tiltMotor->SetSafetyEnabled(true);
+	m_tiltPID->Reset();
 }
 
 void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 
-	if(m_beforeSensor->Get() == 1){
+	if(m_beforeSensor->Get() == 0){				// Frisbee before gate
 		m_pelicanStateEnabled = false;
 	}else{
 		m_pelicanStateEnabled = pelicanStateEnabled;
@@ -69,30 +79,33 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 int Hopper::Periodic(float joyValue){
 
 	// hopperFlags:  Bit 1 = Hopper Tilt Completed
-	//                   2 = Shoot Gate Open
-	// 					 4 = Frisbee Stored
+	// 					 2 = Frisbee Stored
 	
 	static int		pelicanCounter = 0;
 	static float	tiltSpeed = 0.0;
-
 	
 	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 	int             hopperFlags = 0;
 	
-	
 	if(joyValue != 0){
+		m_pelicanStateEnabled = false;
 		m_tiltTarget = curTiltPosition;
-
+		m_newTiltTarget = true;
+		
 		if (joyValue > 0 && curTiltPosition > c_tiltSpan - c_tiltDeadband) {
 			tiltSpeed = 0.0;
+			hopperFlags += 1;
 		}else if(joyValue < 0 && curTiltPosition < c_tiltDeadband) {
 			tiltSpeed = 0.0;
+			hopperFlags += 1;
 		}else{
 			tiltSpeed = joyValue;
+			printf("Hopper Tilt=%d \n", curTiltPosition);
 		}
 		
-	}else if(m_pelicanStateEnabled == true && m_beforeSensor->Get() == 0){
+	}else if(m_pelicanStateEnabled == true && m_beforeSensor->Get() == 1){
 		pelicanCounter++;
+		
 		if(pelicanCounter <= 10){
 			tiltSpeed = 1.0;
 		}else if(pelicanCounter <= 15){
@@ -108,12 +121,16 @@ int Hopper::Periodic(float joyValue){
 	}else{
 		m_pelicanStateEnabled = false;
 		
-		if(curTiltPosition < m_tiltTarget - c_tiltDeadband){
-			tiltSpeed = 1.0;
-		}else if(curTiltPosition > m_tiltTarget + c_tiltDeadband) {
-			tiltSpeed = -1.0;
-		}else{
-			tiltSpeed = 0.0;
+		if (m_newTiltTarget) {
+			m_newTiltTarget = false;
+			m_tiltPID->SetSetpoint(m_tiltTarget);
+			m_tiltPID->Reset();
+		}
+		
+		tiltSpeed = m_tiltPID->Calculate((float) curTiltPosition);
+		
+		if (abs(curTiltPosition - m_tiltTarget) <= c_tiltDeadband) {
+			tiltSpeed = 0;
 			hopperFlags += 1;
 		}
 	}
@@ -122,44 +139,47 @@ int Hopper::Periodic(float joyValue){
 	
 	switch(m_hopState){
 		case hEmpty:
-			if(m_beforeSensor->Get() == 0) {
+			if(m_afterSensor->Get() == 0) {
+				m_hopState = hStore;
+			} else if(m_beforeSensor->Get() == 0) {			// Yes frisbee
 				m_hopState = hLoad;
-			} else {
-				m_hopperGate->Set(Relay::kOff);
+				m_hopperGate->Set(Relay::kOn);
 			}
 			break;
 			
 		case hLoad:			
-			m_hopperGate->Set(Relay::kOn);
 			if(m_afterSensor->Get() == 0){					// Yes frisbee
 				m_hopState = hStore;
+				m_hopperGate->Set(Relay::kOff);
 			}
 			break;
 			
 		case hShoot:
-			m_hopperGate->Set(Relay::kOn);
 			if(m_afterSensor->Get() == 1){					// No frisbee
-				m_hopState = hEmpty;
+				if (m_beforeSensor->Get() == 0) {
+					m_hopState = hLoad;
+				} else {
+					m_hopState = hEmpty;
+					m_hopperGate->Set(Relay::kOff);
+				}
 			}
-			break;
-			
-		case hStore:
-			m_hopperGate->Set(Relay::kOff);
 			break;
 			
 		default:;
 	}
 	
-	if (m_hopState == hShoot) hopperFlags += 2;
-	if (m_beforeSensor->Get() == 0) hopperFlags += 4;
+	if (m_afterSensor->Get() == 0) hopperFlags += 2;
 	
 	return hopperFlags;
 }
 
 void Hopper::RELEASETHEFRISBEE(){	
 	
-	if(m_beforeSensor->Get() == 0){
+	printf("Release HopState=%d\n", m_hopState);
+	
+	if(m_hopState == hStore){
 		m_hopState = hShoot;
+		m_hopperGate->Set(Relay::kOn);
 	}
 }
 
@@ -172,4 +192,5 @@ void Hopper::SetTiltTarget(INT32 Target){
 	}
 	
 	m_tiltTarget = Target;
+	m_newTiltTarget = true;
 }

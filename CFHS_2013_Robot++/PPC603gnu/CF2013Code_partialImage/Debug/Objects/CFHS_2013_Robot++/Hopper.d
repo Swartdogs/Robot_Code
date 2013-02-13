@@ -140,6 +140,7 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/Hopper.o:  \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/AnalogChannel.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/PIDSource.h \
+  C:/WindRiver/workspace/CFHS_2013_Robot++/PIDLoop.h \
   C:/WindRiver/workspace/CFHS_2013_Robot++/Events.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Base.h
 
@@ -422,6 +423,8 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h:
 C:/WindRiver/vxworks-6.3/target/h/WPILib/AnalogChannel.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/PIDSource.h:
+
+C:/WindRiver/workspace/CFHS_2013_Robot++/PIDLoop.h:
 
 C:/WindRiver/workspace/CFHS_2013_Robot++/Events.h:
 

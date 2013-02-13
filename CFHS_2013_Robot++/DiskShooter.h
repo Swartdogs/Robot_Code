@@ -30,14 +30,16 @@ public:
 	void  SetTensionTarget(INT32 Target);
 	void  SetTiltTarget(INT32 Target);
 	void  FIREINTHEHOLE();
+	INT32 		   GetShooterPosition();
 	
 private:
-	typedef enum{sIdle, sLoad, sShootReady, sShoot}ShootState;
+	typedef enum{sIdle, sStart, sLoad, sReady, sFire}ShootState;
 
 	DigitalInput  *m_diskSensor;
 	Events		  *m_event;
 	UINT8		   m_eventSourceId;
 	char		   m_log[100];
+	bool           m_newTiltTarget;
 	INT32		   m_RELEASETHEFRISBEEPOSITION;
 	Victor 		  *m_shootMotor;
 	PIDLoop		  *m_shootPID;
@@ -52,7 +54,7 @@ private:
 	AnalogChannel *m_tiltPot;
 	INT32		   m_tiltTarget;
 	
-	INT32 		   GetShooterPosition();
+//	INT32 		   GetShooterPosition();
 	INT32 		   GetTiltPosition();
 };
 
