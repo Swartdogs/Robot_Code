@@ -49,6 +49,8 @@ typedef struct {									// Autonomous Sequence Step Data Structure
 	bool 		ResetEncoders;						//    Reset Encoder				    (Drive)
 	bool 		StopRobot;							//    Stop robot (Speed = 0)		(Drive or Turn)
 	bool		PickupFrisbees;
+	INT32		tensionTarget;
+	INT32		tiltTarget;
 } StructAutoStep;
 
 
@@ -219,6 +221,8 @@ public:
 		m_hopper->Enable();
 		m_shooter->Enable();
 		
+		m_shootSeq = sIdle;
+		
 		m_logFile = fopen("Log525.txt", "a");
 		
 		m_lastPeriodStart = GetClock() * 1000;
@@ -292,7 +296,13 @@ public:
 			
 			switch(m_autoStep[m_auto.StepIndex].Action){
 				case actionShoot:
-						
+					if((m_hopper->Periodic(0) & 2) == 2) {
+						m_shooter->SetTiltTarget(m_autoStep[m_auto.StepIndex].tiltTarget);
+						m_shooter->SetTensionTarget(m_autoStep[m_auto.StepIndex].tensionTarget);
+						m_shootSeq = sMoveHopper;
+					} else {
+						AutoStepDone = true;
+					}
 					break;
 					
 				case actionShootCamera:
@@ -343,10 +353,35 @@ public:
 					
 				case actionShoot:
 					m_drive->Periodic(Drive::dStop, 0, 0, 0);
-					m_shooter->SetTiltTarget(50);
-					m_shooter->SetTensionTarget(400);
 					autoShooterFlags = m_shooter->Periodic(0);
 					autoHopperFlags = m_hopper->Periodic(0);
+					
+					switch(m_shootSeq) {
+						case sMoveHopper:
+							if ((autoHopperFlags & 1) == 1) {							// Hopper in position
+								m_shootSeq = sLoad;
+								m_shooter->Load();									// Initiate Shooter Arm movement
+							}
+							break;
+
+						case sLoad:
+							if ((autoShooterFlags & 4) == 4 ) {							// Shooter arm ready for load
+								m_hopper->RELEASETHEFRISBEE();						// Load Frisbee
+							}
+									
+							if (autoShooterFlags == 31) {								// Shooter loaded and Ready
+								m_shootSeq = sFire;
+								m_shooter->FIREINTHEHOLE();							// Fire Frisbee
+							}
+							break;
+			
+						case sFire:
+							if ((autoShooterFlags & 16) == 0) {
+								m_shootSeq = sIdle; // No Frisbee in Shooter
+								AutoStepDone = true;
+							}
+						default:;
+					}
 					break;
 				case actionShootCamera:
 					
