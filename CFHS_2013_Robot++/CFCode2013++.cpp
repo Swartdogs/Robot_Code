@@ -78,7 +78,7 @@ class Team525: public IterativeRobot, public Events
 	double	   	    m_periodBeginTime;
 	INT32	   		m_periodicCount;
 	double	   		m_lastPeriodStart;
-	double	   		m_lastPeriodicEnd;
+	double	   		m_lastPeriodEnd;
 	char            m_log[100];						// Buffer for Log Messages
 	
 public:
@@ -98,7 +98,7 @@ public:
 		
 		m_findGoals = new FindGoals();
 		
-		m_sensorPower = new Solenoid(1, 8);			// Sensor Power         SM 1: Solenoid 8
+		m_sensorPower = new Solenoid(1, 1);			// Sensor Power         SM 1: Solenoid 1
 		
 		m_pickup = new DiskPickup(1, 8, 			// Pickup Motor 		DM 1: PWM: 8
 							      1, 9, 			// Flip Motor 			DM 1: PWM: 9
@@ -116,13 +116,13 @@ public:
 									1, 4,			// Shoot Pot 			AM 1: Analog 4
 									1, 3,			// Tilt Pot 			AM 1: Analog 3
 									1, 5,			// Tension Pot 			AM 1: Analog 5
-									1, 5,			// Disk Sensor 			DM 1: Digital 5
+									1, 7,			// Disk Sensor 			DM 1: Digital 7
 									this, 3);	
 		
 		m_hopper = new Hopper(1, 1,   				// Shoot Gate Motor	    DM 1: Relay 1
 						 	  1, 5,  				// Tilt Motor		    DM 1: PWM 5
 						 	  1, 2,  			 	// Tilt Pot             AM 1: Analog 2
-						 	  1, 8,   				// Before Sensor        DM 1: Digital 8
+						 	  1, 5,   				// Before Sensor        DM 1: Digital 5
 						 	  1, 6,                 // After Sensor         DM 1: Digital 6  
 						 	  this, 4);
 		
@@ -204,7 +204,7 @@ public:
 		
 		m_periodicCount = 0;
 		m_lastPeriodStart = GetClock() * 1000;
-		m_lastPeriodicEnd = m_lastPeriodStart;
+		m_lastPeriodEnd = m_lastPeriodStart;
 		m_periodBeginTime = m_lastPeriodStart;
 		
 		AutoDelay = 0;
@@ -220,6 +220,10 @@ public:
 		m_shooter->Enable();
 		
 		m_logFile = fopen("Log525.txt", "a");
+		
+		m_lastPeriodStart = GetClock() * 1000;
+		m_lastPeriodEnd = m_lastPeriodStart;
+		m_periodBeginTime = m_lastPeriodStart;
 		
 		sprintf(m_log, "Autonomous Init: AutoMode=%d  Delay=%d", AutoMode, AutoDelay);
 		WriteToLog("m_log");
@@ -244,8 +248,8 @@ public:
 		
 		if((TimeNow - m_lastPeriodStart) > 100){
 			fprintf(m_logFile, "%5d:	Loop Delay	Start=%f  End=%f \n", m_periodicCount, TimeNow - m_lastPeriodStart,
-					TimeNow - m_lastPeriodicEnd);
-			printf("Loop Delay:  Start=%f  End=%f \n", TimeNow - m_lastPeriodStart, TimeNow - m_lastPeriodicEnd);
+					TimeNow - m_lastPeriodEnd);
+			printf("Loop Delay:  Start=%f  End=%f \n", TimeNow - m_lastPeriodStart, TimeNow - m_lastPeriodEnd);
 		}
 		
 		m_lastPeriodStart = TimeNow;
@@ -385,7 +389,7 @@ public:
 		}
 	
 		m_periodicCount++;
-		m_lastPeriodicEnd = GetClock() * 1000;
+		m_lastPeriodEnd = GetClock() * 1000;
 	
 	}
 
@@ -468,6 +472,10 @@ public:
 		m_logFile = fopen("Log525.txt", "a");
 		WriteToLog("525 Teleop Init");
 		
+		m_lastPeriodStart = GetClock() * 1000;
+		m_lastPeriodEnd = m_lastPeriodStart;
+		m_periodBeginTime = m_lastPeriodStart;
+
 		printf("Teleop Init \n");
 	}
 
@@ -483,8 +491,8 @@ public:
 		
 		if((TimeNow - m_lastPeriodStart) > 100){
 			fprintf(m_logFile, "%5d:	Loop Delay	Start=%f  End=%f \n", m_periodicCount, TimeNow - m_lastPeriodStart,
-					TimeNow - m_lastPeriodicEnd);
-			printf("Loop Delay:  Start=%f  End=%f \n", TimeNow - m_lastPeriodStart, TimeNow - m_lastPeriodicEnd);
+					TimeNow - m_lastPeriodEnd);
+			printf("Loop Delay:  Start=%f  End=%f \n", TimeNow - m_lastPeriodStart, TimeNow - m_lastPeriodEnd);
 		}
 		
 		m_lastPeriodStart = TimeNow;
@@ -572,19 +580,39 @@ public:
 		
 		if (m_driveJoystick->GetRawButton(9)) {
 			if (!printDone) {
-				printf("Hopper Flags=%d  Shooter: Flags=%d  Position=%d  Seq=%d \n", hopperFlags, shooterFlags, m_shooter->GetShooterPosition(), m_shootSeq);
+				printf("Shooter:  Seq=%d Flags=%d  Arm=%d  Tilt=%d  Tension=%d \n", m_shootSeq, shooterFlags, m_shooter->GetShooterPosition(),
+						m_shooter->GetTiltTarget(), m_shooter->GetTensionTarget());
+				printf("Hooper: Flags=%d  Tilt=%d \n", hopperFlags, m_hopper->GetHopperPosition());
 				printDone = true;
 			}
 		} else {
 			printDone = false;
 		}
 		
+		static bool newTension = false;
+		
 		if (m_driveJoystick->GetRawButton(7)) {
+			if (!newTension) {
+				newTension = true;
+				m_shooter->SetTensionTarget(m_shooter->GetTensionTarget() - 25);
+				printf("New Tension=%d \n", m_shooter->GetTensionTarget());
+			}
+		} else if (m_driveJoystick->GetRawButton(8)) {
+			if (!newTension) {
+				newTension = true;
+				m_shooter->SetTensionTarget(m_shooter->GetTensionTarget() + 25);
+				printf("New Tension=%d \n", m_shooter->GetTensionTarget());
+			}
+		} else {
+			newTension = false;
+		}
+		
+		
+		if (m_driveJoystick->GetRawButton(10)) {
 			if ((hopperFlags & 2) == 2) {
 				m_hopper->RELEASETHEFRISBEE();
 			}
 		}
-		
 		
 		if (m_driveJoystick->GetRawButton(11)) {
 			if (m_shootSeq == sIdle  && shooterFlags >= 3 && (hopperFlags & 2) == 2){
@@ -625,7 +653,7 @@ public:
 		}
 		
 		m_periodicCount++;
-		m_lastPeriodicEnd = GetClock() * 1000;
+		m_lastPeriodEnd = GetClock() * 1000;
 	}
 
 	

@@ -24,13 +24,14 @@ public:
 
 	void  Enable();
 	void  Disable();
+	INT32 GetTensionTarget();
 	INT32 GetTiltTarget();
 	void  Load();
 	int   Periodic(float joyValue);
 	void  SetTensionTarget(INT32 Target);
 	void  SetTiltTarget(INT32 Target);
 	void  FIREINTHEHOLE();
-	INT32 		   GetShooterPosition();
+	INT32 GetShooterPosition();
 	
 private:
 	typedef enum{sIdle, sStart, sLoad, sReady, sFire}ShootState;

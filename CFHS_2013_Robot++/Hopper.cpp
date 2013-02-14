@@ -34,6 +34,7 @@ Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
 	m_tiltTarget = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 	m_newTiltTarget = true;
 	m_hopState =hEmpty;
+	m_frisbeeBeforeGate = false;
 	m_pelicanStateEnabled = false;
 }
 
@@ -65,6 +66,10 @@ void Hopper::Enable(){
 	m_tiltMotor->Set(0);
 	m_tiltMotor->SetSafetyEnabled(true);
 	m_tiltPID->Reset();
+}
+
+INT32 Hopper::GetHopperPosition() {
+	return m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 }
 
 void Hopper::PELICANMOVE(bool pelicanStateEnabled){
@@ -137,6 +142,7 @@ int Hopper::Periodic(float joyValue){
 	
 	m_tiltMotor->Set(tiltSpeed);
 	
+	
 	switch(m_hopState){
 		case hEmpty:
 			if(m_afterSensor->Get() == 0) {
@@ -156,7 +162,7 @@ int Hopper::Periodic(float joyValue){
 			
 		case hShoot:
 			if(m_afterSensor->Get() == 1){					// No frisbee
-				if (m_beforeSensor->Get() == 0) {
+				if (m_beforeSensor->Get() == 0 || m_frisbeeBeforeGate) {
 					m_hopState = hLoad;
 				} else {
 					m_hopState = hEmpty;
@@ -179,6 +185,7 @@ void Hopper::RELEASETHEFRISBEE(){
 	
 	if(m_hopState == hStore){
 		m_hopState = hShoot;
+		m_frisbeeBeforeGate = (m_beforeSensor->Get() == 0);
 		m_hopperGate->Set(Relay::kOn);
 	}
 }

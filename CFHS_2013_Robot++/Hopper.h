@@ -24,6 +24,7 @@ public:
 	int   Periodic(float joyValue);
 	void  RELEASETHEFRISBEE();
 	void  SetTiltTarget(INT32 Target);
+	INT32 GetHopperPosition();
 
 private:
 	typedef enum{hEmpty, hLoad, hStore, hShoot}HopState;
@@ -42,6 +43,7 @@ private:
 	HopState	   m_hopState;
 	bool		   m_pelicanStateEnabled;
 	bool           m_newTiltTarget;
+	bool           m_frisbeeBeforeGate;
 };
 
 #endif
