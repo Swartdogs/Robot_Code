@@ -15,7 +15,6 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 						 UINT8   shootPotModule,		UINT32 shootPotChannel,
 						 UINT8   tiltPotModule,			UINT32 tiltPotChannel,
 						 UINT8   tensionPotModule,		UINT32 tensionPotChannel,
-						 UINT8   diskSensorModule,		UINT32 diskSensorChannel,
 						 Events *eventHandler,			UINT8  eventSourceId)
 {
 	m_shootMotor = new Victor(shootMotorModule, shootMotorChannel);
@@ -38,8 +37,6 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 	m_tensionPot->SetAverageBits(2);
 	m_tensionPot->SetOversampleBits(0);
 	
-	m_diskSensor = new DigitalInput(diskSensorModule, diskSensorChannel);
-	
 	m_tiltPID = new PIDLoop(0.02, 0.002, 0.05);
 	m_tiltPID->SetInputRange(0, (float)c_tiltRange);
 	m_tiltPID->SetOutputRange(-1.0, 1.0);
@@ -60,7 +57,6 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 
 DiskShooter::~DiskShooter(){
 	
-	delete m_diskSensor;
 	delete m_event;
 	delete m_shootMotor;
 	delete m_shootPID;
@@ -147,6 +143,7 @@ void DiskShooter::Load(){
 		} else {
 			kP = (tension - 110) * 0.00008 + 0.0040;
 		}
+		
 //		if (tension <= 110) {
 //			kP = 0.0025;
 //		} else if (tension <= 200) {
@@ -248,10 +245,12 @@ int DiskShooter::Periodic(float joyValue){
 		case sReady:
 			shootSpeed = m_shootPID->Calculate(curShootPosition);
 
-//			if (curShootPosition > c_shootTriggerPosition + 25) {
-//				printf("Idle State Detected \n");
+			if (curShootPosition > c_shootTriggerPosition + 25) {
+				printf("Idle Detected:  State=%d  Position=%d \n", m_shootState, curShootPosition);
 //				m_shootState = sIdle;
 //				shootSpeed = 0;
+			}
+			
 			if (curShootPosition > c_shootTriggerPosition - 50) {
 				m_shootState = sReady;
 				shooterFlags += 12;

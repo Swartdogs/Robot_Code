@@ -17,7 +17,6 @@ public:
 				UINT8   shootPotModule,		UINT32 shootPotChannel,
 				UINT8   tiltPotModule,		UINT32 tiltPotChannel,
 				UINT8   tensionPotModule,	UINT32 tensionPotChannel,
-				UINT8   diskSensorModule,	UINT32 diskSensorChannel,
 				Events *eventHandler,		UINT8  eventSourceId);
 	
 	~DiskShooter();
@@ -36,7 +35,6 @@ public:
 private:
 	typedef enum{sIdle, sStart, sLoad, sReady, sFire}ShootState;
 
-	DigitalInput  *m_diskSensor;
 	Events		  *m_event;
 	UINT8		   m_eventSourceId;
 	char		   m_log[100];

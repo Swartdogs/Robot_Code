@@ -1,7 +1,7 @@
 CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/DiskPickup.o:  \
  C:/WindRiver/workspace/CFHS_2013_Robot++/DiskPickup.cpp \
   C:/WindRiver/workspace/CFHS_2013_Robot++/DiskPickup.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Talon.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/MotorSafety.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/PWM.h \
@@ -138,12 +138,15 @@ CF2013Code_partialImage/Debug/Objects/CFHS_2013_Robot++/DiskPickup.o:  \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/ChipObject/tWatchdog.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/AnalogChannel.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/PIDSource.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Relay.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h \
+  C:/WindRiver/workspace/CFHS_2013_Robot++/PIDLoop.h \
   C:/WindRiver/workspace/CFHS_2013_Robot++/Events.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Base.h
 
 C:/WindRiver/workspace/CFHS_2013_Robot++/DiskPickup.h:
 
-C:/WindRiver/vxworks-6.3/target/h/WPILib/Talon.h:
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Victor.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/SafePWM.h:
 
@@ -416,6 +419,12 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/ChipObject/tWatchdog.h:
 C:/WindRiver/vxworks-6.3/target/h/WPILib/AnalogChannel.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/PIDSource.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Relay.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h:
+
+C:/WindRiver/workspace/CFHS_2013_Robot++/PIDLoop.h:
 
 C:/WindRiver/workspace/CFHS_2013_Robot++/Events.h:
 

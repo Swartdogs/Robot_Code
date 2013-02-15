@@ -102,10 +102,12 @@ public:
 		
 		m_sensorPower = new Solenoid(1, 1);			// Sensor Power         SM 1: Solenoid 1
 		
-		m_pickup = new DiskPickup(1, 8, 			// Pickup Motor 		DM 1: PWM: 8
-							      1, 9, 			// Flip Motor 			DM 1: PWM: 9
+		m_pickup = new DiskPickup(1, 3, 			// Pickup Motor 		DM 1: Relay 3
+							      1, 8, 			// Arm Motor 			DM 1: PWM 8
+							      1, 9,				// Wrist Motor			DM 1: PWM 9
 							      1, 7,		 		// Disk Sensor  		DM 1: Digital 7
-							      1, 6, 			// Flip Pot 			AM 1: Analog 6
+							      1, 6, 			// Arm Pot	 			AM 1: Analog 6
+							      1, 7,				// Wrist Pot			AM 1: Analog 7
 							      this, 2);
 		
 		m_driveJoystick = new Joystick(1);
@@ -118,7 +120,6 @@ public:
 									1, 4,			// Shoot Pot 			AM 1: Analog 4
 									1, 3,			// Tilt Pot 			AM 1: Analog 3
 									1, 5,			// Tension Pot 			AM 1: Analog 5
-									1, 7,			// Disk Sensor 			DM 1: Digital 7
 									this, 3);	
 		
 		m_hopper = new Hopper(1, 1,   				// Shoot Gate Motor	    DM 1: Relay 1
@@ -341,6 +342,7 @@ public:
 			}
 			
 			AutoStepDone = true;
+			
 		}else{
 			switch(m_autoStep[m_auto.StepIndex].Action){
 				case actionDrive:
