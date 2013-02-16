@@ -16,8 +16,7 @@ class DiskPickup{
 
 public:
 	
-typedef enum {pIdle, pLoad, pGetFrisbee}PickupRunMode;
-typedef enum {pDeployed, pLoadShooter, pStored}PickupPositions;
+typedef enum {pStore, pLoad, pDeployed, pUnderPyramid}PickupRunMode;
 
 	DiskPickup(
 			UINT8	pickupMotorModule,  UINT32 pickupMotorChannel,
@@ -29,10 +28,10 @@ typedef enum {pDeployed, pLoadShooter, pStored}PickupPositions;
 			Events *eventHandler,		UINT8  eventSourceId);
 	
 	~DiskPickup();
-	void  Enable();
-	void  Disable();
-	void  FeedSafety();
-	void  Periodic(PickupRunMode RunMode);
+	void  			 Enable();
+	void  	 		 Disable();
+	void  			 FeedSafety();
+	void  			 Periodic(PickupRunMode RunMode);
 	
 private:
 	
@@ -43,7 +42,6 @@ private:
 	AnalogChannel   *m_armPot;
 	AnalogChannel   *m_wristPot;
 	PickupRunMode    m_runMode;
-	PickupPositions  m_pickPos;
 	PIDLoop			*m_armPID;
 	PIDLoop			*m_wristPID;
 	INT32			 m_armTiltTarget;

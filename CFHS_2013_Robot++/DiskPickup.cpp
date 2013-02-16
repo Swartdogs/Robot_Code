@@ -4,14 +4,19 @@
 
 #include "DiskPickup.h"
 
-INT32 c_armRange = 500;
-INT32 c_wristRange = 500;
-INT32 c_armLoad = 100;
-INT32 c_armStore = 250;
-INT32 c_armDeployed = 500;
-INT32 c_wristLoad = 100;
-INT32 c_wristStore = 300;
-INT32 c_wristDeployed = 500;
+INT32 const c_armRange = 500;
+INT32 const c_armZeroOffset = 200;
+INT32 const c_wristRange = 500;
+INT32 const c_wristZeroOffset = 100;
+
+INT32 const c_armLoad = c_armZeroOffset - 100;
+INT32 const c_armStore = c_armZeroOffset + 250;
+INT32 const c_armDeployed = c_armZeroOffset + 300;
+INT32 const c_armPyramid = c_armZeroOffset + 275;
+INT32 const c_wristLoad = c_wristZeroOffset;
+INT32 const c_wristStore = c_wristZeroOffset + 200;
+INT32 const c_wristDeployed = c_wristZeroOffset + 400;
+INT32 const c_wristPyramid = c_wristZeroOffset + 350;
 
 DiskPickup::DiskPickup(
 					UINT8	pickupMotorModule,  UINT32 pickupMotorChannel,
@@ -40,10 +45,10 @@ DiskPickup::DiskPickup(
 	m_wristPot->SetAverageBits(2);
 	m_wristPot->SetOversampleBits(0);
 	
-	m_armTiltTarget = m_armPot->GetAverageValue();
-	m_wristTiltTarget = m_wristPot->GetAverageValue();
+	m_armTiltTarget = m_armPot->GetAverageValue() - c_armZeroOffset;
+	m_wristTiltTarget = m_wristPot->GetAverageValue() - c_wristZeroOffset;
 	
-	m_runMode = pIdle;
+	m_runMode = pStore;
 	
 	m_armPID = new PIDLoop(0.0015,			// P coefficient
 						   0,				// I coefficient
@@ -67,6 +72,9 @@ DiskPickup::~DiskPickup(){
 }
 
 void DiskPickup::Enable(){
+	m_armTiltTarget = m_armPot->GetAverageValue() - c_armZeroOffset;
+	m_wristTiltTarget = m_wristPot->GetAverageValue() - c_wristZeroOffset;
+
 	m_pickupMotor->Set(Relay::kOff);
 
 	m_wristMotor->Set(0);
@@ -95,54 +103,60 @@ void DiskPickup::FeedSafety(){
 }
 
 void DiskPickup::Periodic(PickupRunMode RunMode){
-	INT32			curArmPosition = m_armPot->GetAverageValue();
-	INT32   		curWristPosition = m_wristPot->GetAverageValue();
-	static float	armTiltSpeed = 0.0;
-	static float	wristTiltSpeed = 0.0;
+	INT32					curArmPosition = m_armPot->GetAverageValue() - c_armZeroOffset;
+	INT32   				curWristPosition = m_wristPot->GetAverageValue() - c_wristZeroOffset;
+	static float			armTiltSpeed = 0.0;
+	static float			wristTiltSpeed = 0.0;
+	static PickupRunMode	runModeNow;
 	
 //-------------------------------Set Arm/Wrist-----------------------------
-	
-	if (m_pickPos == pLoadShooter){
-		m_armTiltTarget = c_armLoad;
-		m_wristTiltTarget = c_wristLoad;
-	} else if (m_pickPos == pStored){
-		m_armTiltTarget = c_armStore;
-		m_wristTiltTarget = c_wristStore;
-	} else if (m_pickPos == pDeployed){
-		m_armTiltTarget = c_armDeployed;
-		m_wristTiltTarget = c_wristDeployed;
-	}
-	
-	switch(RunMode){
-		case pLoad:
-			m_pickPos = pLoadShooter;
-			m_armPID->SetSetpoint((float)m_armTiltTarget);
-			m_wristPID->SetSetpoint((float)m_wristTiltTarget);
-			if(m_diskSensor->Get() == 1){
-				m_pickupMotor->Set(Relay::kForward);
-			} else {
+	if(runModeNow != RunMode){
+		runModeNow = RunMode;
+		
+		switch(RunMode){
+			case pLoad:
+				m_armTiltTarget = c_armLoad;
+				m_wristTiltTarget = c_wristLoad;
+				m_armPID->SetSetpoint((float)m_armTiltTarget);
+				m_wristPID->SetSetpoint((float)m_wristTiltTarget);
+				if(m_diskSensor->Get() == 1){
+					m_pickupMotor->Set(Relay::kForward);
+				} else {
+					m_pickupMotor->Set(Relay::kOff);
+				}
+				break;
+				
+			case pStore:
+				m_armTiltTarget = c_armStore;
+				m_wristTiltTarget = c_wristStore;
+				m_armPID->SetSetpoint((float)m_armTiltTarget);
+				m_wristPID->SetSetpoint((float)m_wristTiltTarget);
 				m_pickupMotor->Set(Relay::kOff);
-			}
-			break;
+				break;
+				
+			case pDeployed:
+				m_armTiltTarget = c_armDeployed;
+				m_wristTiltTarget = c_wristDeployed;
+				m_armPID->SetSetpoint((float)m_armTiltTarget);
+				m_wristPID->SetSetpoint((float)m_wristTiltTarget);
+				if(m_diskSensor->Get() == 1){
+					m_pickupMotor->Set(Relay::kForward);
+				} else {
+					m_pickupMotor->Set(Relay::kOff);
+				}
+				break;
+				
+			case pUnderPyramid:
+				m_armTiltTarget = c_armPyramid;
+				m_wristTiltTarget = c_wristPyramid;
+				m_armPID->SetSetpoint((float)m_armTiltTarget);
+				break;
+				
+			default:;
 			
-		case pIdle:
-			m_armTiltTarget = curArmPosition;
-			m_wristTiltTarget = curWristPosition;
-			m_armPID->SetSetpoint((float)m_armTiltTarget);
-			m_wristPID->SetSetpoint((float)m_wristTiltTarget);
-			m_pickupMotor->Set(Relay::kOff);
-			break;
-			
-		case pGetFrisbee:
-			m_pickPos = pDeployed;
-			m_armPID->SetSetpoint((float)m_armTiltTarget);
-			m_wristPID->SetSetpoint((float)m_wristTiltTarget);
-			if(m_diskSensor->Get() == 1){
-				m_pickupMotor->Set(Relay::kForward);
-			} else {
-				m_pickupMotor->Set(Relay::kOff);
-			}
-			break;
+		}
+	} else {
+		
 	}
 	
 	armTiltSpeed = m_armPID->Calculate((float)curArmPosition);

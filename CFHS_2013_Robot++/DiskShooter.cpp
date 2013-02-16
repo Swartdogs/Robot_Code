@@ -3,8 +3,8 @@
 INT32 const c_shootTriggerPosition = 790;
 INT32 const c_shootDeadband = 20;
 INT32 const c_tensionDeadband = 5;
-INT32 const c_tensionRange = 250;			// 200
-INT32 const c_tensionZeroOffset = 490;
+INT32 const c_tensionRange = 350;			// 200
+INT32 const c_tensionZeroOffset = 300;
 INT32 const c_tiltDeadband = 5;
 INT32 const c_tiltRange = 330;
 INT32 const c_tiltZeroOffset = 430;
@@ -41,7 +41,7 @@ DiskShooter::DiskShooter(UINT8   shootMotorModule,		UINT32 shootMotorChannel,
 	m_tiltPID->SetInputRange(0, (float)c_tiltRange);
 	m_tiltPID->SetOutputRange(-1.0, 1.0);
 	
-	m_shootPID = new PIDLoop(0.0025, 0, 0);
+	m_shootPID = new PIDLoop(0.0030, 0, 0);
 	m_shootPID->SetInputRange(0, 900);
 	m_shootPID->SetOutputRange(-0.5, 1.0);
 	
@@ -132,17 +132,17 @@ INT32 DiskShooter::GetTiltTarget(){
 
 void DiskShooter::Load(){
 	
-	float kP = 0;
+//	float kP = 0;
 	INT32 tension;
 	
 	if(m_shootState == sIdle){
 		tension = m_tensionPot->GetAverageValue() - c_tensionZeroOffset;
 		
-		if (tension < 110) {
-			kP = 0.002;	
-		} else {
-			kP = (tension - 110) * 0.00008 + 0.0040;
-		}
+//		if (tension < 110) {
+//			kP = 0.002;	
+//		} else {
+//			kP = (tension - 110) * 0.00008 + 0.0040;
+//		}
 		
 //		if (tension <= 110) {
 //			kP = 0.0025;
@@ -152,8 +152,8 @@ void DiskShooter::Load(){
 //			kP = (tension - 200) * 0.00003 + 0.00475;       // 0.00002
 //		}
 		
-		printf("Shooter:  Tension=%d   Kp=%f \n", tension, kP);
-		m_shootPID->SetPID(kP, 0, 0);
+//		printf("Shooter:  Tension=%d   Kp=%f \n", tension, kP);
+		m_shootPID->SetPID(0.003, 0, 0);
 		m_shootPID->Reset();
 		m_shootPID->SetSetpoint((float) c_shootTriggerPosition);
 		
@@ -243,6 +243,13 @@ int DiskShooter::Periodic(float joyValue){
 			
 		case sLoad:
 		case sReady:
+			if (curShootPosition > c_shootTriggerPosition - 100) {
+				m_shootPID->SetPID(0.003, 0.0004, 0);      // 0.00005, 0.00007
+			} else {
+				m_shootPID->SetPID(0.003, 0, 0);
+				m_shootPID->Reset();		
+			}
+			
 			shootSpeed = m_shootPID->Calculate(curShootPosition);
 
 			if (curShootPosition > c_shootTriggerPosition + 25) {
