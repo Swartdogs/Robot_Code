@@ -527,6 +527,8 @@ public:
 		static int          hopperFlags = 0;
 		static int          shooterFlags = 0;
 		
+		static bool			buttonPushed = false;
+		
 //		float  tiltValue = -m_tiltJoystick->GetY();
 		double TimeNow;
 				
@@ -544,13 +546,13 @@ public:
 		
 		if(m_shootSeq != sFire){
 			if(m_driveJoystick->GetRawButton(3) || m_driveJoystick->GetRawButton(4)){
-				m_drive->Periodic(Drive::dStrafe, m_driveJoystick->GetY(), m_driveJoystick->GetX(), 0);
+				m_drive->Periodic(Drive::dStrafe, -m_driveJoystick->GetY(), -m_driveJoystick->GetX(), 0);
 			}else{
-				m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
+				m_drive->Periodic(Drive::dJoystick, -m_driveJoystick->GetY(), -m_driveJoystick->GetX(), m_driveJoystick->GetZ());
 			}
 		}
 		
-		m_drive->Periodic(Drive::dJoystick, 0, 0, 0);
+//		m_drive->Periodic(Drive::dJoystick, 0, 0, 0);
 		
 		//--------------------------------Hopper Stuff------------------------------------------------------
 		
@@ -564,7 +566,7 @@ public:
 				}
 				
 			} else if(m_buttonBox->GetRawButton(1)) {					
-				m_hopper->SetTiltTarget(87);							// Feeder load position
+				m_hopper->SetTiltTarget(382);							// Feeder load position
 			} else if (m_buttonBox->GetRawButton(2)) {
 				m_hopper->SetTiltTarget(87);							// Position for driving 
 			} else if (m_buttonBox->GetRawButton(3)) {
@@ -583,9 +585,9 @@ public:
 				m_shooter->SetTensionTarget(400);
 				m_hopper->SetTiltTarget(302); //find right value
 			} else if (m_buttonBox->GetRawButton(6)) {
-				m_shooter->SetTiltTarget(208);							// Short shot mode
+				m_shooter->SetTiltTarget(204);							// Short shot mode
 				m_shooter->SetTensionTarget(250);
-				m_hopper->SetTiltTarget(302);
+				m_hopper->SetTiltTarget(316);
 			} else if (m_buttonBox->GetRawButton(5)) {
 				m_shooter->SetTiltTarget(0);							// Pyramid flop mode
 				m_shooter->SetTensionTarget(100);
@@ -597,6 +599,22 @@ public:
 				m_shootSeq = sIdle;
 			}
 		}
+		
+		if(m_tiltJoystick->GetRawButton(6)){
+			if(!buttonPushed){
+				m_shooter->IncrementShooter(true);
+				buttonPushed = true;
+			}
+		} else if (m_tiltJoystick->GetRawButton(7)) {
+			if (!buttonPushed){
+				m_shooter->IncrementShooter(false);
+				buttonPushed = true;
+			}
+		} else {
+			buttonPushed = false;
+		}
+		
+		
 		//--------------------------Pickup Stuff------------------------------------------------------
 		
 		if(m_buttonBox->GetRawButton(9)) {
@@ -633,7 +651,7 @@ public:
 		
 		static bool printDone = false;
 		
-		if (m_tiltJoystick->GetRawButton(7)) {
+		if (m_tiltJoystick->GetRawButton(4) || m_tiltJoystick->GetRawButton(5)) {
 			if (!printDone) {
 				printf("Shooter:  Seq=%d Flags=%d  Arm=%d  Tilt=%d  Tension=%d \n", m_shootSeq, shooterFlags, m_shooter->GetShooterPosition(),
 						m_shooter->GetTiltTarget(), m_shooter->GetTensionTarget());

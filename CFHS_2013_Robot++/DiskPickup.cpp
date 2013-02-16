@@ -11,16 +11,16 @@ INT32 const c_wristZeroOffset = 790;
 
 INT32 const c_deadband = 4;
 
-INT32 const c_armLoad = c_armZeroOffset - 565; //When loading onto shooter deck
-INT32 const c_armStore = c_armZeroOffset - 450; //default storage position
-INT32 const c_armDeployed = c_armZeroOffset; //When arm is picking up disks
-INT32 const c_armPyramid = c_armZeroOffset -280; //When going under pyramid
-INT32 const c_wristLoad = c_wristZeroOffset - 230;
-INT32 const c_wristStore = c_wristZeroOffset - 180;
-INT32 const c_wristDeployed = c_wristZeroOffset;
-INT32 const c_wristPyramid = c_wristZeroOffset - 70;
+INT32 const c_armLoad = c_armZeroOffset - 255; //When loading onto shooter deck
+INT32 const c_armStore = c_armZeroOffset - 330; //default storage position
+INT32 const c_armDeployed = c_armZeroOffset - 780; //When arm is picking up disks
+INT32 const c_armPyramid = c_armZeroOffset -580; //When going under pyramid
+INT32 const c_wristLoad = c_wristZeroOffset - 590;
+INT32 const c_wristStore = c_wristZeroOffset - 620;
+INT32 const c_wristDeployed = c_wristZeroOffset - 790;
+INT32 const c_wristPyramid = c_wristZeroOffset - 710;
 
-INT32 const c_clearBumper = c_armZeroOffset - 410;
+INT32 const c_clearBumper = c_armZeroOffset - 670;
 
 DiskPickup::DiskPickup(
 					UINT8	pickupMotorModule,  UINT32 pickupMotorChannel,
@@ -57,14 +57,15 @@ DiskPickup::DiskPickup(
 	m_armPID = new PIDLoop(0.009,			// P coefficient
 						   0,				// I coefficient
 						   0);				// D coefficient
-	m_armPID->SetInputRange(c_armZeroOffset - 630, c_armZeroOffset + 70);
-	m_armPID->SetOutputRange(-1.0, 1.0);
+//	m_armPID->SetInputRange(c_armZeroOffset - 630, c_armZeroOffset + 70);
+	m_armPID->SetInputRange(0, c_armRange);
+	m_armPID->SetOutputRange(-1.0, 1.0);		//-1, 1
 	
 	m_wristPID = new PIDLoop(0.008,		    // P coefficient
 							 0,				// I coefficient
 							 0);            // D coefficient
-	m_wristPID->SetInputRange(c_wristZeroOffset - 290, c_wristZeroOffset + 60);
-	m_wristPID->SetOutputRange(-0.8, 0.8);
+	m_wristPID->SetInputRange(0, c_wristRange);
+	m_wristPID->SetOutputRange(-0.8, 0.8);		//-.8 .8
 }
 
 DiskPickup::~DiskPickup(){
@@ -80,8 +81,8 @@ DiskPickup::~DiskPickup(){
 }
 
 void DiskPickup::Enable(){
-	m_armTiltTarget = m_armPot->GetAverageValue() - c_armZeroOffset;
-	m_wristTiltTarget = m_wristPot->GetAverageValue() - c_wristZeroOffset;
+	m_armTiltTarget = c_armZeroOffset - m_armPot->GetAverageValue();
+	m_wristTiltTarget = c_wristZeroOffset - m_wristPot->GetAverageValue();
 
 	m_pickupMotor->Set(Relay::kOff);
 
@@ -111,8 +112,8 @@ void DiskPickup::FeedSafety(){
 }
 
 void DiskPickup::Periodic(PickupRunMode RunMode){
-	INT32					curArmPosition = m_armPot->GetAverageValue() - c_armZeroOffset;
-	INT32   				curWristPosition = m_wristPot->GetAverageValue() - c_wristZeroOffset;
+	INT32					curArmPosition = c_armZeroOffset - m_armPot->GetAverageValue();
+	INT32   				curWristPosition = c_wristZeroOffset - m_wristPot->GetAverageValue();
 	static float			armTiltSpeed = 0.0;
 	static float			wristTiltSpeed = 0.0;
 	static PickupRunMode	runModeNow = pArgggggggggggggh;
@@ -150,6 +151,7 @@ void DiskPickup::Periodic(PickupRunMode RunMode){
 			case pStore:
 				m_armTiltTarget = c_armStore;
 				m_wristTiltTarget = c_wristStore;
+				printf("Arm=%d  Wrist=%d \n", m_armTiltTarget, m_wristTiltTarget);
 				break;
 				
 			case pDeployed:
@@ -169,15 +171,25 @@ void DiskPickup::Periodic(PickupRunMode RunMode){
 				
 	}
 	
-	if(curArmPosition > c_clearBumper) { //if arm hasn't cleared the bumper
-		m_wristPID->SetSetpoint((float)(c_wristZeroOffset - (c_armZeroOffset-curArmPosition)/2.5));
+	float Setpoint = 0;
+	
+	if(curArmPosition < c_clearBumper) { //if arm hasn't cleared the bumper
+//		Setpoint = c_wristZeroOffset - (c_armZeroOffset-curArmPosition)/2.5;
+		Setpoint = c_wristDeployed;
+		m_wristPID->SetSetpoint((float)Setpoint);
 	} else {
+		Setpoint = (float)m_wristTiltTarget;
 		m_wristPID->SetSetpoint((float)m_wristTiltTarget);
 	}
 	
 	armTiltSpeed = m_armPID->Calculate((float)curArmPosition);
 	wristTiltSpeed = m_wristPID->Calculate((float)curWristPosition);
 	
-	m_armMotor->Set(armTiltSpeed);
-	m_wristMotor->Set(-wristTiltSpeed);
+	printf("Wrist Target=%d  Wrist Position=%d Wrist Tilt Speed=%f Setpoint=%f Arm Position=%d\n", 
+			m_wristTiltTarget, curWristPosition, wristTiltSpeed, Setpoint, curArmPosition);
+	
+	m_armMotor->Set(-armTiltSpeed);   
+	m_wristMotor->Set(wristTiltSpeed);  
+//	m_armMotor->Set(0);   
+//	m_wristMotor->Set(0);  
 }

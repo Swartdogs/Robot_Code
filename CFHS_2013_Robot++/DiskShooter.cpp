@@ -130,6 +130,15 @@ INT32 DiskShooter::GetTiltTarget(){
 	return m_tiltTarget;
 }
 
+void DiskShooter::IncrementShooter(bool Up){
+	if (Up == true){
+		m_tiltTarget += 10;
+	} else {
+		m_tiltTarget -= 10;
+	}
+	m_newTiltTarget = true;
+}
+
 void DiskShooter::Load(){
 	
 //	float kP = 0;
@@ -201,6 +210,7 @@ int DiskShooter::Periodic(float joyValue){
 		
 	}else{
 		if (m_newTiltTarget) {
+			if(m_tiltTarget > c_tiltRange - 60) m_tiltTarget = c_tiltRange;
 			m_newTiltTarget = false;
 			m_tiltPID->SetSetpoint((float)m_tiltTarget);
 			m_tiltPID->Reset();

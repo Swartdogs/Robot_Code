@@ -25,6 +25,7 @@ public:
 	void  Disable();
 	INT32 GetTensionTarget();
 	INT32 GetTiltTarget();
+	void  IncrementShooter(bool Up);
 	void  Load();
 	int   Periodic(float joyValue);
 	void  SetTensionTarget(INT32 Target);
