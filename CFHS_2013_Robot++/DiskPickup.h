@@ -16,7 +16,12 @@ class DiskPickup{
 
 public:
 	
-typedef enum {pStore, pLoad, pDeployed, pUnderPyramid}PickupRunMode;
+typedef enum {pStore, //Default Storage position
+			  pLoad, //Loading onto shooter deck
+			  pDeployed, //When the arm is picking up a disk
+			  pUnderPyramid, //When going under pyramid
+			  pArgggggggggggggh //Just cuz
+		      }PickupRunMode;
 
 	DiskPickup(
 			UINT8	pickupMotorModule,  UINT32 pickupMotorChannel,
