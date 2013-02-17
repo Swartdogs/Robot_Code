@@ -2,8 +2,10 @@
 #include "Hopper.h"
 
 INT32 const c_tiltDeadband = 5;
-INT32 const c_tiltSpan = 390;
+INT32 const c_tiltSpan = 410;
 INT32 const c_tiltZeroOffset = 300;
+INT32 const c_spaceLimit = 100;
+
 
 Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
 			   UINT8 	tiltMotorModule,    UINT32 tiltMotorChannel,
@@ -81,16 +83,24 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 	}
 }
 
-int Hopper::Periodic(float joyValue){
+int Hopper::Periodic(float joyValue, bool spaceFree){
 
 	// hopperFlags:  Bit 1 = Hopper Tilt Completed
 	// 					 2 = Frisbee Stored
+	//                   4 = Shared Space is Free
 	
 	static int		pelicanCounter = 0;
 	static float	tiltSpeed = 0.0;
 	
 	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
+	INT32           lowLimit = 0;
 	int             hopperFlags = 0;
+
+	if (spaceFree) {
+		lowLimit = c_tiltDeadband;
+	} else {
+		lowLimit = c_spaceLimit;
+	}
 	
 	if(joyValue != 0){
 		m_pelicanStateEnabled = false;
@@ -100,7 +110,7 @@ int Hopper::Periodic(float joyValue){
 		if (joyValue > 0 && curTiltPosition > c_tiltSpan - c_tiltDeadband) {
 			tiltSpeed = 0.0;
 			hopperFlags += 1;
-		}else if(joyValue < 0 && curTiltPosition < c_tiltDeadband) {
+		}else if(joyValue < 0 && curTiltPosition < lowLimit) {
 			tiltSpeed = 0.0;
 			hopperFlags += 1;
 		}else{
@@ -128,8 +138,14 @@ int Hopper::Periodic(float joyValue){
 		
 		if (m_newTiltTarget) {
 			m_newTiltTarget = false;
-			m_tiltPID->SetSetpoint(m_tiltTarget);
+//			m_tiltPID->SetSetpoint(m_tiltTarget);
 			m_tiltPID->Reset();
+		}
+		
+		if (!spaceFree && m_tiltTarget < c_spaceLimit) {
+			m_tiltPID->SetSetpoint(c_spaceLimit);
+		} else {
+			m_tiltPID->SetSetpoint(m_tiltTarget);
 		}
 		
 		tiltSpeed = m_tiltPID->Calculate((float) curTiltPosition);
@@ -175,6 +191,7 @@ int Hopper::Periodic(float joyValue){
 	}
 	
 	if (m_afterSensor->Get() == 0) hopperFlags += 2;
+	if (curTiltPosition > c_spaceLimit) hopperFlags +=4;
 	
 	return hopperFlags;
 }

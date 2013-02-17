@@ -78,6 +78,7 @@ class Team525: public IterativeRobot, public Events
 
 	EnumShootSeq    m_shootSeq;
 	DiskPickup::PickupRunMode m_pickupMode;
+	bool            m_sharedSpaceFree;
 	double	   	    m_periodBeginTime;
 	INT32	   		m_periodicCount;
 	double	   		m_lastPeriodStart;
@@ -167,6 +168,7 @@ public:
 		WriteToLog(m_log);
 		
 		m_pickupMode = DiskPickup::pStore;
+		m_sharedSpaceFree = true;
 		
 		printf("525 2013 Robot Init \n");
 	}
@@ -302,7 +304,7 @@ public:
 			
 			switch(m_autoStep[m_auto.StepIndex].Action){
 				case actionShoot:
-					if((m_hopper->Periodic(0) & 2) == 2) {
+					if((m_hopper->Periodic(0, m_sharedSpaceFree) & 2) == 2) {
 						m_shooter->SetTiltTarget(m_autoStep[m_auto.StepIndex].tiltTarget);
 						m_shooter->SetTensionTarget(m_autoStep[m_auto.StepIndex].tensionTarget);
 						m_shootSeq = sMoveHopper;
@@ -361,7 +363,7 @@ public:
 				case actionShoot:
 					m_drive->Periodic(Drive::dStop, 0, 0, 0);
 					autoShooterFlags = m_shooter->Periodic(0);
-					autoHopperFlags = m_hopper->Periodic(0);
+					autoHopperFlags = m_hopper->Periodic(0, m_sharedSpaceFree );
 					
 					switch(m_shootSeq) {
 						case sMoveHopper:
@@ -525,6 +527,7 @@ public:
 	void TeleopPeriodic(void) {
 		
 		static int          hopperFlags = 0;
+		static int          pickupFlags = 0;
 		static int          shooterFlags = 0;
 		
 		static bool			buttonPushed = false;
@@ -570,11 +573,9 @@ public:
 			} else if (m_buttonBox->GetRawButton(2)) {
 				m_hopper->SetTiltTarget(87);							// Position for driving 
 			} else if (m_buttonBox->GetRawButton(3)) {
-				m_hopper->SetTiltTarget(87);                            // Position to get under the pyramid
+				m_hopper->SetTiltTarget(10);                            // Position to get under the pyramid
 				m_pickupMode = DiskPickup::pUnderPyramid;
-			} //else if (m_buttonBox->GetRawButton(9)){
-//				READYTHEHOPPER();
-//			}
+			}
 		}
 
 		//--------------------------------Shooter Stuff------------------------------------------------------	
@@ -622,6 +623,7 @@ public:
 		} else if(m_buttonBox->GetRawButton(10)) {
 			m_pickupMode = DiskPickup::pStore;
 		} else if(m_buttonBox->GetRawButton(11)) {
+			if (m_hopper->GetHopperPosition() < 120) m_hopper->SetTiltTarget(120);
 			m_pickupMode = DiskPickup::pLoad;
 		}
 		//--------------------------Call Periodic Functions--------------------------------------------	
@@ -631,22 +633,25 @@ public:
 		if(fabs(tiltValue) > 0.1 ){				// Use Tilt Joystick		
 //		if(fabs(tiltValue) > 0.1 && m_shootSeq == sIdle){				// Use Tilt Joystick		
 			if (m_tiltJoystick->GetRawButton(2)) {						// Manual Shooter Tilt
-				hopperFlags = m_hopper->Periodic(0);
+				hopperFlags = m_hopper->Periodic(0, m_sharedSpaceFree);
 				shooterFlags = m_shooter->Periodic(tiltValue);
 			} else if (m_tiltJoystick->GetRawButton(3)) {															// Manual Hopper Tilt
-				hopperFlags = m_hopper->Periodic(tiltValue);
+				hopperFlags = m_hopper->Periodic(tiltValue, m_sharedSpaceFree);
 				shooterFlags = m_shooter->Periodic(0);
 			} else {
-				hopperFlags = m_hopper->Periodic(0);	
+				hopperFlags = m_hopper->Periodic(0, m_sharedSpaceFree);	
 				shooterFlags = m_shooter->Periodic(0);
 			}
 			
 		}else{															// Ignore Joystick
-			hopperFlags = m_hopper->Periodic(0);	
+			hopperFlags = m_hopper->Periodic(0, m_sharedSpaceFree);	
 			shooterFlags = m_shooter->Periodic(0);
 		}
 		
-		m_pickup->Periodic(m_pickupMode);
+		pickupFlags = m_pickup->Periodic(m_pickupMode, m_sharedSpaceFree);
+		
+		m_sharedSpaceFree = ((hopperFlags && 4) == 4  && (pickupFlags && 1) == 4);
+		
 		//--------------------------------Frisbee Shoot Sequence---------------------------------------------	
 		
 		static bool printDone = false;
@@ -746,7 +751,7 @@ public:
 		static int  GoalFound = 0;
 		static bool buttonPressed = false;
 		
-		m_hopper->Periodic(0);
+		m_hopper->Periodic(0, m_sharedSpaceFree);
 		m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
 		
 		if(m_driveJoystick->GetRawButton(11)){

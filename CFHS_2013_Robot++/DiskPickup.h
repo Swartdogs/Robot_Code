@@ -36,7 +36,7 @@ typedef enum {pStore, //Default Storage position
 	void  			 Enable();
 	void  	 		 Disable();
 	void  			 FeedSafety();
-	void  			 Periodic(PickupRunMode RunMode);
+	int   			 Periodic(PickupRunMode RunMode, bool spaceFree);
 	
 private:
 	
