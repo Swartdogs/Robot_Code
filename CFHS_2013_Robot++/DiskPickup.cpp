@@ -54,12 +54,12 @@ DiskPickup::DiskPickup(
 	
 	m_runMode = pStore;
 	
-	m_armPID = new PIDLoop(0.009,			// P coefficient
+	m_armPID = new PIDLoop(0.007,			// P coefficient
 						   0,				// I coefficient
 						   0);				// D coefficient
 //	m_armPID->SetInputRange(c_armZeroOffset - 630, c_armZeroOffset + 70);
 	m_armPID->SetInputRange(0, c_armRange);
-	m_armPID->SetOutputRange(-1.0, 1.0);		//-1, 1
+	m_armPID->SetOutputRange(-0.5, 0.5);		//-1, 1
 	
 	m_wristPID = new PIDLoop(0.008,		    // P coefficient
 							 0,				// I coefficient
@@ -121,26 +121,37 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool hopperOtterSpace) {
 	static float			armTiltSpeed = 0.0;
 	static float			wristTiltSpeed = 0.0;
 	static PickupRunMode	runModeNow = pArgggggggggggggh;
+	static bool             rumotor = false;
 	
 //-------------------------------Set Arm/Wrist-----------------------------
 	
+//	printf("Disk Sensor Value=%d\n", m_diskSensor->Get());
 	if(abs(m_armTiltTarget - curArmPosition) <= c_deadband && abs(m_wristTiltTarget - curWristPosition) <= c_deadband) {
-//		printf("Within Deadband, RunMode=%d", runModeNow);
+//		printf("Within Deadband, RunMode=%d\n", runModeNow);
+		rumotor = true;
+	}
+	
+	if(rumotor) {
 		if(runModeNow == pDeployed) {
 			if(m_diskSensor->Get() == 1){
-				m_pickupMotor->Set(Relay::kForward);
-//				printf("Running Motor");
+				m_pickupMotor->Set(Relay::kReverse);
+				printf("Running Motor\n");
 			} else {
 				m_pickupMotor->Set(Relay::kOff);
 				RunMode = pStore;
+				rumotor = false;
+				printf("runModeNow != RunMode: %d\n", (runModeNow!=RunMode));
 			}
 		} else if(runModeNow == pLoad) {
 			if(m_diskSensor->Get() == 0){
-				m_pickupMotor->Set(Relay::kForward);
+				m_pickupMotor->Set(Relay::kReverse);
 			} else {
 				m_pickupMotor->Set(Relay::kOff);
 				RunMode = pStore;
+				rumotor = false;
 			}
+		} else {
+			rumotor = false;
 		}
 	}
 	

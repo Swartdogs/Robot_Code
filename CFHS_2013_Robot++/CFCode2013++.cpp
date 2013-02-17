@@ -108,7 +108,7 @@ public:
 		m_pickup = new DiskPickup(1, 3, 			// Pickup Motor 		DM 1: Relay 3
 							      1, 8, 			// Arm Motor 			DM 1: PWM 8
 							      1, 9,				// Wrist Motor			DM 1: PWM 9
-							      1, 7,		 		// Disk Sensor  		DM 1: Digital 7
+							      1, 8,		 		// Disk Sensor  		DM 1: Digital 8
 							      1, 6, 			// Arm Pot	 			AM 1: Analog 6
 							      1, 7,				// Wrist Pot			AM 1: Analog 7
 							      this, 2);
