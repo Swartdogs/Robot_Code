@@ -2,9 +2,9 @@
 #include "Hopper.h"
 
 INT32 const c_tiltDeadband = 5;
-INT32 const c_tiltSpan = 410;
+INT32 const c_tiltSpan = 400;
 INT32 const c_tiltZeroOffset = 300;
-INT32 const c_spaceLimit = 100;
+INT32 const c_spaceLimit = 120;
 
 
 Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
@@ -83,11 +83,11 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 	}
 }
 
-int Hopper::Periodic(float joyValue, bool spaceFree){
+int Hopper::Periodic(float joyValue, bool pickupOtterSpace){
 
 	// hopperFlags:  Bit 1 = Hopper Tilt Completed
 	// 					 2 = Frisbee Stored
-	//                   4 = Shared Space is Free
+	//                   4 = Hopper out of shared space
 	
 	static int		pelicanCounter = 0;
 	static float	tiltSpeed = 0.0;
@@ -96,7 +96,7 @@ int Hopper::Periodic(float joyValue, bool spaceFree){
 	INT32           lowLimit = 0;
 	int             hopperFlags = 0;
 
-	if (spaceFree) {
+	if (pickupOtterSpace) {
 		lowLimit = c_tiltDeadband;
 	} else {
 		lowLimit = c_spaceLimit;
@@ -142,7 +142,7 @@ int Hopper::Periodic(float joyValue, bool spaceFree){
 			m_tiltPID->Reset();
 		}
 		
-		if (!spaceFree && m_tiltTarget < c_spaceLimit) {
+		if (!pickupOtterSpace && m_tiltTarget < c_spaceLimit) {
 			m_tiltPID->SetSetpoint(c_spaceLimit);
 		} else {
 			m_tiltPID->SetSetpoint(m_tiltTarget);
@@ -191,7 +191,7 @@ int Hopper::Periodic(float joyValue, bool spaceFree){
 	}
 	
 	if (m_afterSensor->Get() == 0) hopperFlags += 2;
-	if (curTiltPosition > c_spaceLimit) hopperFlags +=4;
+	if (curTiltPosition > (c_spaceLimit - c_tiltDeadband)) hopperFlags +=4;
 	
 	return hopperFlags;
 }

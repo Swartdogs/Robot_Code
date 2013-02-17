@@ -9,7 +9,7 @@ INT32 const c_armZeroOffset = 780;
 INT32 const c_wristRange = 350;
 INT32 const c_wristZeroOffset = 790;
 
-INT32 const c_deadband = 4;
+INT32 const c_deadband = 15;
 
 INT32 const c_armLoad = c_armZeroOffset - 255; 			//When loading onto shooter deck
 INT32 const c_armStore = c_armZeroOffset - 330; 		//default storage position
@@ -111,9 +111,9 @@ void DiskPickup::FeedSafety(){
 	m_armMotor->Set(0);
 }
 
-int DiskPickup::Periodic(PickupRunMode RunMode, bool spaceFree) {
+int DiskPickup::Periodic(PickupRunMode RunMode, bool hopperOtterSpace) {
 
-	// pickupFlags:  Bit 1 = Shared Space is free
+	// pickupFlags:  Bit 1 = Pickup out of Shared Space
 
 	INT32					curArmPosition = c_armZeroOffset - m_armPot->GetAverageValue();
 	INT32   				curWristPosition = c_wristZeroOffset - m_wristPot->GetAverageValue();
@@ -125,9 +125,11 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool spaceFree) {
 //-------------------------------Set Arm/Wrist-----------------------------
 	
 	if(abs(m_armTiltTarget - curArmPosition) <= c_deadband && abs(m_wristTiltTarget - curWristPosition) <= c_deadband) {
+//		printf("Within Deadband, RunMode=%d", runModeNow);
 		if(runModeNow == pDeployed) {
 			if(m_diskSensor->Get() == 1){
 				m_pickupMotor->Set(Relay::kForward);
+//				printf("Running Motor");
 			} else {
 				m_pickupMotor->Set(Relay::kOff);
 				RunMode = pStore;
@@ -156,7 +158,7 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool spaceFree) {
 			case pStore:
 				m_armTiltTarget = c_armStore;
 				m_wristTiltTarget = c_wristStore;
-				printf("Arm=%d  Wrist=%d \n", m_armTiltTarget, m_wristTiltTarget);
+//				printf("Arm=%d  Wrist=%d \n", m_armTiltTarget, m_wristTiltTarget);
 				break;
 				
 			case pDeployed:
@@ -179,7 +181,7 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool spaceFree) {
 	float Setpoint = 0;
 	
 	if(curArmPosition < c_clearBumper) { //if arm hasn't cleared the bumper
-		Setpoint = curArmPosition / 2.5;
+		Setpoint = curArmPosition / 2.0;
 		m_wristPID->SetSetpoint((float)Setpoint);
 //		m_wristPID->SetSetpoint((float)curArmPosition / 2.5);
 	} else {
@@ -187,8 +189,9 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool spaceFree) {
 		m_wristPID->SetSetpoint((float)m_wristTiltTarget);
 	}
 	
-	if (!spaceFree && m_armTiltTarget > c_armPyramid) {
+	if (!hopperOtterSpace && m_armTiltTarget > c_armPyramid) {
 		m_armPID->SetSetpoint(c_armPyramid);
+		m_wristPID->SetSetpoint(c_wristPyramid);
 	} else {
 		m_armPID->SetSetpoint(m_armTiltTarget);
 	}
@@ -196,13 +199,13 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool spaceFree) {
 	armTiltSpeed = m_armPID->Calculate((float)curArmPosition);
 	wristTiltSpeed = m_wristPID->Calculate((float)curWristPosition);
 	
-	printf("Wrist Target=%d  Wrist Position=%d Wrist Tilt Speed=%f Setpoint=%f Arm Position=%d\n", 
-			m_wristTiltTarget, curWristPosition, wristTiltSpeed, Setpoint, curArmPosition);
+//	printf("Wrist Target=%d  Wrist Position=%d Wrist Tilt Speed=%f Setpoint=%f Arm Position=%d\n", 
+//			m_wristTiltTarget, curWristPosition, wristTiltSpeed, Setpoint, curArmPosition);
 	
 	m_armMotor->Set(-armTiltSpeed);   
 	m_wristMotor->Set(wristTiltSpeed);
 	
-	if (curArmPosition <= c_armPyramid) pickupFlags += 1;
+	if (curArmPosition < (c_armPyramid + c_deadband)) pickupFlags += 1;
 	
 	return pickupFlags;
 }
