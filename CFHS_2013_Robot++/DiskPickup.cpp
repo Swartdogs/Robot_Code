@@ -7,18 +7,18 @@
 INT32 const c_armRange = 700;
 INT32 const c_armZeroOffset = 780;
 INT32 const c_wristRange = 350;
-INT32 const c_wristZeroOffset = 790;
+INT32 const c_wristZeroOffset = 800;
 
-INT32 const c_deadband = 15;
+INT32 const c_deadband = 20;
 
-INT32 const c_armLoad = c_armZeroOffset - 255; 			//When loading onto shooter deck
+INT32 const c_armLoad = c_armZeroOffset - 240; 			//When loading onto shooter deck
 INT32 const c_armStore = c_armZeroOffset - 330; 		//default storage position
-INT32 const c_armDeployed = c_armZeroOffset - 780; 		//When arm is picking up disks
+INT32 const c_armDeployed = c_armZeroOffset - 770; 		//When arm is picking up disks
 INT32 const c_armPyramid = c_armZeroOffset - 580; 		//When going under pyramid
-INT32 const c_wristLoad = c_wristZeroOffset - 590;
+INT32 const c_wristLoad = c_wristZeroOffset - 570;
 INT32 const c_wristStore = c_wristZeroOffset - 620;
-INT32 const c_wristDeployed = c_wristZeroOffset - 790;
-INT32 const c_wristPyramid = c_wristZeroOffset - 710;
+INT32 const c_wristDeployed = c_wristZeroOffset - 800;
+INT32 const c_wristPyramid = c_wristZeroOffset - 720;
 
 INT32 const c_clearBumper = c_armZeroOffset - 670;
 
@@ -59,7 +59,7 @@ DiskPickup::DiskPickup(
 						   0);				// D coefficient
 //	m_armPID->SetInputRange(c_armZeroOffset - 630, c_armZeroOffset + 70);
 	m_armPID->SetInputRange(0, c_armRange);
-	m_armPID->SetOutputRange(-0.5, 0.5);		//-1, 1
+	m_armPID->SetOutputRange(-1.0, 1.0);		//-1, 1
 	
 	m_wristPID = new PIDLoop(0.008,		    // P coefficient
 							 0,				// I coefficient
@@ -111,56 +111,50 @@ void DiskPickup::FeedSafety(){
 	m_armMotor->Set(0);
 }
 
-int DiskPickup::Periodic(PickupRunMode RunMode, bool hopperOtterSpace) {
+int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace) {
 
-	// pickupFlags:  Bit 1 = Pickup out of Shared Space
-
+	// Pickup Flags:		1 = Frisbee in pickup
+	
 	INT32					curArmPosition = c_armZeroOffset - m_armPot->GetAverageValue();
 	INT32   				curWristPosition = c_wristZeroOffset - m_wristPot->GetAverageValue();
 	int                     pickupFlags = 0;
 	static float			armTiltSpeed = 0.0;
 	static float			wristTiltSpeed = 0.0;
 	static PickupRunMode	runModeNow = pArgggggggggggggh;
-	static bool             rumotor = false;
+	static bool             runPickupMotor = false;
 	
 //-------------------------------Set Arm/Wrist-----------------------------
 	
-//	printf("Disk Sensor Value=%d\n", m_diskSensor->Get());
 	if(abs(m_armTiltTarget - curArmPosition) <= c_deadband && abs(m_wristTiltTarget - curWristPosition) <= c_deadband) {
-//		printf("Within Deadband, RunMode=%d\n", runModeNow);
-		rumotor = true;
+		runPickupMotor = (runModeNow == pDeployed || runModeNow == pLoad);
 	}
 	
-	if(rumotor) {
+	if(runPickupMotor) {
 		if(runModeNow == pDeployed) {
 			if(m_diskSensor->Get() == 1){
 				m_pickupMotor->Set(Relay::kReverse);
-				printf("Running Motor\n");
 			} else {
 				m_pickupMotor->Set(Relay::kOff);
-				RunMode = pStore;
-				rumotor = false;
-				printf("runModeNow != RunMode: %d\n", (runModeNow!=RunMode));
+				*RunMode = pStore;
+				runPickupMotor = false;
 			}
 		} else if(runModeNow == pLoad) {
 			if(m_diskSensor->Get() == 0){
 				m_pickupMotor->Set(Relay::kReverse);
 			} else {
 				m_pickupMotor->Set(Relay::kOff);
-				RunMode = pStore;
-				rumotor = false;
+				*RunMode = pStore;
+				runPickupMotor = false;
 			}
-		} else {
-			rumotor = false;
 		}
 	}
 	
-	if(runModeNow != RunMode){
-		runModeNow = RunMode;
+	if(runModeNow != *RunMode){
+		runModeNow = *RunMode;
 		
 		m_pickupMotor->Set(Relay::kOff);
 		
-		switch(RunMode){
+		switch(runModeNow){
 			case pLoad:
 				m_armTiltTarget = c_armLoad;
 				m_wristTiltTarget = c_wristLoad;
@@ -169,7 +163,6 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool hopperOtterSpace) {
 			case pStore:
 				m_armTiltTarget = c_armStore;
 				m_wristTiltTarget = c_wristStore;
-//				printf("Arm=%d  Wrist=%d \n", m_armTiltTarget, m_wristTiltTarget);
 				break;
 				
 			case pDeployed:
@@ -194,13 +187,12 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool hopperOtterSpace) {
 	if(curArmPosition < c_clearBumper) { //if arm hasn't cleared the bumper
 		Setpoint = curArmPosition / 2.0;
 		m_wristPID->SetSetpoint((float)Setpoint);
-//		m_wristPID->SetSetpoint((float)curArmPosition / 2.5);
 	} else {
 		Setpoint = m_wristTiltTarget;
 		m_wristPID->SetSetpoint((float)m_wristTiltTarget);
 	}
 	
-	if (!hopperOtterSpace && m_armTiltTarget > c_armPyramid) {
+	if (*sharedSpace == 1 && m_armTiltTarget > c_armPyramid) {			// Hopper in shared space
 		m_armPID->SetSetpoint(c_armPyramid);
 		m_wristPID->SetSetpoint(c_wristPyramid);
 	} else {
@@ -216,7 +208,15 @@ int DiskPickup::Periodic(PickupRunMode RunMode, bool hopperOtterSpace) {
 	m_armMotor->Set(-armTiltSpeed);   
 	m_wristMotor->Set(wristTiltSpeed);
 	
-	if (curArmPosition < (c_armPyramid + c_deadband)) pickupFlags += 1;
+	if (*sharedSpace == 0  && curArmPosition > (c_armPyramid - c_deadband)) {
+		*sharedSpace = 2;
+	} else if (*sharedSpace == 2 && curArmPosition < (c_armPyramid + c_deadband)) {
+		*sharedSpace = 0;
+	}
+
+	if (m_diskSensor->Get() == 0){
+		pickupFlags += 1;
+	}
 	
 	return pickupFlags;
 }

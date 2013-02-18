@@ -83,11 +83,11 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 	}
 }
 
-int Hopper::Periodic(float joyValue, bool pickupOtterSpace){
+int Hopper::Periodic(float joyValue, int *sharedSpace){
 
 	// hopperFlags:  Bit 1 = Hopper Tilt Completed
 	// 					 2 = Frisbee Stored
-	//                   4 = Hopper out of shared space
+	//                   4 = Frisbee Loaded
 	
 	static int		pelicanCounter = 0;
 	static float	tiltSpeed = 0.0;
@@ -96,10 +96,10 @@ int Hopper::Periodic(float joyValue, bool pickupOtterSpace){
 	INT32           lowLimit = 0;
 	int             hopperFlags = 0;
 
-	if (pickupOtterSpace) {
-		lowLimit = c_tiltDeadband;
-	} else {
+	if (*sharedSpace == 2) {
 		lowLimit = c_spaceLimit;
+	} else {
+		lowLimit = c_tiltDeadband;
 	}
 	
 	if(joyValue != 0){
@@ -111,6 +111,7 @@ int Hopper::Periodic(float joyValue, bool pickupOtterSpace){
 			tiltSpeed = 0.0;
 			hopperFlags += 1;
 		}else if(joyValue < 0 && curTiltPosition < lowLimit) {
+			if (*sharedSpace == 2) m_event->RaiseEvent(m_eventSourceId, 1);
 			tiltSpeed = 0.0;
 			hopperFlags += 1;
 		}else{
@@ -142,7 +143,7 @@ int Hopper::Periodic(float joyValue, bool pickupOtterSpace){
 			m_tiltPID->Reset();
 		}
 		
-		if (!pickupOtterSpace && m_tiltTarget < c_spaceLimit) {
+		if (*sharedSpace == 2 && m_tiltTarget < c_spaceLimit) {
 			m_tiltPID->SetSetpoint(c_spaceLimit);
 		} else {
 			m_tiltPID->SetSetpoint(m_tiltTarget);
@@ -184,6 +185,7 @@ int Hopper::Periodic(float joyValue, bool pickupOtterSpace){
 					m_hopState = hEmpty;
 					m_hopperGate->Set(Relay::kOff);
 				}
+				hopperFlags += 4;
 			}
 			break;
 			
@@ -191,7 +193,14 @@ int Hopper::Periodic(float joyValue, bool pickupOtterSpace){
 	}
 	
 	if (m_afterSensor->Get() == 0) hopperFlags += 2;
-	if (curTiltPosition > (c_spaceLimit - c_tiltDeadband)) hopperFlags +=4;
+	
+	if (*sharedSpace == 0 && curTiltPosition < (c_spaceLimit + c_tiltDeadband)){
+		*sharedSpace = 1;
+	} else if (*sharedSpace == 1 && curTiltPosition > (c_spaceLimit - c_tiltDeadband)) {
+		*sharedSpace = 0;
+	}
+
+//	if (curTiltPosition < (c_spaceLimit + c_tiltDeadband)) hopperFlags +=4;
 	
 	return hopperFlags;
 }

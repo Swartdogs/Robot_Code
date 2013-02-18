@@ -156,6 +156,7 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			vDrive = ApplyDeadband(JoyDrive, 0.05);
 			vStrafe = ApplyDeadband(-JoyStrafe, 0.05);
 			vRotate = ApplyDeadband(JoyRotate, 0.10);
+			printf("Left Encoder= %d Right Encoder= %d\n", m_lEncoder->GetRaw(), m_rEncoder->GetRaw());
 			break;
 			
 		case dStrafe:

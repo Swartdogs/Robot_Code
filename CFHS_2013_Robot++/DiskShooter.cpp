@@ -3,7 +3,7 @@
 INT32 const c_shootTriggerPosition = 790;
 INT32 const c_shootDeadband = 20;
 INT32 const c_tensionDeadband = 5;
-INT32 const c_tensionRange = 350;			// 200
+INT32 const c_tensionRange = 300;			// 200
 INT32 const c_tensionZeroOffset = 250;
 INT32 const c_tiltDeadband = 5;
 INT32 const c_tiltRange = 330;
@@ -153,13 +153,6 @@ void DiskShooter::Load(){
 //			kP = (tension - 110) * 0.00008 + 0.0040;
 //		}
 		
-//		if (tension <= 110) {
-//			kP = 0.0025;
-//		} else if (tension <= 200) {
-//			kP = (tension - 110) * 0.000025 + 0.0025;       // 0.00002
-//		} else {
-//			kP = (tension - 200) * 0.00003 + 0.00475;       // 0.00002
-//		}
 		
 //		printf("Shooter:  Tension=%d   Kp=%f \n", tension, kP);
 		m_shootPID->SetPID(0.003, 0, 0);

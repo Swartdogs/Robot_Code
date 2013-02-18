@@ -29,8 +29,8 @@
 #include "Drive.h"
 #include "DiskShooter.h"
 
-enum EnumAction{actionNone, actionDrive, actionTurn, actionShoot, actionShootCamera, actionFrisbeePickup, actionDumpFrisbees};
-enum EnumShootSeq{sIdle, sMoveHopper, sLoad, sReady, sFire};
+enum EnumAction{actionNone, actionDrive, actionTurn, actionShoot, actionFrisbeeShoot, actionFrisbeePickup, actionShootCamera, actionDumpFrisbees};
+enum EnumShootSeq{sIdle, sMoveHopper, sLoad, sFlop, sReady, sFire};
 
 typedef struct {									// Autonomous
 	bool        InitStep;							//    Initialize Step
@@ -57,34 +57,37 @@ typedef struct {									// Autonomous Sequence Step Data Structure
 class Team525: public IterativeRobot, public Events
 {
 
-	SmartDashboard *m_dash;
-	Drive	  	   *m_drive;
-	DiskShooter	   *m_shooter;
-	DiskPickup	   *m_pickup;
-	FindGoals 	   *m_findGoals;
-	Hopper         *m_hopper;
-	Joystick  	   *m_driveJoystick;
-	Joystick       *m_tiltJoystick;
-	Joystick	   *m_buttonBox;
-	Solenoid  	   *m_sensorPower;
-	StructAuto 		m_auto;
-	StructAutoStep *m_autoStep;
-	FILE		   *m_logFile;
-	bool			m_cameraShot;
-	
-	char	   		m_autoModeId0;
-	char	   		m_autoModeId1;
-	char            m_autoModeId2;
+	SmartDashboard   *m_dash;
+	SendableChooser  *m_autoChooser;
+	Drive	  	     *m_drive;
+	DiskShooter	     *m_shooter;
+	DiskPickup	     *m_pickup;
+	FindGoals 	     *m_findGoals;
+	Hopper           *m_hopper;
+	Joystick  	     *m_driveJoystick;
+	Joystick         *m_tiltJoystick;
+	Joystick	     *m_buttonBox;
+	Solenoid  	     *m_sensorPower;
+	StructAuto 		  m_auto;
+	StructAutoStep   *m_autoStep;
+	FILE		     *m_logFile;
+	bool			  m_cameraShot;
+	DriverStationLCD *m_DriverMessage;
+	char	   		  m_autoModeId0;
+	char	   		  m_autoModeId1;
+	char              m_autoModeId2;
+	Victor			 *m_climbMotor;
+	DigitalInput     *m_climbLowLimit;
+	DigitalInput     *m_climbHighLimit;
 
-	EnumShootSeq    m_shootSeq;
-	DiskPickup::PickupRunMode m_pickupMode;
-	bool            m_pickupOtterSpace;
-	bool			m_hopperOtterSpace;
-	double	   	    m_periodBeginTime;
-	INT32	   		m_periodicCount;
-	double	   		m_lastPeriodStart;
-	double	   		m_lastPeriodEnd;
-	char            m_log[100];						// Buffer for Log Messages
+	EnumShootSeq                m_shootSeq;
+	DiskPickup::PickupRunMode   m_pickupMode;
+	int            			    m_sharedSpace;
+	double	   	    		    m_periodBeginTime;
+	INT32	   					m_periodicCount;
+	double	   					m_lastPeriodStart;
+	double	   					m_lastPeriodEnd;
+	char         			    m_log[100];						// Buffer for Log Messages
 	
 public:
 
@@ -117,6 +120,8 @@ public:
 		m_tiltJoystick = new Joystick(2);
 		m_buttonBox = new Joystick(3);
 		
+//		m_testMotor = new Jaguar(1, 10);
+		
 		m_shooter = new DiskShooter(1, 7,			// Shoot Motor 			DM 1: PWM 7
 									1, 6,			// Tilt Motor 			DM 1: PWM 6
 									1, 2,			// Tension Motor 	    DM 1: Relay 2
@@ -131,6 +136,14 @@ public:
 						 	  1, 5,   				// Before Sensor        DM 1: Digital 5
 						 	  1, 6,                 // After Sensor         DM 1: Digital 6  
 						 	  this, 4);
+		
+		m_DriverMessage = DriverStationLCD::GetInstance();
+
+		m_autoChooser = new SendableChooser();
+		
+		m_climbMotor = new Victor(1, 10);           // Climb Motor          DM 1: PWM 10
+		m_climbLowLimit = new DigitalInput(1,7);    // Climb Low Limit      DM 1: Digital 7
+		m_climbHighLimit = new DigitalInput(1,8);   // Climb High Limit     DM 1: Digital 8
 		
 		Team525::SetPeriod(0.02);
 		
@@ -154,6 +167,13 @@ public:
 		m_autoModeId1 = 1;
 		m_autoModeId2 = 2;
 		
+		m_autoChooser->AddDefault("Off", &m_autoModeId0);		// Send Autonomous Mode Selections to SmartDashboard
+		m_autoChooser->AddObject("Shoot 3, Pickup and Shoot", &m_autoModeId1);
+		m_autoChooser->AddObject("Shoot 3", &m_autoModeId2);
+		
+		m_dash->PutData("Autonomous Mode", m_autoChooser);
+		m_dash->PutNumber("Auto Delay", BootCount);				// Send Autonomous Delay to SmartDashboard
+		
 		BootFile = fopen("Boot525.txt", "rb");
 			if (!feof(BootFile)) fread(&BootCount, sizeof(int), 1, BootFile);
 		fclose(BootFile);
@@ -169,8 +189,9 @@ public:
 		WriteToLog(m_log);
 		
 		m_pickupMode = DiskPickup::pStore;
-		m_hopperOtterSpace = true;
-		m_pickupOtterSpace = true;
+//		m_hopperInSharedSpace = false;
+//		m_pickupInSharedSpace = false;
+		m_sharedSpace = 0;
 		
 		printf("525 2013 Robot Init \n");
 	}
@@ -210,15 +231,15 @@ public:
 
 	void AutonomousInit(void) {
 		
-		int AutoDelay;
-		char AutoMode;
+		int AutoDelay = 0;
+		char AutoMode = 0;
 		
 		m_periodicCount = 0;
 		m_lastPeriodStart = GetClock() * 1000;
 		m_lastPeriodEnd = m_lastPeriodStart;
 		m_periodBeginTime = m_lastPeriodStart;
 		
-		AutoDelay = 0;
+		AutoDelay = (int)m_dash->GetNumber("Auto Delay");
 		m_auto.StartDelay = AutoDelay / 20;
 		
 		AutoStepLoad(AutoMode);
@@ -255,6 +276,7 @@ public:
 //		static char	StartFrisbeeCount = 0;
 		static int  autoHopperFlags = 0;
 		static int  autoShooterFlags = 0;
+		static int  autoPickupFlags = 0;
 		
 		double TimeNow;
 		
@@ -306,7 +328,7 @@ public:
 			
 			switch(m_autoStep[m_auto.StepIndex].Action){
 				case actionShoot:
-					if((m_hopper->Periodic(0, m_pickupOtterSpace) & 2) == 2) {
+					if((m_hopper->Periodic(0, &m_sharedSpace) & 2) == 2) {
 						m_shooter->SetTiltTarget(m_autoStep[m_auto.StepIndex].tiltTarget);
 						m_shooter->SetTensionTarget(m_autoStep[m_auto.StepIndex].tensionTarget);
 						m_shootSeq = sMoveHopper;
@@ -319,15 +341,16 @@ public:
 					
 					break;
 					
-				case actionFrisbeePickup:
-					
-					break;
-					
 				case actionDumpFrisbees:
 					
 					break;
 					
 				case actionDrive:
+					if(m_autoStep[m_auto.StepIndex].PickupFrisbees) {
+						m_hopper->SetTiltTarget(252);
+						m_pickupMode = DiskPickup::pDeployed;
+					}
+					break;
 				case actionTurn:
 					
 					break;
@@ -355,7 +378,23 @@ public:
 		}else{
 			switch(m_autoStep[m_auto.StepIndex].Action){
 				case actionDrive:
-					AutoStepDone = m_drive->Periodic(Drive::dAutoDrive, 0, 0, 0);
+					if(m_autoStep[m_auto.StepIndex].PickupFrisbees) {
+						m_drive->Periodic(Drive::dStop, 0, 0, 0);
+						autoPickupFlags = m_pickup->Periodic(&m_pickupMode, &m_sharedSpace);
+						autoHopperFlags = m_hopper->Periodic(0, &m_sharedSpace);
+						
+						if(m_pickupMode == DiskPickup::pDeployed) {
+							if(autoHopperFlags & 4 == 4) {
+								m_drive->Periodic(Drive::dAutoDrive, 0, 0, 0);
+								if(autoPickupFlags & 1 == 1) {
+									m_pickupMode = DiskPickup::pStore;
+									AutoStepDone = true;
+								}
+							}
+						}
+					} else {
+						AutoStepDone = m_drive->Periodic(Drive::dAutoDrive, 0, 0, 0);
+					}
 					break;
 					
 				case actionTurn:
@@ -365,22 +404,22 @@ public:
 				case actionShoot:
 					m_drive->Periodic(Drive::dStop, 0, 0, 0);
 					autoShooterFlags = m_shooter->Periodic(0);
-					autoHopperFlags = m_hopper->Periodic(0, m_pickupOtterSpace );
+					autoHopperFlags = m_hopper->Periodic(0, &m_sharedSpace);
 					
 					switch(m_shootSeq) {
 						case sMoveHopper:
-							if ((autoHopperFlags & 1) == 1) {							// Hopper in position
+							if ((autoHopperFlags & 1) == 1) {						// Hopper in position
 								m_shootSeq = sLoad;
 								m_shooter->Load();									// Initiate Shooter Arm movement
 							}
 							break;
 
 						case sLoad:
-							if ((autoShooterFlags & 4) == 4 ) {							// Shooter arm ready for load
+							if ((autoShooterFlags & 4) == 4 ) {						// Shooter arm ready for load
 								m_hopper->RELEASETHEFRISBEE();						// Load Frisbee
 							}
 									
-							if (autoShooterFlags == 31) {								// Shooter loaded and Ready
+							if (autoShooterFlags == 31) {							// Shooter loaded and Ready
 								m_shootSeq = sFire;
 								m_shooter->FIREINTHEHOLE();							// Fire Frisbee
 							}
@@ -394,16 +433,11 @@ public:
 						default:;
 					}
 					break;
-				case actionShootCamera:
+				case actionShootCamera: //Do we need this??
 					
 					break;
 					
-				case actionFrisbeePickup:
-					m_drive->Periodic(Drive::dStop, 0, 0, 0);
-					//ADD STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					break;
-					
-				case actionDumpFrisbees:
+				case actionDumpFrisbees: // Do we need this??
 					m_drive->Periodic(Drive::dStop, 0, 0, 0);
 					//ADD STUFF!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					break;
@@ -459,30 +493,39 @@ public:
 	void AutoStepLoad(char AutoSwitch){
 		
 		switch(AutoSwitch){
-			case 1:
-				AutoStepInit(4);
+			case 1: // Sequence:  Shoot all frisbees and pickup and shoot another one ~~ Possible Points: 24
+				AutoStepInit(6);
+				
+				m_autoStep[0].Action = actionShoot;  // Shoot first frisbee from hopper
+				m_autoStep[0].ResetGyro = true;
+				
+				m_autoStep[1].Action = actionShoot; // Shoot second frisbee from hopper
+				m_autoStep[1].ResetGyro = true;
+				
+				m_autoStep[2].Action = actionShoot; // Shoot third frisee form hopper
+				m_autoStep[2].ResetGyro = true;
+				
+				m_autoStep[3].PickupFrisbees = true; // Drive to pickup position and pick a frisbee up
+				m_autoStep[3].Action = actionDrive;
+				
+				m_autoStep[4].PickupFrisbees = false;
+				m_autoStep[4].Action = actionDrive; // Drive to shooting position
+				
+				m_autoStep[5].Action = actionFrisbeeShoot; // Shoot frisbee from pickup mechanism
+			break;
+			
+			case 2: // Sequence:  Shoot all frisbees ~~ Points Possible: 18
+				AutoStepInit(3);
 				
 				m_autoStep[0].Action = actionShoot;
 				m_autoStep[0].ResetGyro = true;
 				
-				m_autoStep[1].Action = actionFrisbeePickup;
-				
-				m_autoStep[2].Action = actionShoot;
-				
-				m_autoStep[3].Action = actionFrisbeePickup;
-			break;
-			
-			case 2:
-				AutoStepInit(4);
-				
-				m_autoStep[0].Action = actionDrive;
-				
-				m_autoStep[1].Action = actionTurn;
+				m_autoStep[1].Action = actionShoot;
+				m_autoStep[1].ResetGyro = true;
 				
 				m_autoStep[2].Action = actionShoot;
 				m_autoStep[2].ResetGyro = true;
 				
-				m_autoStep[3].Action = actionFrisbeePickup;
 			break;
 			case 3:
 			
@@ -529,8 +572,8 @@ public:
 	void TeleopPeriodic(void) {
 		
 		static int          hopperFlags = 0;
-		static int          pickupFlags = 0;
 		static int          shooterFlags = 0;
+		static int			pickupFlags = 0;
 		
 		static bool			buttonPushed = false;
 		static bool			loadPickup = false;
@@ -558,6 +601,18 @@ public:
 			}
 		}
 		
+		if(m_driveJoystick->GetRawButton(12)) {
+			m_drive->ResetEncoders();
+		}
+		
+		if(m_driveJoystick->GetRawButton(7) && m_climbLowLimit->Get() == 1) {
+			m_climbMotor->Set(1.0);
+		} else if(m_driveJoystick->GetRawButton(8) && m_climbHighLimit->Get() == 1) {
+			m_climbMotor->Set(-1.0);
+		} else {
+			m_climbMotor->Set(0);
+		}
+		
 //		m_drive->Periodic(Drive::dJoystick, 0, 0, 0);
 		
 		//--------------------------------Hopper Stuff------------------------------------------------------
@@ -566,6 +621,7 @@ public:
 			if(m_buttonBox->GetRawButton(8) && shooterFlags >= 3 && (hopperFlags & 4) == 4){		// Shoot button pressed, Shooter Tilt and Tension completed 
 				if((shooterFlags & 16) == 16){
 					m_shootSeq = sFire;
+					
 				}else{
 					m_shootSeq = sMoveHopper;
 					READYTHEHOPPER();
@@ -576,33 +632,41 @@ public:
 			} else if (m_buttonBox->GetRawButton(2)) {
 				m_hopper->SetTiltTarget(250);							// Position for driving 
 			} else if (m_buttonBox->GetRawButton(3)) {
-				m_hopper->SetTiltTarget(10);                            // Position to get under the pyramid
+				m_hopper->SetTiltTarget(5);                            // Position to get under the pyramid
 				m_pickupMode = DiskPickup::pUnderPyramid;
 			}
 		}
 
 		//--------------------------------Shooter Stuff------------------------------------------------------	
 		
-		if(m_shootSeq == sIdle){
-			if(m_buttonBox->GetRawButton(7)) {
-				m_shooter->SetTiltTarget(50);							// Long shot mode
-				m_shooter->SetTensionTarget(400);
-				m_hopper->SetTiltTarget(302); //find right value
-			} else if (m_buttonBox->GetRawButton(6)) {
-				m_shooter->SetTiltTarget(204);							// Short shot mode
-				m_shooter->SetTensionTarget(250);
-				m_hopper->SetTiltTarget(316);
-			} else if (m_buttonBox->GetRawButton(5)) {
-				m_shooter->SetTiltTarget(0);							// Pyramid flop mode
-				m_shooter->SetTensionTarget(100);
-				m_hopper->SetTiltTarget(302); //find right value
-			}
-
-		} else {
-			if(m_tiltJoystick->GetRawButton(8) && m_tiltJoystick->GetRawButton(9)){
-				m_shootSeq = sIdle;
-			}
+//		if(m_shootSeq == sIdle){
+		if(m_buttonBox->GetRawButton(7)) {
+			m_shooter->SetTiltTarget(179);							// Back Right shot mode
+			m_shooter->SetTensionTarget(247);
+			m_hopper->SetTiltTarget(334); //find right value
+		} else if (m_buttonBox->GetRawButton(6)) {
+			m_shooter->SetTiltTarget(237);							// Front Center shot mode
+			m_shooter->SetTensionTarget(197);
+			m_hopper->SetTiltTarget(327);
+		} else if (m_buttonBox->GetRawButton(5)) {
+			m_shooter->SetTiltTarget(204);							// Front Left shot mode
+			m_shooter->SetTensionTarget(222);
+			m_hopper->SetTiltTarget(324);
+		} else if(m_tiltJoystick->GetRawButton(4)) {
+			m_shooter->SetTiltTarget(204);							// Front Left shot mode
+			m_shooter->SetTensionTarget(222);
+			m_hopper->SetTiltTarget(324);
+		} else if(m_tiltJoystick->GetRawButton(5)) {
+			m_shooter->SetTiltTarget(208);							// Front Right shot mode
+			m_shooter->SetTensionTarget(223);
+			m_hopper->SetTiltTarget(323);
 		}
+
+//		} else {
+		if(m_tiltJoystick->GetRawButton(8) && m_tiltJoystick->GetRawButton(9)){
+			m_shootSeq = sIdle;
+		}
+//		}
 		
 		if(m_tiltJoystick->GetRawButton(6)){
 			if(!buttonPushed){
@@ -621,49 +685,56 @@ public:
 		
 		//--------------------------Pickup Stuff------------------------------------------------------
 		
-		if(m_buttonBox->GetRawButton(9)) {
+		if(m_buttonBox->GetRawButton(11)) {
+			m_hopper->SetTiltTarget(252);
 			m_pickupMode = DiskPickup::pDeployed;
 		} else if(m_buttonBox->GetRawButton(10)) {
 			m_pickupMode = DiskPickup::pStore;
-		} else if(m_buttonBox->GetRawButton(11)) {
-			if (m_hopper->GetHopperPosition() < 120) m_hopper->SetTiltTarget(120);
-			loadPickup = true;
-			m_shootSeq = sLoad;
+		} else if(m_buttonBox->GetRawButton(9) && m_shootSeq == sIdle) {
+			if ((pickupFlags & 1) == 1){
+				loadPickup = true;
+				if (m_sharedSpace == 1){
+					m_hopper->SetTiltTarget(130);
+					m_shootSeq = sMoveHopper;
+				}
+				else {
+					m_shootSeq = sLoad;
+					m_shooter->Load();
+				}
+			}
 		}
 		//--------------------------Call Periodic Functions--------------------------------------------	
 		
 		float  tiltValue = -m_tiltJoystick->GetY();
 
-		if(fabs(tiltValue) > 0.1 ){				// Use Tilt Joystick		
-//		if(fabs(tiltValue) > 0.1 && m_shootSeq == sIdle){				// Use Tilt Joystick		
+		if(fabs(tiltValue) > 0.1 ){										// Use Tilt Joystick		
 			if (m_tiltJoystick->GetRawButton(2)) {						// Manual Shooter Tilt
-				hopperFlags = m_hopper->Periodic(0, m_pickupOtterSpace);
+				hopperFlags = m_hopper->Periodic(0, &m_sharedSpace);
 				shooterFlags = m_shooter->Periodic(tiltValue);
-			} else if (m_tiltJoystick->GetRawButton(3)) {															// Manual Hopper Tilt
-				hopperFlags = m_hopper->Periodic(tiltValue, m_pickupOtterSpace);
+//				m_testMotor->Set(tiltValue);
+			} else if (m_tiltJoystick->GetRawButton(3)) {				// Manual Hopper Tilt
+				hopperFlags = m_hopper->Periodic(tiltValue, &m_sharedSpace);
 				shooterFlags = m_shooter->Periodic(0);
 			} else {
-				hopperFlags = m_hopper->Periodic(0, m_pickupOtterSpace);	
+				hopperFlags = m_hopper->Periodic(0, &m_sharedSpace);	
 				shooterFlags = m_shooter->Periodic(0);
 			}
 			
 		}else{															// Ignore Joystick
-			hopperFlags = m_hopper->Periodic(0, m_pickupOtterSpace);	
+			hopperFlags = m_hopper->Periodic(0, &m_sharedSpace);	
 			shooterFlags = m_shooter->Periodic(0);
 		}
 		
-		pickupFlags = m_pickup->Periodic(m_pickupMode, m_hopperOtterSpace);
 		
-		m_pickupOtterSpace = (pickupFlags & 1) == 1;
-		m_hopperOtterSpace = (hopperFlags & 4) == 4;
+		pickupFlags = m_pickup->Periodic(&m_pickupMode, &m_sharedSpace);
 		
-//		printf("Pickup flags=%d	Hopper flags=%d HopOut=%d PickOut=%d\n", pickupFlags, hopperFlags, m_hopperOtterSpace, m_pickupOtterSpace);
+//		printf("Pickup flags=%d	Hopper flags=%d HopOut=%d PickOut=%d\n", pickupFlags, hopperFlags, m_pickupInSharedSpace);
 		
 		//--------------------------------Frisbee Shoot Sequence---------------------------------------------	
 		
 		static bool printDone = false;
 		
-		if (m_tiltJoystick->GetRawButton(4) || m_tiltJoystick->GetRawButton(5)) {
+		if (m_tiltJoystick->GetRawButton(1)) {
 			if (!printDone) {
 				printf("Shooter:  Seq=%d Flags=%d  Arm=%d  Tilt=%d  Tension=%d \n", m_shootSeq, shooterFlags, m_shooter->GetShooterPosition(),
 						m_shooter->GetTiltTarget(), m_shooter->GetTensionTarget());
@@ -735,12 +806,21 @@ public:
 //					m_shooter->FIREINTHEHOLE();							// Fire Frisbee
 //				}
 				break;
-				
+			case sFlop:
+				if(hopperFlags & 4 == 4) {
+					m_hopper->SetTiltTarget(5);
+				} else if(hopperFlags & 1 == 1) {
+					m_shootSeq = sReady;
+				}
+				break;
 			case sFire:
 				if ((shooterFlags & 16) == 0) m_shootSeq = sIdle;			// No Frisbee in Shooter
 				loadPickup = false;
 			default:;
 		}
+		
+		m_DriverMessage->Printf(DriverStationLCD::kUser_Line3, 1, "Tension: %d   ", m_shooter->GetTensionTarget());
+		m_DriverMessage->UpdateLCD();
 		
 		m_periodicCount++;
 		m_lastPeriodEnd = GetClock() * 1000;
@@ -763,7 +843,7 @@ public:
 		static int  GoalFound = 0;
 		static bool buttonPressed = false;
 		
-		m_hopper->Periodic(0, m_hopperOtterSpace);
+		m_hopper->Periodic(0, &m_sharedSpace);
 		m_drive->Periodic(Drive::dJoystick, m_driveJoystick->GetY(), m_driveJoystick->GetX(), m_driveJoystick->GetZ());
 		
 		if(m_driveJoystick->GetRawButton(11)){
@@ -804,7 +884,11 @@ public:
 /***************************************** EVENTS ********************************************/
 	
 	void RaiseEvent(UINT8 EventSourceId, UINT32 EventNumber){
-		
+		if (EventSourceId == 4) {				// Hopper Event
+			if (EventNumber == 1) {
+				if (m_pickupMode != DiskPickup::pUnderPyramid) m_pickupMode = DiskPickup::pUnderPyramid;
+			}
+		}
 	}
 	
 	
