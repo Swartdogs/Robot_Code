@@ -54,8 +54,8 @@ private:
 	AnalogChannel *m_tiltPot;
 	INT32		   m_tiltTarget;
 	
-//	INT32 		   GetShooterPosition();
 	INT32 		   GetTiltPosition();
+	INT32          GetTension();
 };
 
 #endif

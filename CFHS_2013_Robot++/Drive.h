@@ -61,7 +61,8 @@ private:
     float	       m_targetAngle;
     double	       m_targetDistance;
     PIDLoop 	  *m_rotatePID;
-    Events  	  *m_Event;
+    PIDLoop       *m_drivePID;
+    Events  	  *m_event;
     char		   m_log[100];
     
     float	ApplyDeadband(float RawValue, float Deadband);

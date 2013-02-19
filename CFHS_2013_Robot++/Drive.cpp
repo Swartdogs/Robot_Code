@@ -32,18 +32,24 @@ Drive::Drive(
 	m_motorRR->SetExpiration(1.0);
 	
 	m_lEncoder = new Encoder(laEncoderModule, laEncoderChannel, lbEncoderModule, lbEncoderChannel, true);
-	m_lEncoder->SetDistancePerPulse(0.0516);
+	m_lEncoder->SetDistancePerPulse(0.07584);				// Inches per encoder pulse
 	
 	m_rEncoder = new Encoder(raEncoderModule, raEncoderChannel, rbEncoderModule, rbEncoderChannel);
-	m_rEncoder->SetDistancePerPulse(0.0516);
+	m_rEncoder->SetDistancePerPulse(0.07584);				// Inches per encoder pulse
 	
 	m_rotateGyro = new Gyro(rotateGyroModule, rotateGyroChannel);
-	m_rotateGyro->SetSensitivity(0.0069);
+	m_rotateGyro->SetSensitivity(0.00695);
 	
-	m_rotatePID = new PIDLoop(0.075, 0.005, 0.40);
+	m_rotatePID = new PIDLoop(0.050, 0.005, 0.40);   // 0.075  0.005  0.40
 	m_rotatePID->SetInputRange(-360.0, 360.0);
 	m_rotatePID->SetOutputRange(-0.6, 0.6);
 	
+	m_drivePID = new PIDLoop(0.01, 0, 0);    		// 0.025  0.0001  0.3
+	m_drivePID->SetInputRange(-200, 200);
+	m_drivePID->SetOutputRange(-0.6, 0.6);
+
+	m_event = eventHandler;	
+
 	//Initialization Settings
 	
 	m_driveSpeed = 0;
@@ -142,6 +148,7 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				break;
 				
 			case dAutoDrive:
+				m_drivePID->SetOutputRange(-m_maxSpeed, m_maxSpeed);
 				LastDistance = 0;
 				NoMoveCount = 0;
 				vDrive = vRotate = vStrafe = 0;
@@ -156,12 +163,13 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			vDrive = ApplyDeadband(JoyDrive, 0.05);
 			vStrafe = ApplyDeadband(-JoyStrafe, 0.05);
 			vRotate = ApplyDeadband(JoyRotate, 0.10);
-			printf("Left Encoder= %d Right Encoder= %d\n", m_lEncoder->GetRaw(), m_rEncoder->GetRaw());
 			break;
 			
 		case dStrafe:
+			GyroAngle = m_rotateGyro->GetAngle();
 			vDrive = ApplyDeadband(JoyDrive, 0.05);
 			vStrafe = ApplyDeadband(-JoyStrafe, 0.05);
+			vRotate = m_rotatePID->Calculate(GyroAngle);
 			break;
 			
 		case dAim:
@@ -178,39 +186,35 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			break;
 			
 		case dAutoDrive:
-			if(m_targetDistance > 0){
-				Distance = EncoderAverage(m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
-				
-				if(fabs(Distance) >= fabs(m_targetDistance)){
-					//sprintf(m_log, "At Target Distance=%6.1f	(Left=%6.1f	Right=%6.1f)", Distance,
-					//		  m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
-					//m_event->WriteToLog(m_log);
-					vRotate = 0;
-					vReturn = true;
-				}else if(fabs(Distance) > 5.0){
+			Distance = EncoderAverage(m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
+			
+			if (fabs(m_targetDistance - Distance) <= 4.0) {
+				sprintf(m_log, "At Target Distance=%6.1f	(Left=%6.1f	Right=%6.1f)", Distance,
+						  m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
+				m_event->WriteToLog(m_log);
+				vReturn = true;
+
+			} else {
+				vDrive = m_drivePID->Calculate(Distance);
+				if(m_targetAngle != - 1) vRotate = m_rotatePID->Calculate(m_rotateGyro->GetAngle());
+
+				if(fabs(Distance) > 5.0){
 					if(fabs(Distance - LastDistance) < 0.1){
 						if(NoMoveCount < 5){
 							NoMoveCount++;
 							if(NoMoveCount == 5){
-								//sprintf(m_log, "No Movement Detected	(Distance=%6.1f)", Distance);
-								//m_event->WriteToLog(m_log);
-								vReturn = true;
+								sprintf(m_log, "No Movement Detected	(Distance=%6.1f)", Distance);
+								m_event->WriteToLog(m_log);
 							}
 						}
 					}else{
 						NoMoveCount = 0;
 					}
 				}
-				
-				LastDistance = Distance;
 			}
 			
-			if(!vReturn){
-				if(m_driveSpeed != m_maxSpeed) m_driveSpeed = RampSpeed(m_driveSpeed, m_maxSpeed);
-				vDrive = m_driveSpeed;
-				
-				if(m_targetAngle != - 1) vRotate = m_rotatePID->Calculate(m_rotateGyro->GetAngle());
-			}
+			LastDistance = Distance;
+			
 			break;
 			
 		case dAutoRotate:
@@ -233,8 +237,10 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			break;
 			
 		default:;
+
 	}
 	MecanumDrive(vDrive, vStrafe, vRotate, driveAll);
+	
 	return vReturn;
 }
 
@@ -259,6 +265,7 @@ void Drive::SetAngle(float Angle){
 
 void Drive::SetDistance(double Distance){
 	m_targetDistance = Distance;
+	m_drivePID->SetSetpoint(Distance);
 }
 
 void Drive::SetMaxSpeed(float Speed){
@@ -342,34 +349,6 @@ void Drive::MecanumDrive(float Drive, float Strafe, float Rotate, EnumDrive Driv
 	Dash->PutNumber("Rear Right", MotorPwm[3]);
 }
 
-float Drive::RampSpeed(float Speed, float MaxSpeed){
-	float Direction;
-	
-	if(MaxSpeed < 0){
-		Direction = -1.0;
-	}else{
-		Direction = 1.0;
-	}
-	
-	MaxSpeed = fabs(MaxSpeed);
-	Speed = fabs(Speed);
-	
-	if(Speed == 0.0){
-		if(MaxSpeed <= 0.2){
-			Speed = MaxSpeed;
-		}else{
-			Speed = 0.2;
-		}
-	}else if(fabs(MaxSpeed - Speed) <= 0.015){
-		Speed = MaxSpeed;
-	}else if(Speed < MaxSpeed){
-		Speed = Speed + 0.015;
-	}else if(Speed > MaxSpeed){
-		Speed = Speed - 0.015;
-	}
-	
-	return Speed * Direction;
-}
 
 bool Drive::SameSignAndGreater(float Value1, float Value2){
 	if(Value1 > 0 && Value2 < 0) return false;

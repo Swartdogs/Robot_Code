@@ -86,8 +86,9 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 int Hopper::Periodic(float joyValue, int *sharedSpace){
 
 	// hopperFlags:  Bit 1 = Hopper Tilt Completed
-	// 					 2 = Frisbee Stored
+	// 					 2 = Frisbee Stored (after sensor)
 	//                   4 = Frisbee Loaded
+	//                   8 = Frisbee Loading or stored 
 	
 	static int		pelicanCounter = 0;
 	static float	tiltSpeed = 0.0;
@@ -193,6 +194,7 @@ int Hopper::Periodic(float joyValue, int *sharedSpace){
 	}
 	
 	if (m_afterSensor->Get() == 0) hopperFlags += 2;
+	if (m_hopState == hLoad || m_hopState == hStore) hopperFlags += 8;
 	
 	if (*sharedSpace == 0 && curTiltPosition < (c_spaceLimit + c_tiltDeadband)){
 		*sharedSpace = 1;
@@ -200,8 +202,6 @@ int Hopper::Periodic(float joyValue, int *sharedSpace){
 		*sharedSpace = 0;
 	}
 
-//	if (curTiltPosition < (c_spaceLimit + c_tiltDeadband)) hopperFlags +=4;
-	
 	return hopperFlags;
 }
 

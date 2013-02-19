@@ -32,6 +32,7 @@ float PIDLoop::Calculate(float input) 							// CALCULATE OUTPUT
 	m_error = m_setpoint - input;								// Current Error
 
 	if (m_I != 0) {
+		
 		if (m_error < 0) {											// Reset Total Error when Error changes direction
 			if (m_totalError > 0) m_totalError = 0;
 		} else if (m_error > 0) {

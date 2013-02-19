@@ -11,11 +11,11 @@ INT32 const c_wristZeroOffset = 800;
 
 INT32 const c_deadband = 20;
 
-INT32 const c_armLoad = c_armZeroOffset - 240; 			//When loading onto shooter deck
+INT32 const c_armLoad = c_armZeroOffset - 230; 			//When loading onto shooter deck   240
 INT32 const c_armStore = c_armZeroOffset - 330; 		//default storage position
 INT32 const c_armDeployed = c_armZeroOffset - 770; 		//When arm is picking up disks
 INT32 const c_armPyramid = c_armZeroOffset - 580; 		//When going under pyramid
-INT32 const c_wristLoad = c_wristZeroOffset - 570;
+INT32 const c_wristLoad = c_wristZeroOffset - 550;		// 570
 INT32 const c_wristStore = c_wristZeroOffset - 620;
 INT32 const c_wristDeployed = c_wristZeroOffset - 800;
 INT32 const c_wristPyramid = c_wristZeroOffset - 720;
@@ -57,15 +57,18 @@ DiskPickup::DiskPickup(
 	m_armPID = new PIDLoop(0.007,			// P coefficient
 						   0,				// I coefficient
 						   0);				// D coefficient
-//	m_armPID->SetInputRange(c_armZeroOffset - 630, c_armZeroOffset + 70);
+
 	m_armPID->SetInputRange(0, c_armRange);
-	m_armPID->SetOutputRange(-1.0, 1.0);		//-1, 1
+	m_armPID->SetOutputRange(-1.0, 1.0);		
 	
 	m_wristPID = new PIDLoop(0.008,		    // P coefficient
 							 0,				// I coefficient
 							 0);            // D coefficient
+	
 	m_wristPID->SetInputRange(0, c_wristRange);
-	m_wristPID->SetOutputRange(-0.8, 0.8);		//-.8 .8
+	m_wristPID->SetOutputRange(-0.8, 0.8);
+	
+	m_event = eventHandler;
 }
 
 DiskPickup::~DiskPickup(){
