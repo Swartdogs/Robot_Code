@@ -2,10 +2,10 @@
 #include "Hopper.h"
 
 INT32 const c_tiltDeadband = 5;
-INT32 const c_tiltSpan = 400;
+INT32 const c_tiltSpan = 380;
 INT32 const c_tiltZeroOffset = 300;
-INT32 const c_spaceLimit = 120;
-
+INT32 const c_sharedSpaceLimit = 120;
+INT32 const c_outsideRobotLimit = 260;
 
 Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
 			   UINT8 	tiltMotorModule,    UINT32 tiltMotorChannel,
@@ -83,7 +83,7 @@ void Hopper::PELICANMOVE(bool pelicanStateEnabled){
 	}
 }
 
-int Hopper::Periodic(float joyValue, int *sharedSpace){
+int Hopper::Periodic(float joyValue, int *sharedSpace, int *outsideRobot){
 
 	// hopperFlags:  Bit 1 = Hopper Tilt Completed
 	// 					 2 = Frisbee Stored (after sensor)
@@ -94,13 +94,20 @@ int Hopper::Periodic(float joyValue, int *sharedSpace){
 	static float	tiltSpeed = 0.0;
 	
 	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
-	INT32           lowLimit = 0;
+	INT32           lowLimit;
+	INT32           highLimit;
 	int             hopperFlags = 0;
 
-	if (*sharedSpace == 2) {
-		lowLimit = c_spaceLimit;
+	if (*sharedSpace == 2) {  // Check for Shared Space
+		lowLimit = c_sharedSpaceLimit;
 	} else {
 		lowLimit = c_tiltDeadband;
+	}
+	
+	if (*outsideRobot == 2) { // Check for 54in Restriction
+		highLimit = c_outsideRobotLimit;
+	} else {
+		highLimit = c_tiltSpan;
 	}
 	
 	if(joyValue != 0){
@@ -108,7 +115,8 @@ int Hopper::Periodic(float joyValue, int *sharedSpace){
 		m_tiltTarget = curTiltPosition;
 		m_newTiltTarget = true;
 		
-		if (joyValue > 0 && curTiltPosition > c_tiltSpan - c_tiltDeadband) {
+		if (joyValue > 0 && curTiltPosition > highLimit) {
+			if (*outsideRobot == 2) m_event->RaiseEvent(m_eventSourceId, 2);
 			tiltSpeed = 0.0;
 			hopperFlags += 1;
 		}else if(joyValue < 0 && curTiltPosition < lowLimit) {
@@ -120,7 +128,7 @@ int Hopper::Periodic(float joyValue, int *sharedSpace){
 			printf("Hopper Tilt=%d \n", curTiltPosition);
 		}
 		
-	}else if(m_pelicanStateEnabled == true && m_beforeSensor->Get() == 1){
+	}else if(m_pelicanStateEnabled == true && m_beforeSensor->Get() == 1){  // Check for Pelican Mode
 		pelicanCounter++;
 		
 		if(pelicanCounter <= 10){
@@ -140,12 +148,13 @@ int Hopper::Periodic(float joyValue, int *sharedSpace){
 		
 		if (m_newTiltTarget) {
 			m_newTiltTarget = false;
-//			m_tiltPID->SetSetpoint(m_tiltTarget);
 			m_tiltPID->Reset();
 		}
 		
-		if (*sharedSpace == 2 && m_tiltTarget < c_spaceLimit) {
-			m_tiltPID->SetSetpoint(c_spaceLimit);
+		if (*sharedSpace == 2 && m_tiltTarget < c_sharedSpaceLimit) {
+			m_tiltPID->SetSetpoint(c_sharedSpaceLimit);
+		} else if (*outsideRobot == 2 && m_tiltTarget > c_outsideRobotLimit) {
+			m_tiltPID->SetSetpoint(c_outsideRobotLimit);
 		} else {
 			m_tiltPID->SetSetpoint(m_tiltTarget);
 		}
@@ -196,10 +205,16 @@ int Hopper::Periodic(float joyValue, int *sharedSpace){
 	if (m_afterSensor->Get() == 0) hopperFlags += 2;
 	if (m_hopState == hLoad || m_hopState == hStore) hopperFlags += 8;
 	
-	if (*sharedSpace == 0 && curTiltPosition < (c_spaceLimit + c_tiltDeadband)){
+	if (*sharedSpace == 0 && curTiltPosition < (c_sharedSpaceLimit + c_tiltDeadband)){
 		*sharedSpace = 1;
-	} else if (*sharedSpace == 1 && curTiltPosition > (c_spaceLimit - c_tiltDeadband)) {
+	} else if (*sharedSpace == 1 && curTiltPosition > (c_sharedSpaceLimit - c_tiltDeadband)) {
 		*sharedSpace = 0;
+	}
+	
+	if (*outsideRobot == 0 && curTiltPosition > (c_outsideRobotLimit - c_tiltDeadband)) {
+		*outsideRobot = 1;
+	} else if (*outsideRobot == 1 && curTiltPosition < (c_outsideRobotLimit + c_tiltDeadband)) {
+		*outsideRobot = 0;
 	}
 
 	return hopperFlags;

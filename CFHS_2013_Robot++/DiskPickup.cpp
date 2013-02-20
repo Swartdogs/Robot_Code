@@ -6,21 +6,27 @@
 
 INT32 const c_armRange = 700;
 INT32 const c_armZeroOffset = 780;
+
 INT32 const c_wristRange = 350;
 INT32 const c_wristZeroOffset = 800;
 
 INT32 const c_deadband = 20;
 
-INT32 const c_armLoad = c_armZeroOffset - 230; 			//When loading onto shooter deck   240
-INT32 const c_armStore = c_armZeroOffset - 330; 		//default storage position
-INT32 const c_armDeployed = c_armZeroOffset - 770; 		//When arm is picking up disks
-INT32 const c_armPyramid = c_armZeroOffset - 580; 		//When going under pyramid
+INT32 const c_armOutsideRobotLimit = c_armZeroOffset - 530;
+
+INT32 const c_armLoad = c_armZeroOffset - 230; 			// When loading onto shooter deck   240
 INT32 const c_wristLoad = c_wristZeroOffset - 550;		// 570
+
+INT32 const c_armStore = c_armZeroOffset - 330; 		// default storage position
 INT32 const c_wristStore = c_wristZeroOffset - 620;
+
+INT32 const c_armDeployed = c_armZeroOffset - 770; 		// When arm is picking up disks
 INT32 const c_wristDeployed = c_wristZeroOffset - 800;
+
+INT32 const c_armPyramid = c_armZeroOffset - 580; 		// When going under pyramid
 INT32 const c_wristPyramid = c_wristZeroOffset - 720;
 
-INT32 const c_clearBumper = c_armZeroOffset - 670;
+INT32 const c_clearBumper = c_armZeroOffset - 670;  // When Arm has cleared the bumper
 
 DiskPickup::DiskPickup(
 					UINT8	pickupMotorModule,  UINT32 pickupMotorChannel,
@@ -114,7 +120,7 @@ void DiskPickup::FeedSafety(){
 	m_armMotor->Set(0);
 }
 
-int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace) {
+int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace, int *outsideRobot) {
 
 	// Pickup Flags:		1 = Frisbee in pickup
 	
@@ -128,7 +134,7 @@ int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace) {
 	
 //-------------------------------Set Arm/Wrist-----------------------------
 	
-	if(abs(m_armTiltTarget - curArmPosition) <= c_deadband && abs(m_wristTiltTarget - curWristPosition) <= c_deadband) {
+	if(abs(m_armTiltTarget - curArmPosition) <= c_deadband && abs(m_wristTiltTarget - curWristPosition) <= c_deadband) { //Choosing when to run pickup motor
 		runPickupMotor = (runModeNow == pDeployed || runModeNow == pLoad);
 	}
 	
@@ -211,12 +217,18 @@ int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace) {
 	m_armMotor->Set(-armTiltSpeed);   
 	m_wristMotor->Set(wristTiltSpeed);
 	
-	if (*sharedSpace == 0  && curArmPosition > (c_armPyramid - c_deadband)) {
+	if (*sharedSpace == 0  && curArmPosition > (c_armPyramid - c_deadband)) {   // Check for shared space
 		*sharedSpace = 2;
 	} else if (*sharedSpace == 2 && curArmPosition < (c_armPyramid + c_deadband)) {
 		*sharedSpace = 0;
 	}
 
+	if (*outsideRobot == 0 && curArmPosition < (c_armOutsideRobotLimit + c_deadband)) { // Check for 54in restriction
+		*outsideRobot = 2;
+	} else if (*outsideRobot == 2 && curArmPosition > (c_armOutsideRobotLimit - c_deadband)) {
+		*outsideRobot = 0;
+	}
+	
 	if (m_diskSensor->Get() == 0){
 		pickupFlags += 1;
 	}

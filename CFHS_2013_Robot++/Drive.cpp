@@ -44,7 +44,7 @@ Drive::Drive(
 	m_rotatePID->SetInputRange(-360.0, 360.0);
 	m_rotatePID->SetOutputRange(-0.6, 0.6);
 	
-	m_drivePID = new PIDLoop(0.01, 0, 0);    		// 0.025  0.0001  0.3
+	m_drivePID = new PIDLoop(0.035, 0, 0);    	// 0.015, 0.001, 0	// 0.025  0.0001  0.3
 	m_drivePID->SetInputRange(-200, 200);
 	m_drivePID->SetOutputRange(-0.6, 0.6);
 
@@ -122,6 +122,8 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 	static float		vDrive = 0;
 	static float		vRotate = 0;
 	static float		vStrafe = 0;
+	static bool 		DoneFlag = false;
+	static int 	        DoneCount = 0;
 	
 	double Distance;
 	float  GyroAngle;
@@ -148,8 +150,10 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				break;
 				
 			case dAutoDrive:
-				m_drivePID->SetOutputRange(-m_maxSpeed, m_maxSpeed);
+				m_drivePID->SetOutputRange(-0.8, 0.8);
 				LastDistance = 0;
+				DoneFlag = false;
+				DoneCount = 0;
 				NoMoveCount = 0;
 				vDrive = vRotate = vStrafe = 0;
 				break;
@@ -187,32 +191,53 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			
 		case dAutoDrive:
 			Distance = EncoderAverage(m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
+//			
+//			if (fabs(m_targetDistance - Distance) <= 4.0) {
+//				sprintf(m_log, "At Target Distance=%6.1f	(Left=%6.1f	Right=%6.1f)", Distance,
+//						  m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
+//				m_event->WriteToLog(m_log);
+//				vReturn = true;
+//
+//			} else {
+//				vDrive = m_drivePID->Calculate(Distance);
+//				if(m_targetAngle != - 1) vRotate = m_rotatePID->Calculate(m_rotateGyro->GetAngle());
+//
+//				if(fabs(Distance) > 5.0){
+//					if(fabs(Distance - LastDistance) < 0.1){
+//						if(NoMoveCount < 5){
+//							NoMoveCount++;
+//							if(NoMoveCount == 5){
+//								sprintf(m_log, "No Movement Detected	(Distance=%6.1f)", Distance);
+//								m_event->WriteToLog(m_log);
+//							}
+//						}
+//					}else{
+//						NoMoveCount = 0;
+//					}
+//				}
+//			}
 			
-			if (fabs(m_targetDistance - Distance) <= 4.0) {
-				sprintf(m_log, "At Target Distance=%6.1f	(Left=%6.1f	Right=%6.1f)", Distance,
-						  m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
-				m_event->WriteToLog(m_log);
-				vReturn = true;
-
-			} else {
+			if(!DoneFlag) {
 				vDrive = m_drivePID->Calculate(Distance);
-				if(m_targetAngle != - 1) vRotate = m_rotatePID->Calculate(m_rotateGyro->GetAngle());
-
-				if(fabs(Distance) > 5.0){
-					if(fabs(Distance - LastDistance) < 0.1){
-						if(NoMoveCount < 5){
-							NoMoveCount++;
-							if(NoMoveCount == 5){
-								sprintf(m_log, "No Movement Detected	(Distance=%6.1f)", Distance);
-								m_event->WriteToLog(m_log);
-							}
-						}
-					}else{
-						NoMoveCount = 0;
+				if(DoneCount >0) {
+					if(Distance > 0) {
+						vDrive = -0.5;
+					} else {
+						vDrive = 0.5;
 					}
+					DoneCount--;
+					if(DoneCount <= 0) {
+						vDrive = 0;
+						DoneFlag = true;
+					}
+				} else if(fabs(Distance - m_targetDistance) < fabs(m_targetDistance) * 0.10) {
+					DoneCount = 5;
 				}
+			} else {
+				vDrive = 0;
+				vReturn = true;
 			}
-			
+
 			LastDistance = Distance;
 			
 			break;

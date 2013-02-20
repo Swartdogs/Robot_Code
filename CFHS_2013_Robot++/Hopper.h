@@ -21,7 +21,7 @@ public:
 	void  Disable();
 	void  Enable();
 	void  PELICANMOVE(bool pelicanStateEnabled);
-	int   Periodic(float joyValue, int *sharedSpace);
+	int   Periodic(float joyValue, int *sharedSpace, int *outsideRobot);
 	void  RELEASETHEFRISBEE();
 	void  SetTiltTarget(INT32 Target);
 	INT32 GetHopperPosition();

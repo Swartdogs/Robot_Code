@@ -1,9 +1,9 @@
 #include "DiskShooter.h"
 
-INT32 const c_shootTriggerPosition = 790;
-INT32 const c_shootDeadband = 20;
-INT32 const c_tensionDeadband = 5;
-INT32 const c_tensionRange = 150;			// 300
+INT32 const c_shootTriggerPosition = 790;  
+INT32 const c_shootDeadband = 20; 
+INT32 const c_tensionDeadband = 5; 
+INT32 const c_tensionRange = 150;	// 300
 INT32 const c_tensionZeroOffset = 250;
 INT32 const c_tiltDeadband = 5;
 INT32 const c_tiltRange = 330;
