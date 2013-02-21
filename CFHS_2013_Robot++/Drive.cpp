@@ -44,7 +44,7 @@ Drive::Drive(
 	m_rotatePID->SetInputRange(-360.0, 360.0);
 	m_rotatePID->SetOutputRange(-0.6, 0.6);
 	
-	m_drivePID = new PIDLoop(0.035, 0, 0);    	// 0.015, 0.001, 0	// 0.025  0.0001  0.3
+	m_drivePID = new PIDLoop(0.02, 0, 0);    	// 0.015, 0.001, 0	// 0.025  0.0001  0.3
 	m_drivePID->SetInputRange(-200, 200);
 	m_drivePID->SetOutputRange(-0.6, 0.6);
 
@@ -150,7 +150,7 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				break;
 				
 			case dAutoDrive:
-				m_drivePID->SetOutputRange(-0.8, 0.8);
+				m_drivePID->SetOutputRange(-0.6, 0.6);
 				LastDistance = 0;
 				DoneFlag = false;
 				DoneCount = 0;
@@ -221,9 +221,9 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				vDrive = m_drivePID->Calculate(Distance);
 				if(DoneCount >0) {
 					if(Distance > 0) {
-						vDrive = -0.5;
+						vDrive = -0.6;
 					} else {
-						vDrive = 0.5;
+						vDrive = 0.6;
 					}
 					DoneCount--;
 					if(DoneCount <= 0) {

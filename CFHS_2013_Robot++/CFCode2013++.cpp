@@ -221,6 +221,8 @@ public:
 				//fprintf(m_logFile, "Start Camera \n");
 			}
 		}
+		
+//		printf("Hopper Tilt=%d\n", m_hopper->GetHopperPosition());
 	}
 
 /*************************************** AUTONOMOUS ******************************************/
@@ -343,7 +345,7 @@ public:
 					if(m_autoStep[m_auto.StepIndex].Distance == 0) {
 						AutoStepDone = true;
 					} else if(m_autoStep[m_auto.StepIndex].PickupDistance != 0) {
-						m_hopper->SetTiltTarget(252);
+						m_hopper->SetTiltTarget(166);
 					}
 					break;
 	
@@ -360,7 +362,7 @@ public:
 				case actionPickupShot:
 					if ((autoPickupFlags & 1) == 1) {
 						if (m_sharedSpace == 1){
-							m_hopper->SetTiltTarget(130);
+							m_hopper->SetTiltTarget(166);
 							m_shootSeq = sMoveHopper;
 						} else {
 							m_shootSeq = sLoad;
@@ -796,11 +798,11 @@ public:
 				
 			} else if(m_buttonBox->GetRawButton(1)) {	
 				if (m_outsideRobot == 2) m_pickupMode = DiskPickup::pStore;
-				m_hopper->SetTiltTarget(375);							// Feeder load position
+				m_hopper->SetTiltTarget(260);							// Feeder load position
 			} else if (m_buttonBox->GetRawButton(2)) {
-				m_hopper->SetTiltTarget(250);							// Position for driving 
+				m_hopper->SetTiltTarget(166);							// Position for driving 
 			} else if (m_buttonBox->GetRawButton(3)) {
-				m_hopper->SetTiltTarget(5);                            // Position to get under the pyramid
+				m_hopper->SetTiltTarget(4);                            // Position to get under the pyramid
 				m_pickupMode = DiskPickup::pUnderPyramid;
 			}
 		}
@@ -810,23 +812,23 @@ public:
 		if(m_buttonBox->GetRawButton(7)) {
 			m_shooter->SetTiltTarget(139);							// Back Right shot mode
 			m_shooter->SetTensionTarget(80); 						// 247
-			m_hopper->SetTiltTarget(334);
+			m_hopper->SetTiltTarget(243);
 		} else if (m_buttonBox->GetRawButton(6)) {
 			m_shooter->SetTiltTarget(212);							// Front Center shot mode
 			m_shooter->SetTensionTarget(40);          				// 197
-			m_hopper->SetTiltTarget(327);
+			m_hopper->SetTiltTarget(212);
 		} else if (m_buttonBox->GetRawButton(5)) {
 			m_shooter->SetTiltTarget(204);							// Front Left shot mode // Could add another preset
 			m_shooter->SetTensionTarget(40);						// 222
-			m_hopper->SetTiltTarget(326);
+			m_hopper->SetTiltTarget(212);
 		} else if(m_tiltJoystick->GetRawButton(4)) {
 			m_shooter->SetTiltTarget(204);							// Front Left shot mode
 			m_shooter->SetTensionTarget(40);						// 222
-			m_hopper->SetTiltTarget(326);
+			m_hopper->SetTiltTarget(212);
 		} else if(m_tiltJoystick->GetRawButton(5)) {
 			m_shooter->SetTiltTarget(185);							// Front Right shot mode
 			m_shooter->SetTensionTarget(56);						// 223
-			m_hopper->SetTiltTarget(323);
+			m_hopper->SetTiltTarget(217);
 		}
 
 		if(m_tiltJoystick->GetRawButton(8) && m_tiltJoystick->GetRawButton(9)){ // Cancel Shoot Sequence
@@ -851,7 +853,7 @@ public:
 		//--------------------------Pickup Stuff------------------------------------------------------
 		
 		if(m_buttonBox->GetRawButton(11)) { // Deploy Pickup
-			m_hopper->SetTiltTarget(252);
+			m_hopper->SetTiltTarget(250);
 			m_pickupMode = DiskPickup::pDeployed;
 		} else if(m_buttonBox->GetRawButton(10)) { // Move Pickup to Store position
 			m_pickupMode = DiskPickup::pStore;

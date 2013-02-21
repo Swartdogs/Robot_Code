@@ -2,8 +2,8 @@
 #include "Hopper.h"
 
 INT32 const c_tiltDeadband = 5;
-INT32 const c_tiltSpan = 380;
-INT32 const c_tiltZeroOffset = 300;
+INT32 const c_tiltSpan = 251;
+INT32 const c_tiltZeroOffset = 622;
 INT32 const c_sharedSpaceLimit = 120;
 INT32 const c_outsideRobotLimit = 260;
 
