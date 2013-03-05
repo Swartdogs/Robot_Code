@@ -160,8 +160,7 @@ int DiskShooter::Periodic(float joyValue){
 	//                    2 = Shooter Tension completed
 	//                    4 = Shooter Arm ready for Load
 	//                    8 = Shooter Arm ready to Shoot
-	//                    16 = Disc Loaded
-	//                    32 = Shoot State is sIdle
+	//                   16 = Shoot State is sIdle
 	
 	static float 		tiltSpeed = 0.0;
 
@@ -255,7 +254,7 @@ int DiskShooter::Periodic(float joyValue){
 			
 			if (curShootPosition > c_shootTriggerPosition - 50) {
 				m_shootState = sReady;
-				shooterFlags += 12; // 8 + 4
+				shooterFlags += 12; 						// 8 + 4
 			} else {
 				m_shootState = sLoad;
 				if (curShootPosition > m_RELEASETHEFRISBEEPOSITION) shooterFlags += 4;
@@ -268,7 +267,9 @@ int DiskShooter::Periodic(float joyValue){
 			}else{
 				shootSpeed = 0;
 				m_shootState = sIdle;
-				printf("Shoot State = %d\n", m_shootState);
+
+				sprintf(m_log, "Shooter: Fire Disc  Tilt=%d  Tension=%d", curTiltPosition, curTensionPosition);
+				m_event->WriteToLog(m_log);
 			}
 			break;
 		
@@ -278,8 +279,7 @@ int DiskShooter::Periodic(float joyValue){
 	
 	m_shootMotor->Set(-shootSpeed);
 	
-	if (m_shootState == sReady) shooterFlags += 16;
-	if (m_shootState == sIdle) shooterFlags += 32;
+	if (m_shootState == sIdle) shooterFlags += 16;
 	
 	return shooterFlags;
 }

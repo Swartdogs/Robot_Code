@@ -5,6 +5,8 @@
 #include "Drive.h"
 
 float const c_rotateDeadband = 0.75;
+float const c_drivePID_P = 0.03;
+float const c_drivePID_D = 0.30;
 
 Drive::Drive(
 		UINT8 lfJagModule,		  UINT32 lfJagChannel,		// Left Front Jag
@@ -44,7 +46,7 @@ Drive::Drive(
 	m_rotatePID->SetInputRange(-360.0, 360.0);
 	m_rotatePID->SetOutputRange(-0.6, 0.6);
 	
-	m_drivePID = new PIDLoop(0.02, 0, 0);    	// 0.015, 0.001, 0	// 0.025  0.0001  0.3
+	m_drivePID = new PIDLoop(0.03, 0, 0);    		// 0.02, 0, 0
 	m_drivePID->SetInputRange(-200, 200);
 	m_drivePID->SetOutputRange(-0.6, 0.6);
 
@@ -114,16 +116,16 @@ double Drive::GetDistance(){
 	return EncoderAverage(m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
 }
 
-bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, float JoyRotate){	
+bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, float JoyRotate){
+	
 	static int			AimCount = 0;
 	static double		LastDistance = 0;
-	static int			NoMoveCount = 0;
 	static DriveRunMode RunModeNow = dStop;
 	static float		vDrive = 0;
 	static float		vRotate = 0;
 	static float		vStrafe = 0;
-	static bool 		DoneFlag = false;
-	static int 	        DoneCount = 0;
+	static bool         BrakeFlag = false;
+	static bool         PeakFlag = false;
 	
 	double Distance;
 	float  GyroAngle;
@@ -151,10 +153,9 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				
 			case dAutoDrive:
 				m_drivePID->SetOutputRange(-0.6, 0.6);
+				m_drivePID->SetPID(c_drivePID_P, 0, 0);
 				LastDistance = 0;
-				DoneFlag = false;
-				DoneCount = 0;
-				NoMoveCount = 0;
+				BrakeFlag = PeakFlag = false;
 				vDrive = vRotate = vStrafe = 0;
 				break;
 				
@@ -191,55 +192,36 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			
 		case dAutoDrive:
 			Distance = EncoderAverage(m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
-//			
-//			if (fabs(m_targetDistance - Distance) <= 4.0) {
-//				sprintf(m_log, "At Target Distance=%6.1f	(Left=%6.1f	Right=%6.1f)", Distance,
-//						  m_lEncoder->GetDistance(), m_rEncoder->GetDistance());
-//				m_event->WriteToLog(m_log);
-//				vReturn = true;
-//
-//			} else {
-//				vDrive = m_drivePID->Calculate(Distance);
-//				if(m_targetAngle != - 1) vRotate = m_rotatePID->Calculate(m_rotateGyro->GetAngle());
-//
-//				if(fabs(Distance) > 5.0){
-//					if(fabs(Distance - LastDistance) < 0.1){
-//						if(NoMoveCount < 5){
-//							NoMoveCount++;
-//							if(NoMoveCount == 5){
-//								sprintf(m_log, "No Movement Detected	(Distance=%6.1f)", Distance);
-//								m_event->WriteToLog(m_log);
-//							}
-//						}
-//					}else{
-//						NoMoveCount = 0;
-//					}
-//				}
-//			}
-			
-			if(!DoneFlag) {
-				vDrive = m_drivePID->Calculate(Distance);
-				if(DoneCount >0) {
-					if(Distance > 0) {
-						vDrive = -0.6;
-					} else {
-						vDrive = 0.6;
-					}
-					DoneCount--;
-					if(DoneCount <= 0) {
-						vDrive = 0;
-						DoneFlag = true;
-					}
-				} else if(fabs(Distance - m_targetDistance) < fabs(m_targetDistance) * 0.10) {
-					DoneCount = 5;
+
+			if (!BrakeFlag) {
+				if (fabs(m_targetDistance - Distance) < fabs(m_targetDistance) * .15) {
+					BrakeFlag = true;
+					m_drivePID->SetPID(c_drivePID_P, 0, c_drivePID_D);
+					sprintf(m_log, "DrivePID: Brake  Distance=%6.1f", Distance);
+					m_event->WriteToLog(m_log);
 				}
-			} else {
-				vDrive = 0;
-				vReturn = true;
 			}
 
-			LastDistance = Distance;
+			if (PeakFlag) {
+				vDrive = m_drivePID->Calculate(Distance);
+			} else {
+				PeakFlag = RampSpeed(&vDrive, m_drivePID->Calculate(Distance));
+			}
 			
+			if (m_targetAngle != -1) vRotate = m_rotatePID->Calculate(m_rotateGyro->GetAngle());
+	
+			Distance = fabs(Distance);
+
+			if (Distance > fabs(m_targetDistance) / 2) {
+				if (Distance - LastDistance <= 0) {
+					sprintf(m_log, "DrivePID: Done  Distance=%6.1f  PWM=%5.3f", Distance, vDrive);
+					m_event->WriteToLog(m_log);
+					vDrive = vRotate = 0;
+					vReturn = true;
+				}
+			}
+			
+			LastDistance = Distance;
 			break;
 			
 		case dAutoRotate:
@@ -250,8 +232,8 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 				if(AimCount < 5){
 					AimCount++;
 					if(AimCount == 5){
-						//sprintf(m_log, "Turn Completed: Gyro=%5.1f \n", GyroAngle);
-						//m_event->WriteToLog(m_log);
+						sprintf(m_log, "Turn Completed: Gyro=%5.1f \n", GyroAngle);
+						m_event->WriteToLog(m_log);
 						vRotate = 0;
 						vReturn = true;
 					}
@@ -262,8 +244,8 @@ bool Drive::Periodic(DriveRunMode RunMode, float JoyDrive, float JoyStrafe, floa
 			break;
 			
 		default:;
-
 	}
+	
 	MecanumDrive(vDrive, vStrafe, vRotate, driveAll);
 	
 	return vReturn;
@@ -321,17 +303,11 @@ float Drive::Limit(float Value){
 					 return Value;
 }
 
-float Drive::Maximum(float Value1, float Value2){
-	if(Value1 > Value2) return Value1;
-						return Value2;
-}
-
 void Drive::MecanumDrive(float Drive, float Strafe, float Rotate, EnumDrive DriveMode){
 	int i = 0;
 	float MotorAbs;
 	float MotorPwm[4];
 	float MotorMax = 0;
-	SmartDashboard *Dash;
 	
 	MotorPwm[0] = Rotate + Drive + Strafe;
 	MotorPwm[1] = Rotate + Drive - Strafe;
@@ -367,16 +343,41 @@ void Drive::MecanumDrive(float Drive, float Strafe, float Rotate, EnumDrive Driv
 			m_motorRR->Set(MotorPwm[3]);
 			break;
 	}
-	
-	Dash->PutNumber("Front Left", MotorPwm[0]);
-	Dash->PutNumber("Rear Left", MotorPwm[1]);
-	Dash->PutNumber("Front Right", MotorPwm[2]);
-	Dash->PutNumber("Rear Right", MotorPwm[3]);
 }
 
+bool Drive::RampSpeed(float *curSpeed, float pidSpeed) {
 
-bool Drive::SameSignAndGreater(float Value1, float Value2){
-	if(Value1 > 0 && Value2 < 0) return false;
-	if(Value1 < 0 && Value2 > 0) return false;
-	return (fabs(Value1) >= fabs(Value2));
+	float Direction;
+	float Speed;
+	bool  vReturn = false;
+	
+	if (pidSpeed < 0) {									// Determine direction
+		Direction = -1.0;
+	} else {
+		Direction = 1.0;
+	}
+	
+	pidSpeed = fabs(pidSpeed);							// Use absolute Speed values 
+	Speed = fabs(*curSpeed);								
+
+	if (Speed == 0.0) {									// If stopped, set speed to minimum value
+		if (pidSpeed <= 0.2) {
+			Speed = pidSpeed;
+			vReturn = true;
+		} else {
+			Speed = 0.2;						
+		}
+
+	} else {
+		Speed = Speed + 0.025;
+		
+		if (Speed >= pidSpeed){
+			Speed = pidSpeed;
+			vReturn = true;
+		}
+	}
+	
+	*curSpeed = Speed * Direction;						// Apply direction and set curSpeed
+
+	return vReturn;							
 }

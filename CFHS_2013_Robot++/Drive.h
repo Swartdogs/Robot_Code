@@ -68,10 +68,8 @@ private:
     float	ApplyDeadband(float RawValue, float Deadband);
     double	EncoderAverage(double Value1, double Value2);
     float	Limit(float Value);
-    float	Maximum(float Value1, float Value2);
     void	MecanumDrive(float Drive, float Strafe, float Rotate, EnumDrive DriveMode);
-    bool	SameSignAndGreater(float Value1, float Value2);
-    float   RampSpeed(float Speed, float MaxSpeed);
+    bool    RampSpeed(float *curSpeed, float pidSpeed);
 };
 
 #endif

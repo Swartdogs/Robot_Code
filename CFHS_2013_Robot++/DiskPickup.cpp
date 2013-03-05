@@ -54,6 +54,9 @@ DiskPickup::DiskPickup(
 	m_wristPot = new AnalogChannel(wristPotModule, wristPotChannel);
 	m_wristPot->SetAverageBits(2);
 	m_wristPot->SetOversampleBits(0);
+
+	m_event = eventHandler;
+	m_eventSourceId = eventSourceId;
 	
 	m_armTiltTarget = m_armPot->GetAverageValue() - c_armZeroOffset;
 	m_wristTiltTarget = m_wristPot->GetAverageValue() - c_wristZeroOffset;
@@ -73,8 +76,6 @@ DiskPickup::DiskPickup(
 	
 	m_wristPID->SetInputRange(0, c_wristRange);
 	m_wristPID->SetOutputRange(-0.8, 0.8);
-	
-	m_event = eventHandler;
 }
 
 DiskPickup::~DiskPickup(){
@@ -123,19 +124,23 @@ void DiskPickup::FeedSafety(){
 int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace, int *outsideRobot) {
 
 	// Pickup Flags:		1 = Frisbee in pickup
+	//					    2 = Pickup is Deployed
 	
-	INT32					curArmPosition = c_armZeroOffset - m_armPot->GetAverageValue();
-	INT32   				curWristPosition = c_wristZeroOffset - m_wristPot->GetAverageValue();
-	int                     pickupFlags = 0;
 	static float			armTiltSpeed = 0.0;
 	static float			wristTiltSpeed = 0.0;
 	static PickupRunMode	runModeNow = pArgggggggggggggh;
 	static bool             runPickupMotor = false;
+    static int              rollerOffDelay = 0;
+    
+	INT32					curArmPosition = c_armZeroOffset - m_armPot->GetAverageValue();
+	INT32   				curWristPosition = c_wristZeroOffset - m_wristPot->GetAverageValue();
+	int                     pickupFlags = 0;
 	
 //-------------------------------Set Arm/Wrist-----------------------------
 	
 	if(abs(m_armTiltTarget - curArmPosition) <= c_deadband && abs(m_wristTiltTarget - curWristPosition) <= c_deadband) { //Choosing when to run pickup motor
 		runPickupMotor = (runModeNow == pDeployed || runModeNow == pLoad);
+		if (runModeNow == pDeployed) pickupFlags += 2;
 	}
 	
 	if(runPickupMotor) {
@@ -146,14 +151,21 @@ int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace, int *outsideR
 				m_pickupMotor->Set(Relay::kOff);
 				*RunMode = pStore;
 				runPickupMotor = false;
+				m_event->RaiseEvent(m_eventSourceId, 1);		// Frisbee in deployed pickup
+				m_event->WriteToLog("Pickup: Disc in Pickup");
 			}
+			
 		} else if(runModeNow == pLoad) {
 			if(m_diskSensor->Get() == 0){
 				m_pickupMotor->Set(Relay::kReverse);
+				rollerOffDelay = 10;
+			} else if (rollerOffDelay > 0) {
+				rollerOffDelay--;
 			} else {
 				m_pickupMotor->Set(Relay::kOff);
 				*RunMode = pStore;
 				runPickupMotor = false;
+				m_event->WriteToLog("Pickup: Disc to Shooter");
 			}
 		}
 	}
@@ -167,21 +179,25 @@ int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace, int *outsideR
 			case pLoad:
 				m_armTiltTarget = c_armLoad;
 				m_wristTiltTarget = c_wristLoad;
+				m_event->WriteToLog("Pickup: Move to Shooter");
 				break;
 				
 			case pStore:
 				m_armTiltTarget = c_armStore;
 				m_wristTiltTarget = c_wristStore;
+				m_event->WriteToLog("Pickup: Move to Store");
 				break;
 				
 			case pDeployed:
 				m_armTiltTarget = c_armDeployed;
 				m_wristTiltTarget = c_wristDeployed;
+				m_event->WriteToLog("Pickup: Move to Deploy");
 				break;
 				
 			case pUnderPyramid:
 				m_armTiltTarget = c_armPyramid;
 				m_wristTiltTarget = c_wristPyramid;
+				m_event->WriteToLog("Pickup: Move to Pyramid");
 				break;
 				
 			default:;
@@ -193,7 +209,7 @@ int DiskPickup::Periodic(PickupRunMode *RunMode, int *sharedSpace, int *outsideR
 	
 	float Setpoint = 0;
 	
-	if(curArmPosition < c_clearBumper) { //if arm hasn't cleared the bumper
+	if(curArmPosition < c_clearBumper) { 								//if arm hasn't cleared the bumper
 		Setpoint = curArmPosition / 2.0;
 		m_wristPID->SetSetpoint((float)Setpoint);
 	} else {

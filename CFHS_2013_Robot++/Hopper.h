@@ -20,7 +20,6 @@ public:
 	
 	void  Disable();
 	void  Enable();
-	void  PELICANMOVE(bool pelicanStateEnabled);
 	int   Periodic(float joyValue, int *sharedSpace, int *outsideRobot);
 	void  RELEASETHEFRISBEE();
 	void  SetTiltTarget(INT32 Target);
@@ -41,7 +40,6 @@ private:
 	UINT8		   m_eventSourceId;
 	INT32		   m_tiltTarget;
 	HopState	   m_hopState;
-	bool		   m_pelicanStateEnabled;
 	bool           m_newTiltTarget;
 	bool           m_frisbeeBeforeGate;
 };

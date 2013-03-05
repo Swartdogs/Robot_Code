@@ -46,13 +46,15 @@ private:
 	DigitalInput    *m_diskSensor;
 	AnalogChannel   *m_armPot;
 	AnalogChannel   *m_wristPot;
-	PickupRunMode    m_runMode;
 	PIDLoop			*m_armPID;
 	PIDLoop			*m_wristPID;
+	Events 		    *m_event;
+
 	INT32			 m_armTiltTarget;
 	INT32			 m_wristTiltTarget;
-	Events 		    *m_event;
+	UINT8		     m_eventSourceId;
 	char   		     m_log[100];
+	PickupRunMode    m_runMode;
 };
 
 #endif

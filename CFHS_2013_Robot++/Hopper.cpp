@@ -37,7 +37,6 @@ Hopper::Hopper(UINT8 	hopperGateModule,   UINT32 hopperGateChannel,
 	m_newTiltTarget = true;
 	m_hopState =hEmpty;
 	m_frisbeeBeforeGate = false;
-	m_pelicanStateEnabled = false;
 }
 
 Hopper::~Hopper(){
@@ -74,23 +73,14 @@ INT32 Hopper::GetHopperPosition() {
 	return m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
 }
 
-void Hopper::PELICANMOVE(bool pelicanStateEnabled){
-
-	if(m_beforeSensor->Get() == 0){				// Frisbee before gate
-		m_pelicanStateEnabled = false;
-	}else{
-		m_pelicanStateEnabled = pelicanStateEnabled;
-	}
-}
-
 int Hopper::Periodic(float joyValue, int *sharedSpace, int *outsideRobot){
 
 	// hopperFlags:  Bit 1 = Hopper Tilt Completed
 	// 					 2 = Frisbee Stored (after sensor)
-	//                   4 = Frisbee Loaded
-	//                   8 = Frisbee Loading or stored 
+	//                   4 = Frisbee Moved to Shooter
+	//                   8 = Frisbee Loading or Stored 
+	//                  16 = Frisbee waiting (before sensor)
 	
-	static int		pelicanCounter = 0;
 	static float	tiltSpeed = 0.0;
 	
 	INT32			curTiltPosition = m_tiltPot->GetAverageValue() - c_tiltZeroOffset;
@@ -111,7 +101,6 @@ int Hopper::Periodic(float joyValue, int *sharedSpace, int *outsideRobot){
 	}
 	
 	if(joyValue != 0){
-		m_pelicanStateEnabled = false;
 		m_tiltTarget = curTiltPosition;
 		m_newTiltTarget = true;
 		
@@ -128,24 +117,7 @@ int Hopper::Periodic(float joyValue, int *sharedSpace, int *outsideRobot){
 			printf("Hopper Tilt=%d \n", curTiltPosition);
 		}
 		
-	}else if(m_pelicanStateEnabled == true && m_beforeSensor->Get() == 1){  // Check for Pelican Mode
-		pelicanCounter++;
-		
-		if(pelicanCounter <= 10){
-			tiltSpeed = 1.0;
-		}else if(pelicanCounter <= 15){
-			tiltSpeed = 0.0;
-		}else if(pelicanCounter <= 25){
-			tiltSpeed = -1.0;
-		}else if(pelicanCounter <= 30){
-			tiltSpeed = 0;
-		}else{
-			pelicanCounter = 0;
-		}
-	
 	}else{
-		m_pelicanStateEnabled = false;
-		
 		if (m_newTiltTarget) {
 			m_newTiltTarget = false;
 			m_tiltPID->Reset();
@@ -168,7 +140,6 @@ int Hopper::Periodic(float joyValue, int *sharedSpace, int *outsideRobot){
 	}
 	
 	m_tiltMotor->Set(tiltSpeed);
-	
 	
 	switch(m_hopState){
 		case hEmpty:
@@ -204,6 +175,7 @@ int Hopper::Periodic(float joyValue, int *sharedSpace, int *outsideRobot){
 	
 	if (m_afterSensor->Get() == 0) hopperFlags += 2;
 	if (m_hopState == hLoad || m_hopState == hStore) hopperFlags += 8;
+	if (m_beforeSensor->Get() == 0) hopperFlags += 16;
 	
 	if (*sharedSpace == 0 && curTiltPosition < (c_sharedSpaceLimit + c_tiltDeadband)){
 		*sharedSpace = 1;
