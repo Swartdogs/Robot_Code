@@ -135,12 +135,19 @@ void Drive::ExecuteDistance() {
 
 void Drive::ExecuteRotate() {
 	float rotateSpeed = m_rotatePID->Calculate(rotateSpeed);
-	float curAngle = m_gyro->Get();
+	float curAngle = m_gyro->GetAngle();
 	static int counter = 5;
 	
-	DriveArcade(0, rotate);
+	DriveArcade(0, rotateSpeed);
 	
-	if(curAngle);
+	if(fabs(curAngle) <= 1); {
+		if(counter > 0) {
+			counter--;
+		} else {
+			m_onTarget = true;
+			counter = 5;
+		}
+	}
 }
 
 void Drive::SetPID(float kP, float kI, float kD, bool drive) {

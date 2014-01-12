@@ -5,9 +5,12 @@
 
 class OI {
 private:
-
+	Joystick* driveJoystick;
 public:
 	OI();
+	float GetDriveX();
+	float GetDriveY();
+	float GetDriveZ();
 };
 
 #endif
