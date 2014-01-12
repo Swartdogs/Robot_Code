@@ -1,5 +1,6 @@
 #include "Drive.h"
 #include "../Robotmap.h"
+#include "../Commands/DriveWithJoystick.h"
 #include <math.h>
 
 Drive::Drive() : Subsystem("Drive") {
@@ -41,6 +42,7 @@ Drive::Drive() : Subsystem("Drive") {
 void Drive::InitDefaultCommand() {
 	// Set the default command for a subsystem here.
 	//SetDefaultCommand(new MySpecialCommand());
+	SetDefaultCommand(new DriveWithJoystick());
 }
 
 bool Drive::OnTarget() {

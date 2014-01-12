@@ -386,6 +386,12 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/PIDControl.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Robotmap.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/DriveWithJoystick.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../CommandBase.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../Subsystems/Drive.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../OI.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
   C:/WindRiver/vxworks-6.3/target/h/math.h
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/Drive.h:
@@ -1157,5 +1163,17 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h:
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/PIDControl.h:
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Robotmap.h:
+
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/DriveWithJoystick.h:
+
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../CommandBase.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h:
+
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../Subsystems/Drive.h:
+
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../OI.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
 
 C:/WindRiver/vxworks-6.3/target/h/math.h:
