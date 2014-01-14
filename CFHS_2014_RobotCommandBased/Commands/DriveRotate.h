@@ -9,6 +9,7 @@
 class DriveRotate: public CommandBase {
 public:
 	DriveRotate(float target_angle, bool reset_gyro);
+	
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();

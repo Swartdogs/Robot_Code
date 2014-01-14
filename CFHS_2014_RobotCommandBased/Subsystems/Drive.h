@@ -34,6 +34,8 @@ private:
 	float    m_targetAngle;
 	float    m_maxSpeed;
 	
+	bool m_brakeApplied;
+	
 	double EncoderAverage(double val1, double val2);
 	bool RampSpeed(float* curSpeed, float pidSpeed);
 	

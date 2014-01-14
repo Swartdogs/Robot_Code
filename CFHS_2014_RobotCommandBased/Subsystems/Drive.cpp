@@ -42,6 +42,7 @@ Drive::Drive() : Subsystem("Drive") {
 void Drive::InitDefaultCommand() {
 	// Set the default command for a subsystem here.
 	//SetDefaultCommand(new MySpecialCommand());
+	
 	SetDefaultCommand(new DriveWithJoystick());
 }
 
@@ -67,6 +68,8 @@ void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncode
 	m_drivePID->SetPID(0.025, 0, 0);
 	
 	m_onTarget = m_useGyro = false;
+	
+	m_brakeApplied = false;
 }
 
 void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncoders, float targetAngle, bool resetGyro) {
@@ -114,13 +117,25 @@ void Drive::DriveArcade(float move, float rotate) {
 
 void Drive::ExecuteDistance() {
 	
+	const float brake_threshold = 0.15f;
+	
 	float moveSpeed = 0;
 	float rotateSpeed = 0;
-	float curDistance = 0;
-
+	float curDistance = EncoderAverage(m_leftEncoder->Get(), m_rightEncoder->Get());
+	
+	if (!m_brakeApplied){
+		// Brake is not applied.
+		// We check to see if it needs to be.
+		
+		if (fabs(m_targetDistance) - fabs(curDistance) <= fabs(m_targetDistance) * brake_threshold) {
+			m_brakeApplied = true;
+			m_drivePID->SetPID(0.025f,0.0f,0.3f);
+		}
+		
+	}
+	
 	moveSpeed = m_drivePID->Calculate(m_targetDistance);		
 	rotateSpeed = m_rotatePID->Calculate(m_targetAngle);
-	curDistance = EncoderAverage(m_leftEncoder->Get(), m_rightEncoder->Get());
 	
 	if(m_useGyro) {
 		DriveArcade(moveSpeed, rotateSpeed);
