@@ -388,16 +388,12 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Timer.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/RobotBase.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h \
-  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/ExampleCommand.h \
-  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../CommandBase.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h \
-  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/Drive.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/CommandBase.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/Drive.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
-  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/PIDControl.h \
-  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../OI.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
-  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/CommandBase.h
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/PIDControl.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/OI.h
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
 
@@ -1173,22 +1169,14 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/RobotBase.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h:
 
-C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/ExampleCommand.h:
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/CommandBase.h:
 
-C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../CommandBase.h:
-
-C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h:
-
-C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/Drive.h:
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/Drive.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
 
-C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/PIDControl.h:
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/PIDControl.h:
 
-C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../OI.h:
-
-C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
-
-C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/CommandBase.h:
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/OI.h:

@@ -389,7 +389,6 @@
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/PIDControl.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/OI.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
-  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/ExampleSubsystem.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Scheduler.h
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/CommandBase.h:
@@ -1167,7 +1166,5 @@ C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/PIDControl.h:
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/OI.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
-
-C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/ExampleSubsystem.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Scheduler.h:

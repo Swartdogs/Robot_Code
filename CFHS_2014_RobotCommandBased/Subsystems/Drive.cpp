@@ -123,7 +123,7 @@ void Drive::ExecuteDistance() {
 	float rotateSpeed = 0;
 	float curDistance = EncoderAverage(m_leftEncoder->Get(), m_rightEncoder->Get());
 	
-	if (!m_brakeApplied){
+	if (!m_brakeApplied) {
 		// Brake is not applied.
 		// We check to see if it needs to be.
 		
