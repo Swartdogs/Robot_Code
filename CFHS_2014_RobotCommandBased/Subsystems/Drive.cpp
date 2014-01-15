@@ -207,6 +207,35 @@ double EncoderAverage(double val1, double val2) {
 								  return (val1+val2)/2;
 }
 
-bool RampSpeed(float* curSpeed, float pidSpeed) {
-	return true;
+bool RampSpeed(float& curSpeed, float pidSpeed) {
+	float direction;
+	float speed;
+	bool vReturn = false;
+	
+	if (pidSpeed < 0) {
+		direction = -1.0;
+	} else {
+		direction = 1.0;
+	}
+	
+	pidSpeed = fabs(pidSpeed);
+	speed = fabs(curSpeed);
+	
+	if(speed == 0.0) {
+		if (pidSpeed <= 0.2) {
+			speed = pidSpeed;
+			vReturn = true;
+		} else {
+			speed = speed + 0.03;
+			
+			if (speed >= pidSpeed) {
+				speed = pidSpeed;
+				vReturn = true;
+			}
+		}
+	}
+		
+	pidSpeed = speed * direction;
+				
+	return vReturn;
 }

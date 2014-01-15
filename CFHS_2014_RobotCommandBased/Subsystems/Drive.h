@@ -37,7 +37,7 @@ private:
 	bool m_brakeApplied;
 	
 	double EncoderAverage(double val1, double val2);
-	bool RampSpeed(float* curSpeed, float pidSpeed);
+	bool RampSpeed(float& curSpeed, float pidSpeed);
 	
 public:
 	Drive();
