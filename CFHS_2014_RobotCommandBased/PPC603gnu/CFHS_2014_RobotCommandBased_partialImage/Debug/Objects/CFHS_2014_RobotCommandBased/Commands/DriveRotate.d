@@ -388,6 +388,9 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/ColorImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/PIDControl.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/FindTarget.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../OI.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h
 
@@ -1164,6 +1167,12 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/ColorImage.h:
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h:
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/PIDControl.h:
+
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../Subsystems/FindTarget.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Commands/../OI.h:
 

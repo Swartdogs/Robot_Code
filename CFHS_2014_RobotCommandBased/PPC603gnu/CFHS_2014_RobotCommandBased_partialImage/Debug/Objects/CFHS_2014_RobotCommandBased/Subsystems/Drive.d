@@ -390,6 +390,11 @@
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../CommandBase.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../Subsystems/Drive.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../Subsystems/FindTarget.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../OI.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
   C:/WindRiver/vxworks-6.3/target/h/math.h
@@ -1171,6 +1176,16 @@ C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../Com
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h:
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../Subsystems/Drive.h:
+
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../Subsystems/FindTarget.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/../Commands/../OI.h:
 
