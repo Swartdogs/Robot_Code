@@ -4,6 +4,7 @@
 #include "Commands/Command.h"
 #include "Subsystems/Drive.h"
 #include "Subsystems/FindTarget.h"
+#include "Subsystems/FrontPickup.h"
 #include "OI.h"
 
 
@@ -20,7 +21,8 @@ public:
 	// Create a single static instance of all of your subsystems
 	static Drive* drive;
 	static FindTarget* findTarget;
-	static OI *oi;
+	static OI* oi;
+	static FrontPickup* frontPickup;
 };
 
 #endif

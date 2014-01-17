@@ -396,6 +396,7 @@
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/FindTarget.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
+  C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/FrontPickup.h \
   C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/OI.h
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
@@ -1187,5 +1188,7 @@ C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/FindTarget.h:
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
+
+C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/Subsystems/FrontPickup.h:
 
 C:/WindRiver/workspace/CFHS_2014_RobotCommandBased/OI.h:

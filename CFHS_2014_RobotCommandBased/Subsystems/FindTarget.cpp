@@ -132,7 +132,7 @@ void FindTarget::FindOne() {
 	ColorImage* cameraImage = m_camera->GetImage();
 	printf("GetImage Time=%f\n", GetClock() * 1000 - StartTime);
 	
-	BinaryImage* filterImage = cameraImage->ThresholdHSL(50, 120, 70, 255, 70, 255);
+	BinaryImage* filterImage = cameraImage->ThresholdHSL(10, 120, 70, 255, 70, 255);
 	printf("Color Threshold Time=%f\n", GetClock() * 1000 - StartTime);
 	
 	ParticleFilterCriteria2  filterCriteria[] = {
@@ -161,9 +161,9 @@ void FindTarget::FindOne() {
 					printf("%d: Aspect Ratio=%f\n", i, aspectRatio);
 					
 					if (par->boundingRect.height > par->boundingRect.width) {
-						aspectRatio = fabs(1.0 - aspectRatio / 8); 
+						aspectRatio = fabs(aspectRatio / 8); 
 						
-						if (aspectRatio < 0.4) {
+						if (aspectRatio > 0.6) {
 							if (!vFound || fabs(par->center_mass_x_normalized) < fabs(vTarget.centerX)) {
 								vTarget.centerX = par->center_mass_x_normalized;
 								vTarget.rectHeight = par->boundingRect.height;
@@ -176,9 +176,9 @@ void FindTarget::FindOne() {
 							}
 						}
 					} else {
-						aspectRatio = fabs(1.0 - aspectRatio / 5.875);
+						aspectRatio = fabs(aspectRatio / 5.875);
 								
-						if (aspectRatio < 0.4) {
+						if (aspectRatio > 0.6) {
 							hTarget[hCount].centerX = par->center_mass_x_normalized;
 							hTarget[hCount].rectHeight = par->boundingRect.height;
 							hTarget[hCount].rectLeft = par->boundingRect.left;
@@ -198,7 +198,7 @@ void FindTarget::FindOne() {
 		delete parReports;
 
 		if (vFound) {
-			double distance = 11400 / min((double)vTarget.rectHeight, vTarget.rectLong);
+			double distance = 10000 / min((double)vTarget.rectHeight, vTarget.rectLong);
 			
 			for (int i = 0; i < hCount; i++) {
 				if (max(vTarget.rectShort, hTarget[i].rectShort) / min(vTarget.rectShort, hTarget[i].rectShort) < 1.5) {

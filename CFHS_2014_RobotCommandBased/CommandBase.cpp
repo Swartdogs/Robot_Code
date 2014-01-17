@@ -11,6 +11,7 @@ CommandBase::CommandBase() : Command() {
 Drive* CommandBase::drive = NULL;
 OI* CommandBase::oi = NULL;
 FindTarget* CommandBase::findTarget = NULL;
+FrontPickup* CommandBase::frontPickup = NULL;
 
 void CommandBase::init() {
     // Create a single static instance of all of your subsystems. The following
@@ -18,4 +19,5 @@ void CommandBase::init() {
 	drive = new Drive();
 	oi = new OI();
 	findTarget = new FindTarget();
+	frontPickup = new FrontPickup();
 }
