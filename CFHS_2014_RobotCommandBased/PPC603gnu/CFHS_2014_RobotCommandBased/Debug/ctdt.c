@@ -11,6 +11,8 @@ void _GLOBAL__I__Z20FRC_userClassFactoryv();
 
 void _GLOBAL__I__ZN10FindTargetC2Ev();
 
+void _GLOBAL__I__ZN11BallShooterC2Ev();
+
 void _GLOBAL__I__ZN11CommandBaseC2EPKc();
 
 void _GLOBAL__I__ZN11DriveRotateC2Efb();
@@ -98,6 +100,7 @@ void (*_ctors[])() =
     {
     _GLOBAL__I__Z20FRC_userClassFactoryv,
     _GLOBAL__I__ZN10FindTargetC2Ev,
+    _GLOBAL__I__ZN11BallShooterC2Ev,
     _GLOBAL__I__ZN11CommandBaseC2EPKc,
     _GLOBAL__I__ZN11DriveRotateC2Efb,
     _GLOBAL__I__ZN11FrontPickupC2Ev,
@@ -145,6 +148,8 @@ void (*_ctors[])() =
 void _GLOBAL__D__Z20FRC_userClassFactoryv();
 
 void _GLOBAL__D__ZN10FindTargetC2Ev();
+
+void _GLOBAL__D__ZN11BallShooterC2Ev();
 
 void _GLOBAL__D__ZN11CommandBaseC2EPKc();
 
@@ -223,6 +228,7 @@ void (*_dtors[])() =
     {
     _GLOBAL__D__Z20FRC_userClassFactoryv,
     _GLOBAL__D__ZN10FindTargetC2Ev,
+    _GLOBAL__D__ZN11BallShooterC2Ev,
     _GLOBAL__D__ZN11CommandBaseC2EPKc,
     _GLOBAL__D__ZN11DriveRotateC2Efb,
     _GLOBAL__D__ZN11FrontPickupC2Ev,
