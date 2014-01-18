@@ -47,7 +47,7 @@ void Drive::InitDefaultCommand() {
 }
 
 bool Drive::OnTarget() {
-	return true;
+	return m_onTarget;
 }
 
 void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncoders) {
@@ -68,16 +68,12 @@ void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncode
 	m_drivePID->SetPID(0.025, 0, 0);
 	
 	m_onTarget = m_useGyro = false;
-	
 	m_brakeApplied = false;
 }
 
 void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncoders, float targetAngle, bool resetGyro) {
 	InitDistance(targetDistance, maxSpeed, resetEncoders);
-	
 	InitRotate(targetAngle, resetGyro);
-	
-	m_onTarget = false;
 	m_useGyro = true;
 }
 
@@ -87,8 +83,8 @@ void Drive::InitRotate(float targetAngle, bool resetGyro) {
 	}
 	
 	m_targetAngle = targetAngle;
-	
 	m_rotatePID->SetSetpoint(m_targetAngle);
+	m_onTarget = false;
 }
 
 void Drive::DriveArcade(float move, float rotate) {

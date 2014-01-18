@@ -13,7 +13,8 @@
  */
 class FindTarget: public Subsystem {
 private:
-	enum WhichTarget {wtUnknown, wtLeft, wtRight};
+	typedef enum {iStart, iGetImage, iFilterImage, iParticleFilter, iImageAnalysis} FindStep;
+	typedef enum {wtUnknown, wtLeft, wtRight} WhichTarget;
 
 	struct TargetData {
 		double		centerX;
@@ -36,28 +37,20 @@ private:
 
 	AxisCamera*		m_camera;
 	TargetReport    m_report[8];
+	FindStep		m_findStep;
 	int				m_horizontal[8];
 	int				m_horizontalCount;
 	int				m_vertical[8];
 	int				m_verticalCount;
-	
-	bool foundHotTarget;
-	
-	void Arcade1(float move, float rotate, float& left, float& right);
-	void Arcade2(float move, float rotate, float& left, float& right);
+	bool 			m_foundHotTarget;
 	
 public:
-	
-	typedef enum {iIdle, iGetImage, iFilterImage, iParticleFilter, iImageAnalysis} ImageProcessStep;
-	
 	FindTarget();
 	void InitDefaultCommand();
 	
-	bool PeriodicFind();
-	void Find();
-	void FindOne();
+	void Init();
+	bool IsFinished();
 	void StartCamera(const char* cameraIP);
-	void DriveTest(float move, float rotate);
 	bool GetHotTarget();
 };
 

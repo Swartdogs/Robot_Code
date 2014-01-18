@@ -19,17 +19,11 @@ void _GLOBAL__I__ZN11DriveRotateC2Efb();
 
 void _GLOBAL__I__ZN11FrontPickupC2Ev();
 
-void _GLOBAL__I__ZN12VisionTargetC2Ev();
-
 void _GLOBAL__I__ZN13DriveDistanceC2Edfb();
 
 void _GLOBAL__I__ZN13FindHotTargetC2Ev();
 
-void _GLOBAL__I__ZN14ExampleCommandC2Ev();
-
 void _GLOBAL__I__ZN14FrontPickupRunC2Ev();
-
-void _GLOBAL__I__ZN16ExampleSubsystemC2Ev();
 
 void _GLOBAL__I__ZN17DriveWithJoystickC2Ev();
 
@@ -104,12 +98,9 @@ void (*_ctors[])() =
     _GLOBAL__I__ZN11CommandBaseC2EPKc,
     _GLOBAL__I__ZN11DriveRotateC2Efb,
     _GLOBAL__I__ZN11FrontPickupC2Ev,
-    _GLOBAL__I__ZN12VisionTargetC2Ev,
     _GLOBAL__I__ZN13DriveDistanceC2Edfb,
     _GLOBAL__I__ZN13FindHotTargetC2Ev,
-    _GLOBAL__I__ZN14ExampleCommandC2Ev,
     _GLOBAL__I__ZN14FrontPickupRunC2Ev,
-    _GLOBAL__I__ZN16ExampleSubsystemC2Ev,
     _GLOBAL__I__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__I__ZN24FrontPickupRunLeftWheelsC2EN5Relay5ValueE,
     _GLOBAL__I__ZN25FrontPickupRunRightWheelsC2EN5Relay5ValueE,
@@ -157,17 +148,11 @@ void _GLOBAL__D__ZN11DriveRotateC2Efb();
 
 void _GLOBAL__D__ZN11FrontPickupC2Ev();
 
-void _GLOBAL__D__ZN12VisionTargetC2Ev();
-
 void _GLOBAL__D__ZN13DriveDistanceC2Edfb();
 
 void _GLOBAL__D__ZN13FindHotTargetC2Ev();
 
-void _GLOBAL__D__ZN14ExampleCommandC2Ev();
-
 void _GLOBAL__D__ZN14FrontPickupRunC2Ev();
-
-void _GLOBAL__D__ZN16ExampleSubsystemC2Ev();
 
 void _GLOBAL__D__ZN17DriveWithJoystickC2Ev();
 
@@ -232,12 +217,9 @@ void (*_dtors[])() =
     _GLOBAL__D__ZN11CommandBaseC2EPKc,
     _GLOBAL__D__ZN11DriveRotateC2Efb,
     _GLOBAL__D__ZN11FrontPickupC2Ev,
-    _GLOBAL__D__ZN12VisionTargetC2Ev,
     _GLOBAL__D__ZN13DriveDistanceC2Edfb,
     _GLOBAL__D__ZN13FindHotTargetC2Ev,
-    _GLOBAL__D__ZN14ExampleCommandC2Ev,
     _GLOBAL__D__ZN14FrontPickupRunC2Ev,
-    _GLOBAL__D__ZN16ExampleSubsystemC2Ev,
     _GLOBAL__D__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__D__ZN24FrontPickupRunLeftWheelsC2EN5Relay5ValueE,
     _GLOBAL__D__ZN25FrontPickupRunRightWheelsC2EN5Relay5ValueE,
