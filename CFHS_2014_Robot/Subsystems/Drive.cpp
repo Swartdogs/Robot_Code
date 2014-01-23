@@ -22,6 +22,7 @@ Drive::Drive() : Subsystem("Drive") {
 	m_lastDistance = 0;
 	m_targetAngle = 0;
 	m_maxSpeed = 0;
+	m_relativeZero = 0;
 	
 	m_leftFront->SetExpiration(1.0);
 	m_leftCenter->SetExpiration(1.0);
@@ -37,6 +38,7 @@ Drive::Drive() : Subsystem("Drive") {
 	m_rotatePID = new PIDControl(0.05, 0.005, 0.2);
 	m_rotatePID->SetInputRange(-360.0,-360.0);
 	m_rotatePID->SetOutputRange(-0.7,0.7);
+	m_rotatePID->SetSetpoint(0);
 }
     
 void Drive::InitDefaultCommand() {
@@ -71,6 +73,12 @@ void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncode
 	m_brakeApplied = false;
 }
 
+void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncoders, float targetAngle) {
+	InitDistance(targetDistance, maxSpeed, resetEncoders);
+	InitRotate(targetAngle);
+	m_useGyro = true;
+}
+
 void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncoders, float targetAngle, bool resetGyro) {
 	InitDistance(targetDistance, maxSpeed, resetEncoders);
 	InitRotate(targetAngle, resetGyro);
@@ -79,11 +87,13 @@ void Drive::InitDistance(double targetDistance, float maxSpeed, bool resetEncode
 
 void Drive::InitRotate(float targetAngle, bool resetGyro) {
 	if(resetGyro) {
-		m_gyro->Reset();
+		m_relativeZero = GetAngle();
 	}
-	
-	m_targetAngle = targetAngle;
-	m_rotatePID->SetSetpoint(m_targetAngle);
+	InitRotate(targetAngle + m_relativeZero);
+}
+
+void Drive::InitRotate(float targetAngle) {
+	m_targetAngle = ((int)((targetAngle)*10) % 3600) / 10.0;
 	m_onTarget = false;
 }
 
@@ -147,13 +157,17 @@ void Drive::ExecuteDistance() {
 }
 
 void Drive::ExecuteRotate() {
-	float rotateSpeed = m_rotatePID->Calculate(rotateSpeed);
-	float curAngle = m_gyro->GetAngle();
+	
 	static int counter = 5;
-	
+
+	float distance = (m_targetAngle - GetAngle());
+	distance = (distance > 180) ? (distance - 360):
+			   (distance < 180) ? (distance + 360):
+								   distance;
+		
+	float rotateSpeed = m_rotatePID->Calculate(distance);
 	DriveArcade(0, rotateSpeed);
-	
-	if(fabs(curAngle) <= 1); {
+	if(fabs(distance) <= 1) {
 		if(counter > 0) {
 			counter--;
 		} else {
@@ -234,4 +248,10 @@ bool RampSpeed(float& curSpeed, float pidSpeed) {
 	pidSpeed = speed * direction;
 				
 	return vReturn;
+}
+
+float Drive::GetAngle() {
+	float angle = ((int)(m_gyro->GetAngle() * 10) % 3600) / 10.0;
+	if(angle < 0) angle += 360.0;
+	return angle;
 }
