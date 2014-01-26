@@ -17,14 +17,15 @@ private:
 	
 	Victor*        m_shootMotor;
 	AnalogChannel* m_shootPot;
+	
 	PIDControl*    m_shootPID;
-	INT32          m_shootReadyPosition;
 	ShootState     m_shootState;
-	INT32          m_releaseBallPosition;
 	
 public:
 	BallShooter();
 	void InitDefaultCommand();
+	
+	void  Periodic();
 	
 	INT32 GetShooterPosition();
 	void  Load();

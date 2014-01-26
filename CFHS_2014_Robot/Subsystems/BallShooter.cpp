@@ -6,7 +6,15 @@ INT32 const c_shootDeadband = 0;
 
 
 BallShooter::BallShooter() : Subsystem("BallShooter") {
+	m_shootMotor = new Victor(MOD_SHOOT_MOTOR, PWM_SHOOT_MOTOR);
+	m_shootPot = new AnalogChannel(AI_SHOOT_POT);
+	m_shootPot->SetAverageBits(2);
+	m_shootPot->SetOversampleBits(0);
 	
+	m_shootState = sIdle;
+	m_shootPID = new PIDControl(0.003, 0, 0);
+	m_shootPID->SetInputRange(0, 1000);       // NEED TO CHANGE
+	m_shootPID->SetOutputRange(-0.7, 0.7);
 }
     
 void BallShooter::InitDefaultCommand() {
@@ -14,33 +22,46 @@ void BallShooter::InitDefaultCommand() {
 	//SetDefaultCommand(new MySpecialCommand());
 }
 
-void BallShooter::Load() {
-	if(m_shootState == sIdle) {
-		m_shootPID->SetPID(0.003, 0, 0);
-		m_shootPID->Reset();
-		m_shootPID->SetSetpoint((float) c_shootTriggerPosition);
-		
-		m_shootState = sStart;
+void BallShooter::Periodic() {
+	float shootSpeed = 0;
+	INT32 curShootPosition = GetShooterPosition();
+	switch(m_shootState) {
+		case sIdle:
+			break;
+		case sStart:
+			m_shootPID->SetPID(0.003, 0, 0);
+			m_shootPID->Reset();
+			m_shootPID->SetSetpoint((float) c_shootTriggerPosition);
+			
+			m_shootState = sLoad;
+			break;
+		case sLoad:
+			if(curShootPosition > (c_shootTriggerPosition - 100)) {
+				m_shootPID->SetPID(0.003, 0.0004, 0);
+				m_shootState = sReady;
+			}
+		case sReady:
+			shootSpeed = m_shootPID->Calculate(GetShooterPosition());
+			m_shootMotor->Set(shootSpeed);
+			break;
+		case sFire:
+			if(abs(curShootPosition - c_shootTriggerPosition) < 100) {
+				shootSpeed = 1.0;
+			} else {
+				shootSpeed = 0.0;
+				m_shootState = sIdle;
+			}
+			break;
 	}
+	m_shootMotor->Set(shootSpeed);
+}
+
+void BallShooter::Load() {
+	m_shootState = sLoad;
 }
 
 void BallShooter::Fire() {
-	
-	INT32 curShootPosition = GetShooterPosition();
-	float shootSpeed = 0.0;
-	
-	if(m_shootState == sReady) {
-		m_shootState = sFire;
-		
-		if(abs(curShootPosition - c_shootTriggerPosition) < 50) {
-			shootSpeed = 1.0;
-		} else {
-			shootSpeed = 0.0;
-			m_shootState = sIdle;
-		}
-	}
-	
-	m_shootMotor->Set(shootSpeed);
+	m_shootState = sFire;
 }
 
 INT32 BallShooter::GetShooterPosition() {
