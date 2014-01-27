@@ -57,11 +57,15 @@ void BallShooter::Periodic() {
 }
 
 void BallShooter::Load() {
-	m_shootState = sLoad;
+	if(m_shootState == sIdle) {
+		m_shootState = sStart;
+	}
 }
 
 void BallShooter::Fire() {
-	m_shootState = sFire;
+	if(m_shootState == sReady) {
+		m_shootState = sFire;
+	}
 }
 
 INT32 BallShooter::GetShooterPosition() {

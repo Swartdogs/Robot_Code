@@ -393,6 +393,7 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/FrontPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BackPickup.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BallShooter.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../OI.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h
 
@@ -1179,6 +1180,8 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/FrontPickup.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BackPickup.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BallShooter.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../OI.h:
 

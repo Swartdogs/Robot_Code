@@ -29,6 +29,30 @@ private:
 	int m_position;
 };
 
+/////////////////
+// BALLSHOOTER //
+/////////////////
+
+class BallShooterFire: public CommandBase {
+public:
+	BallShooterFire();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
+class BallShooterLoad: public CommandBase {
+public:
+	BallShooterLoad();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
 ///////////
 // DRIVE //
 ///////////
@@ -95,6 +119,26 @@ public:
 /////////////////
 // FRONTPICKUP //
 /////////////////
+
+class FrontPickupManualLeftDrive: public CommandBase {
+public:
+	FrontPickupManualLeftDrive();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
+class FrontPickupManualRightDrive: public CommandBase {
+public:
+	FrontPickupManualRightDrive();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
 
 class FrontPickupMoveArmsToPosition: public CommandBase {
 public:

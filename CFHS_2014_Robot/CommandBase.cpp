@@ -13,6 +13,7 @@ OI* CommandBase::oi = NULL;
 FindTarget* CommandBase::findTarget = NULL;
 FrontPickup* CommandBase::frontPickup = NULL;
 BackPickup* CommandBase::backPickup = NULL;
+BallShooter* CommandBase::ballShooter = NULL;
 
 void CommandBase::init() {
     // Create a single static instance of all of your subsystems. The following
@@ -22,4 +23,5 @@ void CommandBase::init() {
 	findTarget = new FindTarget();
 	frontPickup = new FrontPickup();
 	backPickup = new BackPickup();
+	ballShooter = new BallShooter();
 }

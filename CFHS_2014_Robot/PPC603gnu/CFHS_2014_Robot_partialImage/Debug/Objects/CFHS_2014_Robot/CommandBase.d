@@ -391,6 +391,7 @@ CFHS_2014_Robot_partialImage/Debug/Objects/CFHS_2014_Robot/CommandBase.o:  \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/FrontPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BallShooter.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/OI.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Scheduler.h
@@ -1176,6 +1177,8 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
 C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/FrontPickup.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BallShooter.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/OI.h:
 

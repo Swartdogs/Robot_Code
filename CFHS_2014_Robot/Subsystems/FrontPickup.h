@@ -46,6 +46,9 @@ public:
 	void RunLeftWheels(Relay::Value value);
 	
 	INT32 GetPosition(AnalogChannel* pot);
+	
+	void SetUseJoystickLeft(bool use);
+	void SetUseJoystickRight(bool use);
 };
 
 #endif

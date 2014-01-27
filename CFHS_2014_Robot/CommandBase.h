@@ -6,6 +6,7 @@
 #include "Subsystems/FindTarget.h"
 #include "Subsystems/FrontPickup.h"
 #include "Subsystems/BackPickup.h"
+#include "Subsystems/BallShooter.h"
 #include "OI.h"
 
 
@@ -25,6 +26,7 @@ public:
 	static OI* oi;
 	static FrontPickup* frontPickup;
 	static BackPickup* backPickup;
+	static BallShooter* ballShooter;
 };
 
 #endif

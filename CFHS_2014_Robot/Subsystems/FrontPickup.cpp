@@ -28,6 +28,9 @@ FrontPickup::FrontPickup() : Subsystem("FrontPickup") {
 	
 	m_leftArmTarget = GetPosition(m_leftArmPot) - c_leftArmZeroOffset;
 	m_rightArmTarget = GetPosition(m_rightArmPot) - c_rightArmZeroOffset;
+	
+	m_useJoystickLeft = false;
+	m_useJoystickRight = false;
 
 }
     
@@ -41,7 +44,7 @@ void FrontPickup::InitDefaultCommand() {
 // Put methods for controlling this subsystem
 // here. Call these from Commands.
 
-void FrontPickup::Periodic(float joyLeft, float joyRight) {
+void FrontPickup::Periodic(float joyLeft, float joyRight) { // need to add support for rollers!
 	static float leftSpeed = 0;
 	static float rightSpeed = 0;
 	
@@ -183,4 +186,12 @@ INT32 FrontPickup::GetPosition(AnalogChannel* pot) {
 	lastReading = curReading;
 	
 	return returnValue;
+}
+
+void FrontPickup::SetUseJoystickLeft(bool use) {
+	m_useJoystickLeft = use;
+}
+
+void FrontPickup::SetUseJoystickRight(bool use) {
+	m_useJoystickRight = use;
 }
