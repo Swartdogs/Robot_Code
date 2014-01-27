@@ -1,7 +1,7 @@
 #include "FrontPickup.h"
 #include "../Robotmap.h"
 #include <math.h>
-#include "../Commands/FrontPickupRun.h"
+#include "../Commands/AllCommands.h"
 
 const INT32 c_leftArmZeroOffset = 0;
 const INT32 c_leftArmMaxPosition = 500;
@@ -25,6 +25,10 @@ FrontPickup::FrontPickup() : Subsystem("FrontPickup") {
 	m_rightArmPID = new PIDControl(0, 0, 0);
 	m_rightArmPID->SetInputRange(0, 1000);
 	m_rightArmPID->SetOutputRange(-1.0, 1.0);
+	
+	m_leftArmTarget = GetPosition(m_leftArmPot) - c_leftArmZeroOffset;
+	m_rightArmTarget = GetPosition(m_rightArmPot) - c_rightArmZeroOffset;
+
 }
     
 void FrontPickup::InitDefaultCommand() {
@@ -36,6 +40,66 @@ void FrontPickup::InitDefaultCommand() {
 
 // Put methods for controlling this subsystem
 // here. Call these from Commands.
+
+void FrontPickup::Periodic(float joyLeft, float joyRight) {
+	static float leftSpeed = 0;
+	static float rightSpeed = 0;
+	
+	bool isTooHigh;
+	bool isTooLow;
+	
+	INT32 curLeftPosition = GetPosition(m_leftArmPot);
+	INT32 curRightPosition = GetPosition(m_rightArmPot);
+	
+	if(m_useJoystickLeft) {
+		m_leftArmTarget = curLeftPosition;
+		
+		isTooHigh = curLeftPosition > (c_leftArmMaxPosition - c_armTargetDeadband);
+		isTooLow = curLeftPosition < (c_leftArmZeroOffset + c_armTargetDeadband);
+		
+		if((joyLeft > 0) && isTooHigh) {
+			leftSpeed = 0;
+		} else if((joyLeft < 0) && isTooLow) {
+			leftSpeed = 0;
+		} else {
+			leftSpeed = joyLeft;
+		}
+	} else {
+		m_leftArmPID->SetSetpoint(m_leftArmTarget);
+		
+		leftSpeed = m_leftArmPID->Calculate((float) curLeftPosition);
+		
+		if(abs(curLeftPosition - m_leftArmTarget) <= c_armTargetDeadband) {
+			leftSpeed = 0;
+		}
+	}
+	
+	if(m_useJoystickRight) {
+		m_rightArmTarget = curRightPosition;
+		
+		isTooHigh = curRightPosition > (c_rightArmMaxPosition - c_armTargetDeadband);
+		isTooLow = curRightPosition < (c_rightArmZeroOffset + c_armTargetDeadband);
+		
+		if((joyRight > 0) && isTooHigh) {
+			rightSpeed = 0;
+		} else if((joyRight < 0) && isTooLow) {
+			rightSpeed = 0;
+		} else {
+			rightSpeed = joyRight;
+		}
+	} else {
+		m_rightArmPID->SetSetpoint(m_rightArmTarget);
+		
+		rightSpeed = m_rightArmPID->Calculate((float) curRightPosition);
+		
+		if(abs(curRightPosition - m_rightArmTarget) <= c_armTargetDeadband) {
+			rightSpeed = 0;
+		}
+	}
+	
+	m_leftArm->Set(leftSpeed);
+	m_rightArm->Set(rightSpeed);
+}
 
 void FrontPickup::Run(){
 	float leftSpeed;
@@ -103,4 +167,20 @@ void FrontPickup::RunLeftWheels(Relay::Value value){
 
 void FrontPickup::RunRightWheels(Relay::Value value){
 	m_rightWheels->Set(value);
+}
+
+INT32 FrontPickup::GetPosition(AnalogChannel* pot) {
+	INT32 curReading = 0;
+	static INT32 lastReading = 0;
+	INT32 returnValue = 0;
+	
+	curReading = pot->GetAverageValue();
+	returnValue = curReading;
+	
+	if((curReading < lastReading) || (abs(curReading - lastReading) >= 200)) {
+		returnValue = lastReading;
+	}	
+	lastReading = curReading;
+	
+	return returnValue;
 }

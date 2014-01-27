@@ -1,6 +1,6 @@
 #include "Drive.h"
 #include "../Robotmap.h"
-#include "../Commands/DriveWithJoystick.h"
+#include "../Commands/AllCommands.h"
 #include <math.h>
 
 Drive::Drive() : Subsystem("Drive") {

@@ -1,6 +1,6 @@
 #include "BackPickup.h"
 #include "../Robotmap.h"
-#include "../Commands/BackPickupPeriodic.h"
+#include "../Commands/AllCommands.h"
 
 const int c_baseMotorDeadband = 1;
 

@@ -170,43 +170,43 @@ CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/CommandBase.o :
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickupPeriodic.o : $(PRJ_ROOT_DIR)/Commands/BackPickupPeriodic.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickup/BackPickupPeriodic.o : $(PRJ_ROOT_DIR)/Commands/BackPickup/BackPickupPeriodic.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickupSetPosition.o : $(PRJ_ROOT_DIR)/Commands/BackPickupSetPosition.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickup/BackPickupSetPosition.o : $(PRJ_ROOT_DIR)/Commands/BackPickup/BackPickupSetPosition.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveDistance.o : $(PRJ_ROOT_DIR)/Commands/DriveDistance.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveDistance.o : $(PRJ_ROOT_DIR)/Commands/Drive/DriveDistance.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveRotate.o : $(PRJ_ROOT_DIR)/Commands/DriveRotate.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveRotate.o : $(PRJ_ROOT_DIR)/Commands/Drive/DriveRotate.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveWithJoystick.o : $(PRJ_ROOT_DIR)/Commands/DriveWithJoystick.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveWithJoystick.o : $(PRJ_ROOT_DIR)/Commands/Drive/DriveWithJoystick.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FindHotTarget.o : $(PRJ_ROOT_DIR)/Commands/FindHotTarget.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupMoveArmsToPosition.o : $(PRJ_ROOT_DIR)/Commands/FrontPickup/FrontPickupMoveArmsToPosition.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupMoveArmsToPosition.o : $(PRJ_ROOT_DIR)/Commands/FrontPickupMoveArmsToPosition.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRun.o : $(PRJ_ROOT_DIR)/Commands/FrontPickup/FrontPickupRun.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRun.o : $(PRJ_ROOT_DIR)/Commands/FrontPickupRun.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRunLeftWheels.o : $(PRJ_ROOT_DIR)/Commands/FrontPickup/FrontPickupRunLeftWheels.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRunLeftWheels.o : $(PRJ_ROOT_DIR)/Commands/FrontPickupRunLeftWheels.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRunRightWheels.o : $(PRJ_ROOT_DIR)/Commands/FrontPickup/FrontPickupRunRightWheels.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRunRightWheels.o : $(PRJ_ROOT_DIR)/Commands/FrontPickupRunRightWheels.cpp $(FORCE_FILE_BUILD)
+CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Misc/FindHotTarget.o : $(PRJ_ROOT_DIR)/Commands/Misc/FindHotTarget.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
@@ -244,16 +244,16 @@ CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/PIDC
 
 OBJECTS_CFHS_2014_Robot_partialImage = CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/CFHS_2014_RobotCommandBased.o \
 	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/CommandBase.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickupPeriodic.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickupSetPosition.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveDistance.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveRotate.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveWithJoystick.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FindHotTarget.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupMoveArmsToPosition.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRun.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRunLeftWheels.o \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRunRightWheels.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickup/BackPickupPeriodic.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickup/BackPickupSetPosition.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveDistance.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveRotate.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveWithJoystick.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupMoveArmsToPosition.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRun.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRunLeftWheels.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRunRightWheels.o \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Misc/FindHotTarget.o \
 	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/IterativeRobot525.o \
 	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/OI.o \
 	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/BackPickup.o \
@@ -275,10 +275,10 @@ CFHS_2014_Robot_partialImage/$(MODE_DIR)/CFHS_2014_Robot_partialImage_clean :
 
 force : 
 
-DEP_FILES := CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/CFHS_2014_RobotCommandBased.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/CommandBase.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickupPeriodic.d \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickupSetPosition.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveDistance.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveRotate.d \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/DriveWithJoystick.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FindHotTarget.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupMoveArmsToPosition.d \
-	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRun.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRunLeftWheels.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickupRunRightWheels.d \
+DEP_FILES := CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/CFHS_2014_RobotCommandBased.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/CommandBase.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickup/BackPickupPeriodic.d \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/BackPickup/BackPickupSetPosition.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveDistance.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveRotate.d \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Drive/DriveWithJoystick.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupMoveArmsToPosition.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRun.d \
+	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRunLeftWheels.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/FrontPickup/FrontPickupRunRightWheels.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Commands/Misc/FindHotTarget.d \
 	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/IterativeRobot525.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/OI.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/BackPickup.d \
 	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/BallShooter.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/Drive.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/FindTarget.d \
 	 CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/FrontPickup.d CFHS_2014_Robot_partialImage/$(MODE_DIR)/Objects/CFHS_2014_Robot/Subsystems/PIDControl.d

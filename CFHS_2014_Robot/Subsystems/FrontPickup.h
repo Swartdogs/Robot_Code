@@ -29,6 +29,8 @@ private:
 	int m_leftLastPosition;
 	int m_rightLastPosition;
 	
+	bool m_useJoystickLeft;
+	bool m_useJoystickRight;
 	bool m_leftOnTarget;
 	bool m_rightOnTarget;
 	
@@ -36,11 +38,14 @@ public:
 	FrontPickup();
 	void InitDefaultCommand();
 	
+	void Periodic(float joyLeft, float joyRight);
 	void Run();
 	void MoveArmsWithJoystick(float leftArmPower, float rightArmPower);
 	void SetArmsToPosition(int leftPosition, int rightPosition);
 	void RunRightWheels(Relay::Value value);
 	void RunLeftWheels(Relay::Value value);
+	
+	INT32 GetPosition(AnalogChannel* pot);
 };
 
 #endif
