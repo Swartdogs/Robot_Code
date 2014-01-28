@@ -388,6 +388,7 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/ColorImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/PIDControl.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/../RobotLog.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/FindTarget.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
@@ -395,7 +396,8 @@
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/BackPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/BallShooter.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../OI.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../RobotLog.h
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../AllCommands.h:
 
@@ -1171,6 +1173,8 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/PIDControl.h:
 
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/../RobotLog.h:
+
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/FindTarget.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h:
@@ -1186,3 +1190,5 @@ C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../Subsystems/Bal
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../OI.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BallShooter/../../RobotLog.h:

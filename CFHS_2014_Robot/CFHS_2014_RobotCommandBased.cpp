@@ -57,7 +57,7 @@ private:
 		m_runMode = mInit;
 		
 		CommandBasedRobot::SetPeriod(0.02);
-		CommandBase::init();
+		CommandBase::Init(this);
 
 		m_DriverMessage = DriverStationLCD::GetInstance();	
 

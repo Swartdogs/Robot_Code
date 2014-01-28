@@ -8,7 +8,7 @@
 #include "Subsystems/BackPickup.h"
 #include "Subsystems/BallShooter.h"
 #include "OI.h"
-
+#include "RobotLog.h"
 
 /**
  * The base for all commands. All atomic commands should subclass CommandBase.
@@ -19,7 +19,9 @@ class CommandBase: public Command {
 public:
 	CommandBase(const char *name);
 	CommandBase();
-	static void init();
+
+	static void Init(RobotLog* logDelegate);
+
 	// Create a single static instance of all of your subsystems
 	static Drive* drive;
 	static FindTarget* findTarget;

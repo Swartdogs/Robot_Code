@@ -10,15 +10,15 @@ const INT32 c_rightArmMaxPosition = 500;
 const int   c_armTargetDeadband = 2;
 
 FrontPickup::FrontPickup() : Subsystem("FrontPickup") {
-	m_leftArm = new Victor(MOD_FRONT_PICKUP_LEFT_ARM, PWM_FRONT_PICKUP_LEFT_ARM);
-	m_rightArm = new Victor(MOD_FRONT_PICKUP_RIGHT_ARM, PWM_FRONT_PICKUP_RIGHT_ARM);
-	m_leftWheels = new Relay(MOD_FRONT_PICKUP_LEFT_ROLLERS, PWM_FRONT_PICKUP_LEFT_ROLLERS);
+	m_leftArm = 	new Victor(MOD_FRONT_PICKUP_LEFT_ARM, PWM_FRONT_PICKUP_LEFT_ARM);
+	m_rightArm = 	new Victor(MOD_FRONT_PICKUP_RIGHT_ARM, PWM_FRONT_PICKUP_RIGHT_ARM);
+	m_leftWheels = 	new Relay(MOD_FRONT_PICKUP_LEFT_ROLLERS, PWM_FRONT_PICKUP_LEFT_ROLLERS);
 	m_rightWheels = new Relay(MOD_FRONT_PICKUP_RIGHT_ROLLERS, PWM_FRONT_PICKUP_RIGHT_ROLLERS);
 	
-	m_leftArmPot = new AnalogChannel(AI_FRONT_PICKUP_LEFT_ARM_POT);
+	m_leftArmPot = 	new AnalogChannel(AI_FRONT_PICKUP_LEFT_ARM_POT);
 	m_rightArmPot = new AnalogChannel(AI_FRONT_PICKUP_RIGHT_ARM_POT);
 	
-	m_leftArmPID = new PIDControl(0, 0, 0);
+	m_leftArmPID = 	new PIDControl(0, 0, 0);
 	m_leftArmPID->SetInputRange(0, 1000);
 	m_leftArmPID->SetOutputRange(-1.0, 1.0);
 	
@@ -35,14 +35,9 @@ FrontPickup::FrontPickup() : Subsystem("FrontPickup") {
 }
     
 void FrontPickup::InitDefaultCommand() {
-	// Set the default command for a subsystem here.
-	//SetDefaultCommand(new MySpecialCommand());
 	SetDefaultCommand(new FrontPickupRun());
 }
 
-
-// Put methods for controlling this subsystem
-// here. Call these from Commands.
 
 void FrontPickup::Periodic(float joyLeft, float joyRight) { // need to add support for rollers!
 	static float leftSpeed = 0;

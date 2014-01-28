@@ -388,13 +388,16 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/ColorImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/PIDControl.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/../RobotLog.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/FindTarget.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/FrontPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/BackPickup.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/BallShooter.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../OI.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../RobotLog.h
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickupRunLeftWheels.h:
 
@@ -1170,6 +1173,8 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/PIDControl.h:
 
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/../RobotLog.h:
+
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/FindTarget.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h:
@@ -1180,6 +1185,10 @@ C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/FrontPickup.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/BackPickup.h:
 
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../Subsystems/BallShooter.h:
+
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../OI.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../RobotLog.h:
