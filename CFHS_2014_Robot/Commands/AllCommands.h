@@ -7,9 +7,9 @@
 // BACKPICKUP //
 ////////////////
 
-class BackPickupPeriodic: public CommandBase {
+class BackPickupManualDrive: public CommandBase {
 public:
-	BackPickupPeriodic();
+	BackPickupManualDrive();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
@@ -143,16 +143,6 @@ public:
 class FrontPickupMoveArmsToPosition: public CommandBase {
 public:
 	FrontPickupMoveArmsToPosition();
-	virtual void Initialize();
-	virtual void Execute();
-	virtual bool IsFinished();
-	virtual void End();
-	virtual void Interrupted();
-};
-
-class FrontPickupRun: public CommandBase {
-public:
-	FrontPickupRun();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();

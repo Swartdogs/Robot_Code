@@ -21,6 +21,7 @@ public:
 	CommandBase();
 
 	static void Init(RobotLog* logDelegate);
+	static void Periodic();
 
 	// Create a single static instance of all of your subsystems
 	static Drive* drive;

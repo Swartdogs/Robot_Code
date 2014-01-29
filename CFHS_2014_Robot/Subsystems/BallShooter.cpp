@@ -88,4 +88,8 @@ INT32 BallShooter::GetShooterPosition() {
 	return returnValue;
 }
 
+BallShooter::ShootState BallShooter::GetShootState() {
+	return m_shootState;
+}
+
 

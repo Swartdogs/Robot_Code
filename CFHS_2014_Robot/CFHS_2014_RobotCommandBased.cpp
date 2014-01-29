@@ -146,6 +146,7 @@ private:
 		
 		m_periodicLastStart = timeNow;							// Set Periodic Start Time
 
+		CommandBase::Periodic();
 		Scheduler::GetInstance()->Run();
 		EndOfPeriodic();
 	}
@@ -177,6 +178,7 @@ private:
 		
 		m_periodicLastStart = timeNow;							// Set Periodic Start Time
 
+		CommandBase::Periodic();
 		Scheduler::GetInstance()->Run();
 		EndOfPeriodic();
 	}

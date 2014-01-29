@@ -1,8 +1,9 @@
  \
- CFHS_2014_Robot_partialImage/Debug/Objects/CFHS_2014_Robot/Subsystems/BackPickup.o:  \
- C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.cpp \
-  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.h \
-  C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h \
+ CFHS_2014_Robot_partialImage/Debug/Objects/CFHS_2014_Robot/Commands/BackPickup/BackPickupManualDrive.o:  \
+ C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/BackPickupManualDrive.cpp \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../AllCommands.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../CommandBase.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/ErrorBase.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Base.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/ChipObject/NiRio.h \
@@ -109,6 +110,12 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/networktables2/type/ComplexData.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITableListener.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h \
+  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/set \
+  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/xtree \
+  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/functional \
+  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/memory \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/Drive.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
   c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/iostream \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Accelerometer.h \
@@ -150,10 +157,6 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Buttons/Trigger.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/SmartDashboard/Sendable.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h \
-  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/set \
-  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/xtree \
-  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/functional \
-  c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/memory \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Buttons/DigitalIOButton.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Buttons/InternalButton.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Buttons/JoystickButton.h \
@@ -384,13 +387,23 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/HSLImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/ColorImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h \
-  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/PIDControl.h \
-  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../RobotLog.h \
-  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../Robotmap.h
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/PIDControl.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/../RobotLog.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/FindTarget.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/FrontPickup.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BackPickup.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BallShooter.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../OI.h \
+  C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../RobotLog.h
 
-C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.h:
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../AllCommands.h:
 
-C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h:
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../CommandBase.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/ErrorBase.h:
 
@@ -604,6 +617,18 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITableListener.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/tables/ITable.h:
 
+c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/set:
+
+c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/xtree:
+
+c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/functional:
+
+c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/memory:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/Drive.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Subsystem.h:
+
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
 
 c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/iostream:
@@ -685,14 +710,6 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/Buttons/Trigger.h:
 C:/WindRiver/vxworks-6.3/target/h/WPILib/SmartDashboard/Sendable.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Commands/Command.h:
-
-c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/set:
-
-c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/xtree:
-
-c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/functional:
-
-c:/windriver/gnu/3.4.4-vxworks-6.3/x86-win32/lib/gcc/../../../x86-win32/include/c++/3.4.4/memory:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Buttons/DigitalIOButton.h:
 
@@ -1154,8 +1171,24 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/ColorImage.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h:
 
-C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/PIDControl.h:
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/PIDControl.h:
 
-C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../RobotLog.h:
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/../RobotLog.h:
 
-C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../Robotmap.h:
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/FindTarget.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/FrontPickup.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BackPickup.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../Subsystems/BallShooter.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../OI.h:
+
+C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/BackPickup/../../RobotLog.h:

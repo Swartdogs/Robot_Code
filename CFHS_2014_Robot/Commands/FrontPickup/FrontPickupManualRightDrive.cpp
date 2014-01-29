@@ -13,7 +13,7 @@ void FrontPickupManualRightDrive::Initialize() {
 
 // Called repeatedly when this Command is scheduled to run
 void FrontPickupManualRightDrive::Execute() {
-	
+	frontPickup->SetJoystickRight(oi->GetTiltY());
 }
 
 // Make this return true when this Command no longer needs to run execute()
@@ -29,4 +29,5 @@ void FrontPickupManualRightDrive::End() {
 // Called when another command which requires one or more of the same
 // subsystems is scheduled to run
 void FrontPickupManualRightDrive::Interrupted() {
+	frontPickup->SetUseJoystickRight(false);
 }

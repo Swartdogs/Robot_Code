@@ -3,6 +3,7 @@
 #include "Commands/Subsystem.h"
 #include "WPILib.h"
 #include "PIDControl.h"
+#include "../RobotLog.h"
 
 /**
  *
@@ -11,6 +12,9 @@
  */
 class FrontPickup: public Subsystem {
 private:
+	
+	typedef enum {pLeft, pRight}Pot;
+	
 	Victor* 		m_rightArm;
 	Victor* 		m_leftArm;
 	Relay* 			m_rightWheels;
@@ -22,31 +26,33 @@ private:
 	PIDControl* 	m_leftArmPID;
 	PIDControl* 	m_rightArmPID;
 	
-	int 	m_leftArmTarget;
-	int 	m_rightArmTarget;
-	int 	m_leftLastPosition;
-	int 	m_rightLastPosition;
+	RobotLog*       m_log;
+
+	INT32 	m_leftArmTarget;
+	INT32 	m_rightArmTarget;
+	
+	float   m_joyLeft;
+	float   m_joyRight;
 	
 	bool 	m_useJoystickLeft;
 	bool 	m_useJoystickRight;
 	bool 	m_leftOnTarget;
 	bool 	m_rightOnTarget;
 	
+	INT32 GetPosition(Pot pot);
+	
 public:
-	FrontPickup();
+	FrontPickup(RobotLog* log);
 	void InitDefaultCommand();
 	
-	void Periodic(float joyLeft, float joyRight);
-	void Run();
-	void MoveArmsWithJoystick(float leftArmPower, float rightArmPower);
-	void SetArmsToPosition(int leftPosition, int rightPosition);
+	void Periodic();
+	void SetSetpoint(INT32 leftPosition, INT32 rightPosition);
 	void RunRightWheels(Relay::Value value);
 	void RunLeftWheels(Relay::Value value);
-	
-	INT32 GetPosition(AnalogChannel* pot);
-	
 	void SetUseJoystickLeft(bool use);
 	void SetUseJoystickRight(bool use);
+	void SetJoystickLeft(float joyLeft);
+	void SetJoystickRight(float joyRight);
 };
 
 #endif

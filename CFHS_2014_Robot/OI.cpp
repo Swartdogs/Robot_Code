@@ -23,7 +23,7 @@ OI::OI() {
 	
 	tiltButton1->WhileHeld(new FrontPickupManualLeftDrive());
 	tiltButton2->WhileHeld(new FrontPickupManualRightDrive());
-	
+	tiltButton3->WhileHeld(new BackPickupManualDrive());
 	tiltButton4->WhenPressed(new BallShooterLoad());  // Will be replaced by Command Group to include actually loading a ball from either Pickup
 	tiltButton5->WhenPressed(new BallShooterFire());
 }

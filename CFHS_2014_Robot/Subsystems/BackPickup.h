@@ -3,6 +3,7 @@
 #include "Commands/Subsystem.h"
 #include "WPILib.h"
 #include "PIDControl.h"
+#include "../RobotLog.h"
 
 /**
  *
@@ -21,16 +22,25 @@ private:
 	
 	PIDControl* m_baseMotorPID;
 	
-	int m_lastPosition;
-	int m_baseTarget;
-	bool m_onTarget;
+	RobotLog* m_log;
+	
+	bool m_useJoystick;
+	
+	float m_joySpeed;
+	
+	INT32 m_baseTarget;
+	bool  m_onTarget;
+	
+	INT32 GetPosition();
 	
 public:
-	BackPickup();
+	BackPickup(RobotLog* log);
 	void InitDefaultCommand();
 	void Periodic();
-	void SetToPosition(int target);
+	void SetSetpoint(INT32 target);
 	void SetRollers(float power);
+	void SetUseJoystick(bool use);
+	void SetJoystickSpeed(float speed);
 	bool OnTarget();
 };
 

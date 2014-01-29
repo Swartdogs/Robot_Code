@@ -21,7 +21,13 @@ void CommandBase::Init(RobotLog* logDelegate) {
 	drive = new Drive(logDelegate);
 	oi = new OI();
 	findTarget = new FindTarget();
-	frontPickup = new FrontPickup();
-	backPickup = new BackPickup();
+	frontPickup = new FrontPickup(logDelegate);
+	backPickup = new BackPickup(logDelegate);
 	ballShooter = new BallShooter();
+}
+
+void CommandBase::Periodic() {
+	frontPickup->Periodic();
+	backPickup->Periodic();
+	ballShooter->Periodic();
 }

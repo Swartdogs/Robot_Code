@@ -7,9 +7,9 @@ const INT32 c_leftArmZeroOffset = 0;
 const INT32 c_leftArmMaxPosition = 500;
 const INT32 c_rightArmZeroOffset = 0;
 const INT32 c_rightArmMaxPosition = 500;
-const int   c_armTargetDeadband = 2;
+const INT32 c_armTargetDeadband = 2;
 
-FrontPickup::FrontPickup() : Subsystem("FrontPickup") {
+FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_leftArm = 	new Victor(MOD_FRONT_PICKUP_LEFT_ARM, PWM_FRONT_PICKUP_LEFT_ARM);
 	m_rightArm = 	new Victor(MOD_FRONT_PICKUP_RIGHT_ARM, PWM_FRONT_PICKUP_RIGHT_ARM);
 	m_leftWheels = 	new Relay(MOD_FRONT_PICKUP_LEFT_ROLLERS, PWM_FRONT_PICKUP_LEFT_ROLLERS);
@@ -26,72 +26,80 @@ FrontPickup::FrontPickup() : Subsystem("FrontPickup") {
 	m_rightArmPID->SetInputRange(0, 1000);
 	m_rightArmPID->SetOutputRange(-1.0, 1.0);
 	
-	m_leftArmTarget = GetPosition(m_leftArmPot) - c_leftArmZeroOffset;
-	m_rightArmTarget = GetPosition(m_rightArmPot) - c_rightArmZeroOffset;
+	m_leftArmTarget = GetPosition(pLeft);
+	m_rightArmTarget = GetPosition(pRight);
+	
+	m_rightArmPID->SetSetpoint(m_rightArmTarget);
+	m_leftArmPID->SetSetpoint(m_leftArmTarget);
 	
 	m_useJoystickLeft = false;
 	m_useJoystickRight = false;
+	m_joyLeft = 0;
+	m_joyRight = 0;
+	
+	m_log = log;
+}
 
+INT32 FrontPickup::GetPosition(Pot pot) {
+	switch(pot) {
+		case pLeft:
+			return (m_leftArmPot->GetAverageValue() - c_leftArmZeroOffset);
+		case pRight:
+			return (m_rightArmPot->GetAverageValue() - c_rightArmZeroOffset);
+	}
+	return 0;
 }
     
 void FrontPickup::InitDefaultCommand() {
-	SetDefaultCommand(new FrontPickupRun());
 }
 
 
-void FrontPickup::Periodic(float joyLeft, float joyRight) { // need to add support for rollers!
+void FrontPickup::Periodic() { // need to add support for rollers!
 	static float leftSpeed = 0;
 	static float rightSpeed = 0;
 	
 	bool isTooHigh;
 	bool isTooLow;
 	
-	INT32 curLeftPosition = GetPosition(m_leftArmPot);
-	INT32 curRightPosition = GetPosition(m_rightArmPot);
+	INT32 curLeftPosition = GetPosition(pLeft);
+	INT32 curRightPosition = GetPosition(pRight);
+	
+	leftSpeed = m_leftArmPID->Calculate((float) curLeftPosition);
+	rightSpeed = m_rightArmPID->Calculate((float) curRightPosition);
 	
 	if(m_useJoystickLeft) {
 		m_leftArmTarget = curLeftPosition;
+		m_leftArmPID->SetSetpoint(m_leftArmTarget);
 		
 		isTooHigh = curLeftPosition > (c_leftArmMaxPosition - c_armTargetDeadband);
 		isTooLow = curLeftPosition < (c_leftArmZeroOffset + c_armTargetDeadband);
 		
-		if((joyLeft > 0) && isTooHigh) {
+		if(((m_joyLeft > 0) && isTooHigh) || ((m_joyLeft < 0) && isTooLow)) {
 			leftSpeed = 0;
-		} else if((joyLeft < 0) && isTooLow) {
-			leftSpeed = 0;
-		} else {
-			leftSpeed = joyLeft;
+		} else if((m_joyLeft*leftSpeed < 0) || (m_joyLeft > leftSpeed)) {
+			leftSpeed = m_joyLeft;
 		}
 	} else {
-		m_leftArmPID->SetSetpoint(m_leftArmTarget);
-		
-		leftSpeed = m_leftArmPID->Calculate((float) curLeftPosition);
-		
 		if(abs(curLeftPosition - m_leftArmTarget) <= c_armTargetDeadband) {
-			leftSpeed = 0;
+			m_leftOnTarget = true;
 		}
 	}
 	
 	if(m_useJoystickRight) {
 		m_rightArmTarget = curRightPosition;
+		m_rightArmPID->SetSetpoint(m_rightArmTarget);
 		
 		isTooHigh = curRightPosition > (c_rightArmMaxPosition - c_armTargetDeadband);
 		isTooLow = curRightPosition < (c_rightArmZeroOffset + c_armTargetDeadband);
 		
-		if((joyRight > 0) && isTooHigh) {
+		if(((m_joyRight > 0) && isTooHigh) || ((m_joyRight < 0) && isTooLow)) {
 			rightSpeed = 0;
-		} else if((joyRight < 0) && isTooLow) {
-			rightSpeed = 0;
-		} else {
-			rightSpeed = joyRight;
+		} else if((m_joyRight*rightSpeed < 0) || (m_joyRight > rightSpeed)) {
+			rightSpeed = m_joyRight;
 		}
 	} else {
-		m_rightArmPID->SetSetpoint(m_rightArmTarget);
-		
-		rightSpeed = m_rightArmPID->Calculate((float) curRightPosition);
-		
 		if(abs(curRightPosition - m_rightArmTarget) <= c_armTargetDeadband) {
-			rightSpeed = 0;
+			m_rightOnTarget = true;
 		}
 	}
 	
@@ -99,38 +107,7 @@ void FrontPickup::Periodic(float joyLeft, float joyRight) { // need to add suppo
 	m_rightArm->Set(rightSpeed);
 }
 
-void FrontPickup::Run(){
-	float leftSpeed;
-	float rightSpeed;
-	int   curLeftPosition = m_leftArmPot->GetValue();
-	int   curRightPosition = m_rightArmPot->GetValue();
-	
-	m_leftArmPID->SetSetpoint(m_leftArmTarget);
-	m_rightArmPID->SetSetpoint(m_rightArmTarget);
-	
-	leftSpeed = m_leftArmPID->Calculate(curLeftPosition);
-	rightSpeed = m_rightArmPID->Calculate(curRightPosition);
-	
-	m_leftArm->Set(leftSpeed);
-	m_rightArm->Set(rightSpeed);
-}
-
-void FrontPickup::MoveArmsWithJoystick(float leftArmPower, float rightArmPower){
-	if(m_leftArmPot->GetValue() <= c_leftArmMaxPosition && m_leftArmPot->GetValue() >= c_leftArmZeroOffset){
-		m_leftArm->Set(leftArmPower);
-		m_leftArmTarget = m_leftArmPot->GetValue();
-	}
-	if(m_rightArmPot->GetValue() <= c_rightArmMaxPosition && m_rightArmPot->GetValue() >= c_rightArmZeroOffset){
-		m_rightArm->Set(rightArmPower);
-		m_rightArmTarget = m_rightArmPot->GetValue();
-	}
-}
-
-void FrontPickup::SetArmsToPosition(int leftPosition, int rightPosition){
-	int curLeftPosition = m_leftArmPot->GetValue();
-	int curRightPosition = m_rightArmPot->GetValue();
-	float leftSpeed;
-	float rightSpeed;
+void FrontPickup::SetSetpoint(INT32 leftPosition, INT32 rightPosition){
 	
 	m_leftOnTarget = false;
 	m_rightOnTarget = false;
@@ -145,18 +122,6 @@ void FrontPickup::SetArmsToPosition(int leftPosition, int rightPosition){
 	
 	m_leftArmPID->SetSetpoint(m_leftArmTarget);
 	m_rightArmPID->SetSetpoint(m_rightArmTarget);
-	
-	leftSpeed = m_leftArmPID->Calculate(curLeftPosition);
-	rightSpeed = m_rightArmPID->Calculate(curRightPosition);
-	
-	m_leftArm->Set(leftSpeed);
-	m_rightArm->Set(rightSpeed);
-	
-	if(abs(curLeftPosition - m_leftLastPosition) < c_armTargetDeadband) m_leftOnTarget = true;
-	if(abs(curRightPosition - m_rightLastPosition) < c_armTargetDeadband) m_rightOnTarget = true;
-	
-	m_leftLastPosition = curLeftPosition;
-	m_rightLastPosition = curRightPosition;
 }
 
 void FrontPickup::RunLeftWheels(Relay::Value value){
@@ -167,26 +132,18 @@ void FrontPickup::RunRightWheels(Relay::Value value){
 	m_rightWheels->Set(value);
 }
 
-INT32 FrontPickup::GetPosition(AnalogChannel* pot) {
-	INT32 curReading = 0;
-	static INT32 lastReading = 0;
-	INT32 returnValue = 0;
-	
-	curReading = pot->GetAverageValue();
-	returnValue = curReading;
-	
-	if((curReading < lastReading) || (abs(curReading - lastReading) >= 200)) {
-		returnValue = lastReading;
-	}	
-	lastReading = curReading;
-	
-	return returnValue;
-}
-
 void FrontPickup::SetUseJoystickLeft(bool use) {
 	m_useJoystickLeft = use;
 }
 
 void FrontPickup::SetUseJoystickRight(bool use) {
 	m_useJoystickRight = use;
+}
+
+void FrontPickup::SetJoystickLeft(float joyLeft) {
+	m_joyLeft = joyLeft;
+}
+
+void FrontPickup::SetJoystickRight(float joyRight) {
+	m_joyRight = joyRight;
 }
