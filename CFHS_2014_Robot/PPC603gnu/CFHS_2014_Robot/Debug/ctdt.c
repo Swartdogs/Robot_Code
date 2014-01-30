@@ -25,19 +25,19 @@ void _GLOBAL__I__ZN13DriveDistanceC2Edfb();
 
 void _GLOBAL__I__ZN13FindHotTargetC2Ev();
 
+void _GLOBAL__I__ZN14BackPickupPassC2Ev();
+
+void _GLOBAL__I__ZN15BackPickupStoreC2Ev();
+
 void _GLOBAL__I__ZN15BallShooterFireC2Ev();
 
 void _GLOBAL__I__ZN15BallShooterLoadC2Ev();
 
+void _GLOBAL__I__ZN16BackPickupDeployC2Ev();
+
 void _GLOBAL__I__ZN17DriveWithJoystickC2Ev();
 
 void _GLOBAL__I__ZN21BackPickupManualDriveC2Ev();
-
-void _GLOBAL__I__ZN21BackPickupSetPositionC2Ei();
-
-void _GLOBAL__I__ZN24FrontPickupRunLeftWheelsC2EN5Relay5ValueE();
-
-void _GLOBAL__I__ZN25FrontPickupRunRightWheelsC2EN5Relay5ValueE();
 
 void _GLOBAL__I__ZN26FrontPickupManualLeftDriveC2Ev();
 
@@ -113,13 +113,13 @@ void (*_ctors[])() =
     _GLOBAL__I__ZN11FrontPickupC2EP8RobotLog,
     _GLOBAL__I__ZN13DriveDistanceC2Edfb,
     _GLOBAL__I__ZN13FindHotTargetC2Ev,
+    _GLOBAL__I__ZN14BackPickupPassC2Ev,
+    _GLOBAL__I__ZN15BackPickupStoreC2Ev,
     _GLOBAL__I__ZN15BallShooterFireC2Ev,
     _GLOBAL__I__ZN15BallShooterLoadC2Ev,
+    _GLOBAL__I__ZN16BackPickupDeployC2Ev,
     _GLOBAL__I__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__I__ZN21BackPickupManualDriveC2Ev,
-    _GLOBAL__I__ZN21BackPickupSetPositionC2Ei,
-    _GLOBAL__I__ZN24FrontPickupRunLeftWheelsC2EN5Relay5ValueE,
-    _GLOBAL__I__ZN25FrontPickupRunRightWheelsC2EN5Relay5ValueE,
     _GLOBAL__I__ZN26FrontPickupManualLeftDriveC2Ev,
     _GLOBAL__I__ZN27FrontPickupManualRightDriveC2Ev,
     _GLOBAL__I__ZN29FrontPickupMoveArmsToPositionC2Ev,
@@ -172,19 +172,19 @@ void _GLOBAL__D__ZN13DriveDistanceC2Edfb();
 
 void _GLOBAL__D__ZN13FindHotTargetC2Ev();
 
+void _GLOBAL__D__ZN14BackPickupPassC2Ev();
+
+void _GLOBAL__D__ZN15BackPickupStoreC2Ev();
+
 void _GLOBAL__D__ZN15BallShooterFireC2Ev();
 
 void _GLOBAL__D__ZN15BallShooterLoadC2Ev();
 
+void _GLOBAL__D__ZN16BackPickupDeployC2Ev();
+
 void _GLOBAL__D__ZN17DriveWithJoystickC2Ev();
 
 void _GLOBAL__D__ZN21BackPickupManualDriveC2Ev();
-
-void _GLOBAL__D__ZN21BackPickupSetPositionC2Ei();
-
-void _GLOBAL__D__ZN24FrontPickupRunLeftWheelsC2EN5Relay5ValueE();
-
-void _GLOBAL__D__ZN25FrontPickupRunRightWheelsC2EN5Relay5ValueE();
 
 void _GLOBAL__D__ZN26FrontPickupManualLeftDriveC2Ev();
 
@@ -250,13 +250,13 @@ void (*_dtors[])() =
     _GLOBAL__D__ZN11FrontPickupC2EP8RobotLog,
     _GLOBAL__D__ZN13DriveDistanceC2Edfb,
     _GLOBAL__D__ZN13FindHotTargetC2Ev,
+    _GLOBAL__D__ZN14BackPickupPassC2Ev,
+    _GLOBAL__D__ZN15BackPickupStoreC2Ev,
     _GLOBAL__D__ZN15BallShooterFireC2Ev,
     _GLOBAL__D__ZN15BallShooterLoadC2Ev,
+    _GLOBAL__D__ZN16BackPickupDeployC2Ev,
     _GLOBAL__D__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__D__ZN21BackPickupManualDriveC2Ev,
-    _GLOBAL__D__ZN21BackPickupSetPositionC2Ei,
-    _GLOBAL__D__ZN24FrontPickupRunLeftWheelsC2EN5Relay5ValueE,
-    _GLOBAL__D__ZN25FrontPickupRunRightWheelsC2EN5Relay5ValueE,
     _GLOBAL__D__ZN26FrontPickupManualLeftDriveC2Ev,
     _GLOBAL__D__ZN27FrontPickupManualRightDriveC2Ev,
     _GLOBAL__D__ZN29FrontPickupMoveArmsToPositionC2Ev,

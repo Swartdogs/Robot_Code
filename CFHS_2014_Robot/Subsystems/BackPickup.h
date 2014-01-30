@@ -11,12 +11,30 @@
  * @author Neil
  */
 class BackPickup: public Subsystem {
+public:
+	typedef enum{bDeploy, bStore, bPass}BackMode;
+	
+	BackPickup(RobotLog* log);
+	void InitDefaultCommand();
+	void Periodic();
+	void SetUseJoystick(bool use);
+	void SetJoystickSpeed(float speed);
+	bool OnTarget();
+	void SetPickupMode(BackMode mode);
+	
+	BackMode  GetBackPickupMode();
+	
 private:
 	// It's desirable that everything possible under private except
 	// for methods that implement subsystem capabilities
 	
+	void SetSetpoint(INT32 target);
+	void SetRollers(float power);
+	
 	Victor* m_baseMotor;
 	Victor* m_rollers;
+	
+	DigitalInput* m_lightSensor;
 	
 	AnalogChannel* m_baseMotorPot;
 	
@@ -31,17 +49,9 @@ private:
 	INT32 m_baseTarget;
 	bool  m_onTarget;
 	
-	INT32 GetPosition();
+	BackMode m_backMode;
 	
-public:
-	BackPickup(RobotLog* log);
-	void InitDefaultCommand();
-	void Periodic();
-	void SetSetpoint(INT32 target);
-	void SetRollers(float power);
-	void SetUseJoystick(bool use);
-	void SetJoystickSpeed(float speed);
-	bool OnTarget();
+	INT32 GetPosition();
 };
 
 #endif

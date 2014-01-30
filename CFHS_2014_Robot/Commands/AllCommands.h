@@ -17,16 +17,34 @@ public:
 	virtual void Interrupted();
 };
 
-class BackPickupSetPosition: public CommandBase {
+class BackPickupDeploy: public CommandBase {
 public:
-	BackPickupSetPosition(int position);
+	BackPickupDeploy();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
 	virtual void End();
 	virtual void Interrupted();
-private:
-	int m_position;
+};
+
+class BackPickupPass: public CommandBase {
+public:
+	BackPickupPass();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
+class BackPickupStore: public CommandBase {
+public:
+	BackPickupStore();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
 };
 
 /////////////////
@@ -148,30 +166,6 @@ public:
 	virtual bool IsFinished();
 	virtual void End();
 	virtual void Interrupted();
-};
-
-class FrontPickupRunLeftWheels: public CommandBase {
-public:
-	FrontPickupRunLeftWheels(Relay::Value value);
-	virtual void Initialize();
-	virtual void Execute();
-	virtual bool IsFinished();
-	virtual void End();
-	virtual void Interrupted();
-private:
-	Relay::Value m_value;
-};
-
-class FrontPickupRunRightWheels: public CommandBase {
-public:
-	FrontPickupRunRightWheels(Relay::Value value);
-	virtual void Initialize();
-	virtual void Execute();
-	virtual bool IsFinished();
-	virtual void End();
-	virtual void Interrupted();
-private:
-	Relay::Value m_value;
 };
 
 #endif

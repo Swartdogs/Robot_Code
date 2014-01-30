@@ -15,6 +15,8 @@ BackPickup::BackPickup(RobotLog* log) : Subsystem("BackPickup") {
 	m_baseMotorPID->SetInputRange(0, 1024);
 	m_baseMotorPID->SetOutputRange(-1.0, 1.0);
 	
+	m_lightSensor = new DigitalInput(DI_BACK_PICKUP_SENSOR);
+	
 	m_log = log;
 	
 	m_useJoystick = false;
@@ -25,6 +27,8 @@ BackPickup::BackPickup(RobotLog* log) : Subsystem("BackPickup") {
 	m_baseMotorPID->SetSetpoint(m_baseTarget);
 	
 	m_onTarget = true;
+	
+	m_backMode = bStore;
 }
 
 INT32 BackPickup::GetPosition() {
@@ -44,6 +48,8 @@ void BackPickup::Periodic(){
 	float motorPower;
 	bool  isTooHigh;
 	bool  isTooLow;
+	
+	static int ballTimerCount = 0;
 	
 	INT32 curPosition = GetPosition();
 	isTooHigh = curPosition > (c_baseMaxPosition - c_baseMotorDeadband);
@@ -65,6 +71,31 @@ void BackPickup::Periodic(){
 	}
 	
 	m_baseMotor->Set(motorPower);
+	
+	switch (m_backMode) {
+	case bDeploy:
+		if (! m_lightSensor->Get()) {
+			SetPickupMode(bStore);
+		}
+		break;
+	case bPass:
+		if (m_onTarget) {
+			SetRollers(-1.0);
+			
+			if (m_lightSensor->Get()) {
+				if (ballTimerCount > 25) {
+					SetPickupMode(bStore);
+				} else {
+					ballTimerCount++;
+				}
+			} else {
+				ballTimerCount = 0;
+			}
+		}
+		break;
+	case bStore:
+		break;
+	}
 }
 
 void BackPickup::SetSetpoint(INT32 target){
@@ -92,4 +123,26 @@ void BackPickup::SetUseJoystick(bool use) {
 
 void BackPickup::SetJoystickSpeed(float speed) {
 	m_joySpeed = speed;
+}
+
+BackPickup::BackMode BackPickup::GetBackPickupMode(){
+	return m_backMode;
+}
+
+void BackPickup::SetPickupMode(BackMode mode){
+	m_backMode = mode;
+	
+	switch (mode) {
+	case bDeploy:
+		SetRollers(0.5);
+		SetSetpoint(200);
+		break;
+	case bPass:
+		SetSetpoint(150);
+		break;
+	case bStore:
+		SetRollers(0.0);
+		SetSetpoint(0);
+		break;
+	}
 }

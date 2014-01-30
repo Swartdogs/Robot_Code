@@ -12,8 +12,10 @@ const INT32 c_armTargetDeadband = 2;
 FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_leftArm = 	new Victor(MOD_FRONT_PICKUP_LEFT_ARM, PWM_FRONT_PICKUP_LEFT_ARM);
 	m_rightArm = 	new Victor(MOD_FRONT_PICKUP_RIGHT_ARM, PWM_FRONT_PICKUP_RIGHT_ARM);
-	m_leftWheels = 	new Relay(MOD_FRONT_PICKUP_LEFT_ROLLERS, PWM_FRONT_PICKUP_LEFT_ROLLERS);
-	m_rightWheels = new Relay(MOD_FRONT_PICKUP_RIGHT_ROLLERS, PWM_FRONT_PICKUP_RIGHT_ROLLERS);
+	m_leftWheels = 	new Victor(MOD_FRONT_PICKUP_LEFT_ROLLERS, PWM_FRONT_PICKUP_LEFT_ROLLERS);
+	m_rightWheels = new Victor(MOD_FRONT_PICKUP_RIGHT_ROLLERS, PWM_FRONT_PICKUP_RIGHT_ROLLERS);
+	
+	m_rightArmSensor = new DigitalInput(DI_FRONT_PICKUP_RIGHT_SENSOR);
 	
 	m_leftArmPot = 	new AnalogChannel(AI_FRONT_PICKUP_LEFT_ARM_POT);
 	m_rightArmPot = new AnalogChannel(AI_FRONT_PICKUP_RIGHT_ARM_POT);
@@ -105,9 +107,35 @@ void FrontPickup::Periodic() { // need to add support for rollers!
 	
 	m_leftArm->Set(leftSpeed);
 	m_rightArm->Set(rightSpeed);
+	
+	switch (m_frontMode) {
+	case fDeployBoth:
+		if (! m_rightArmSensor->Get()) {
+			SetPickupMode(fStore);
+		}
+		break;
+	case fDeployLeft:
+		
+		break;
+	case fDeployRight:
+		
+		break;
+	case fStore:
+		
+		break;
+	case fPass:
+		
+		break;
+	case fLowShoot:
+		
+		break;
+	case fLowDeploy:
+		
+		break;
+	}
 }
 
-void FrontPickup::SetSetpoint(INT32 leftPosition, INT32 rightPosition){
+void FrontPickup::SetSetpoints(INT32 leftPosition, INT32 rightPosition){
 	
 	m_leftOnTarget = false;
 	m_rightOnTarget = false;
@@ -124,14 +152,6 @@ void FrontPickup::SetSetpoint(INT32 leftPosition, INT32 rightPosition){
 	m_rightArmPID->SetSetpoint(m_rightArmTarget);
 }
 
-void FrontPickup::RunLeftWheels(Relay::Value value){
-	m_leftWheels->Set(value);
-}
-
-void FrontPickup::RunRightWheels(Relay::Value value){
-	m_rightWheels->Set(value);
-}
-
 void FrontPickup::SetUseJoystickLeft(bool use) {
 	m_useJoystickLeft = use;
 }
@@ -146,4 +166,40 @@ void FrontPickup::SetJoystickLeft(float joyLeft) {
 
 void FrontPickup::SetJoystickRight(float joyRight) {
 	m_joyRight = joyRight;
+}
+
+void FrontPickup::SetPickupMode(FrontMode mode) {
+	m_frontMode = mode;
+	
+	switch (mode) {
+	case fDeployBoth:
+		SetSetpoints(0,0);
+		m_rightWheels->Set(1.0);
+		m_leftWheels->Set(1.0);
+		break;
+	case fDeployLeft:
+		
+		break;
+	case fDeployRight:
+		
+		break;
+	case fStore:
+		SetSetpoints(50,50);
+		m_rightWheels->Set(0.0);
+		m_leftWheels->Set(0.0);
+		break;
+	case fPass:
+		
+		break;
+	case fLowShoot:
+		
+		break;
+	case fLowDeploy:
+		SetSetpoints(0,0);
+		break;
+	}
+}
+
+FrontPickup::FrontMode FrontPickup::GetFrontPickupMode() {
+	return m_frontMode;
 }
