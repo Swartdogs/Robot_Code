@@ -7,9 +7,9 @@
 // BACKPICKUP //
 ////////////////
 
-class BackPickupManualDrive: public CommandBase {
+class BackPickupJoystick: public CommandBase {
 public:
-	BackPickupManualDrive();
+	BackPickupJoystick();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
@@ -17,34 +17,16 @@ public:
 	virtual void Interrupted();
 };
 
-class BackPickupDeploy: public CommandBase {
+class BackPickupSetMode: public CommandBase {
 public:
-	BackPickupDeploy();
+	BackPickupSetMode(BackPickup::BackMode mode);
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
 	virtual void End();
 	virtual void Interrupted();
-};
-
-class BackPickupPass: public CommandBase {
-public:
-	BackPickupPass();
-	virtual void Initialize();
-	virtual void Execute();
-	virtual bool IsFinished();
-	virtual void End();
-	virtual void Interrupted();
-};
-
-class BackPickupStore: public CommandBase {
-public:
-	BackPickupStore();
-	virtual void Initialize();
-	virtual void Execute();
-	virtual bool IsFinished();
-	virtual void End();
-	virtual void Interrupted();
+private:
+	BackPickup::BackMode m_pickupMode;
 };
 
 /////////////////
@@ -138,9 +120,9 @@ public:
 // FRONTPICKUP //
 /////////////////
 
-class FrontPickupManualLeftDrive: public CommandBase {
+class FrontPickupJoystickLeft: public CommandBase {
 public:
-	FrontPickupManualLeftDrive();
+	FrontPickupJoystickLeft();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
@@ -148,19 +130,9 @@ public:
 	virtual void Interrupted();
 };
 
-class FrontPickupManualRightDrive: public CommandBase {
+class FrontPickupJoystickRight: public CommandBase {
 public:
-	FrontPickupManualRightDrive();
-	virtual void Initialize();
-	virtual void Execute();
-	virtual bool IsFinished();
-	virtual void End();
-	virtual void Interrupted();
-};
-
-class FrontPickupMoveArmsToPosition: public CommandBase {
-public:
-	FrontPickupMoveArmsToPosition();
+	FrontPickupJoystickRight();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();

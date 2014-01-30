@@ -36,13 +36,8 @@ INT32 BackPickup::GetPosition() {
 }
     
 void BackPickup::InitDefaultCommand() {
-	// Set the default command for a subsystem here.
-	//SetDefaultCommand(new MySpecialCommand());
 }
 
-
-// Put methods for controlling this subsystem
-// here. Call these from Commands.
 
 void BackPickup::Periodic(){
 	float motorPower;
@@ -130,19 +125,24 @@ BackPickup::BackMode BackPickup::GetBackPickupMode(){
 }
 
 void BackPickup::SetPickupMode(BackMode mode){
-	m_backMode = mode;
-	
 	switch (mode) {
 	case bDeploy:
-		SetRollers(0.5);
-		SetSetpoint(200);
+		if (m_lightSensor->Get()) {			// No ball
+			SetRollers(0.5);
+			SetSetpoint(200);
+			m_backMode = bDeploy;
+		}
 		break;
 	case bPass:
-		SetSetpoint(150);
+		if (! m_lightSensor->Get()) {		// Ball loaded
+			SetSetpoint(150);
+			m_backMode = bPass;
+		}
 		break;
 	case bStore:
 		SetRollers(0.0);
 		SetSetpoint(0);
+		m_backMode = bStore;
 		break;
 	}
 }

@@ -34,13 +34,10 @@ private:
 	Victor* m_baseMotor;
 	Victor* m_rollers;
 	
-	DigitalInput* m_lightSensor;
-	
+	DigitalInput*  m_lightSensor;
 	AnalogChannel* m_baseMotorPot;
-	
-	PIDControl* m_baseMotorPID;
-	
-	RobotLog* m_log;
+	PIDControl*    m_baseMotorPID;
+	RobotLog*      m_log;
 	
 	bool m_useJoystick;
 	

@@ -21,9 +21,9 @@ OI::OI() {
 	tiltButton10  = new JoystickButton(tiltJoystick, 10);	// 
 	tiltButton11  = new JoystickButton(tiltJoystick, 11);	// 
 	
-	tiltButton1->WhileHeld(new FrontPickupManualLeftDrive());
-	tiltButton2->WhileHeld(new FrontPickupManualRightDrive());
-	tiltButton3->WhileHeld(new BackPickupManualDrive());
+	tiltButton1->WhileHeld(new FrontPickupJoystickLeft());
+	tiltButton2->WhileHeld(new FrontPickupJoystickRight());
+	tiltButton3->WhileHeld(new BackPickupJoystick());
 	tiltButton4->WhenPressed(new BallShooterLoad());  // Will be replaced by Command Group to include actually loading a ball from either Pickup
 	tiltButton5->WhenPressed(new BallShooterFire());
 }

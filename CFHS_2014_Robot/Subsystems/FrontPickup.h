@@ -12,7 +12,7 @@
  */
 class FrontPickup: public Subsystem {
 public:
-	typedef enum {fDeployBoth,fDeployLeft,fDeployRight,fPass,fStore,fLowShoot,fLowDeploy} FrontMode;
+	typedef enum {fDeployBoth, fDeployLeft, fDeployRight, fPass, fStore, fLowShoot, fLowDeploy} FrontMode;
 	
 	FrontPickup(RobotLog* log);
 	void InitDefaultCommand();
@@ -42,7 +42,7 @@ private:
 	PIDControl* 	m_leftArmPID;
 	PIDControl* 	m_rightArmPID;
 	
-	DigitalInput*   m_rightArmSensor;
+	DigitalInput*   m_ballLoadedSensor;
 	
 	RobotLog*       m_log;
 

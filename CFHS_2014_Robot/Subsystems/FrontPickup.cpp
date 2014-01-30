@@ -15,7 +15,7 @@ FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_leftWheels = 	new Victor(MOD_FRONT_PICKUP_LEFT_ROLLERS, PWM_FRONT_PICKUP_LEFT_ROLLERS);
 	m_rightWheels = new Victor(MOD_FRONT_PICKUP_RIGHT_ROLLERS, PWM_FRONT_PICKUP_RIGHT_ROLLERS);
 	
-	m_rightArmSensor = new DigitalInput(DI_FRONT_PICKUP_RIGHT_SENSOR);
+	m_ballLoadedSensor = new DigitalInput(DI_FRONT_PICKUP_BALL_SENSOR);
 	
 	m_leftArmPot = 	new AnalogChannel(AI_FRONT_PICKUP_LEFT_ARM_POT);
 	m_rightArmPot = new AnalogChannel(AI_FRONT_PICKUP_RIGHT_ARM_POT);
@@ -110,7 +110,7 @@ void FrontPickup::Periodic() { // need to add support for rollers!
 	
 	switch (m_frontMode) {
 	case fDeployBoth:
-		if (! m_rightArmSensor->Get()) {
+		if (! m_ballLoadedSensor->Get()) {
 			SetPickupMode(fStore);
 		}
 		break;
@@ -169,13 +169,14 @@ void FrontPickup::SetJoystickRight(float joyRight) {
 }
 
 void FrontPickup::SetPickupMode(FrontMode mode) {
-	m_frontMode = mode;
-	
 	switch (mode) {
 	case fDeployBoth:
-		SetSetpoints(0,0);
-		m_rightWheels->Set(1.0);
-		m_leftWheels->Set(1.0);
+		if (m_ballLoadedSensor) {				// No ball
+			SetSetpoints(0,0);
+			m_rightWheels->Set(1.0);
+			m_leftWheels->Set(1.0);
+			m_frontMode = fDeployBoth;
+		}
 		break;
 	case fDeployLeft:
 		
@@ -187,6 +188,7 @@ void FrontPickup::SetPickupMode(FrontMode mode) {
 		SetSetpoints(50,50);
 		m_rightWheels->Set(0.0);
 		m_leftWheels->Set(0.0);
+		m_frontMode = fStore;
 		break;
 	case fPass:
 		
@@ -195,7 +197,10 @@ void FrontPickup::SetPickupMode(FrontMode mode) {
 		
 		break;
 	case fLowDeploy:
-		SetSetpoints(0,0);
+		if (! m_ballLoadedSensor) {				// Ball loaded
+			SetSetpoints(0,0);
+			m_frontMode = fLowDeploy;
+		}
 		break;
 	}
 }
