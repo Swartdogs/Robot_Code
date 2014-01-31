@@ -8,6 +8,7 @@ const INT32 c_leftArmMaxPosition = 500;
 const INT32 c_rightArmZeroOffset = 0;
 const INT32 c_rightArmMaxPosition = 500;
 const INT32 c_armTargetDeadband = 2;
+const INT32 c_incrementValue = 10;
 
 FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_leftArm = 	new Victor(MOD_FRONT_PICKUP_LEFT_ARM, PWM_FRONT_PICKUP_LEFT_ARM);
@@ -42,6 +43,9 @@ FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_log = log;
 }
 
+void FrontPickup::InitDefaultCommand() {
+}
+
 INT32 FrontPickup::GetPosition(Pot pot) {
 	switch(pot) {
 		case pLeft:
@@ -51,14 +55,26 @@ INT32 FrontPickup::GetPosition(Pot pot) {
 	}
 	return 0;
 }
-    
-void FrontPickup::InitDefaultCommand() {
-}
 
+INT32 FrontPickup::LimitValue(Pot arm, INT32 position) {
+	if(arm == pLeft) {
+		position = (position > c_leftArmMaxPosition) ? c_leftArmMaxPosition :
+				   (position < c_leftArmZeroOffset)  ? c_leftArmZeroOffset  : 
+													   position;
+	} else {
+		position = (position > c_rightArmMaxPosition) ? c_rightArmMaxPosition :
+				   (position < c_rightArmZeroOffset)  ? c_rightArmZeroOffset  :
+														position;
+	}
+	
+	return position;
+}
 
 void FrontPickup::Periodic() { // need to add support for rollers!
 	static float leftSpeed = 0;
 	static float rightSpeed = 0;
+	
+	static int ballTimerCount = 0;
 	
 	bool isTooHigh;
 	bool isTooLow;
@@ -136,6 +152,36 @@ void FrontPickup::Periodic() { // need to add support for rollers!
 	case fLowDeploy:
 		
 		break;
+	case fMoveToLoad:
+		if(m_leftOnTarget && m_rightOnTarget) {
+			m_leftWheels->Set(0.3);
+			m_rightWheels->Set(0.3);
+			m_frontMode = fLoad;
+		}
+		break;
+	case fLoad:
+		if(m_ballLoadedSensor->Get()) {
+			if(ballTimerCount > 25) {
+				SetPickupMode(fStore);
+			} else {
+				ballTimerCount++;
+			}
+		} else {
+			ballTimerCount = 0;
+		}
+		break;
+	}
+}
+
+void FrontPickup::IncrementArm(Pot arm, bool up) {
+	if(arm == pLeft) {
+		m_leftArmTarget += (up) ? c_incrementValue : -c_incrementValue;
+		m_leftArmTarget = LimitValue(pLeft, m_leftArmTarget);
+		m_leftArmPID->SetSetpoint(m_leftArmTarget);
+	} else {
+		m_rightArmTarget += (up) ? c_incrementValue : -c_incrementValue;
+		m_rightArmTarget = LimitValue(pRight, m_rightArmTarget);
+		m_rightArmPID->SetSetpoint(m_rightArmTarget);
 	}
 }
 
@@ -144,16 +190,21 @@ void FrontPickup::SetSetpoints(INT32 leftPosition, INT32 rightPosition){
 	m_leftOnTarget = false;
 	m_rightOnTarget = false;
 	
-	if(leftPosition > c_leftArmMaxPosition) leftPosition = c_leftArmMaxPosition;
-	if(rightPosition > c_rightArmMaxPosition) rightPosition = c_rightArmMaxPosition;
-	if(leftPosition < c_leftArmZeroOffset) leftPosition = c_leftArmZeroOffset;
-	if(rightPosition < c_rightArmZeroOffset) rightPosition = c_rightArmZeroOffset;
-	
-	m_leftArmTarget = leftPosition;
-	m_rightArmTarget = rightPosition;
+	m_leftArmTarget = LimitValue(pLeft, leftPosition);
+	m_rightArmTarget = LimitValue(pRight, rightPosition);
 	
 	m_leftArmPID->SetSetpoint(m_leftArmTarget);
 	m_rightArmPID->SetSetpoint(m_rightArmTarget);
+}
+
+void FrontPickup::SetSetpoint(INT32 position, Pot arm) {
+	if(arm == pLeft) {
+		m_leftArmTarget = LimitValue(arm, position);
+		m_leftArmPID->SetSetpoint(m_leftArmTarget);
+	} else {
+		m_rightArmTarget = LimitValue(arm, position);
+		m_rightArmPID->SetSetpoint(m_rightArmTarget);
+	}
 }
 
 void FrontPickup::SetUseJoystickLeft(bool use) {
@@ -175,7 +226,7 @@ void FrontPickup::SetJoystickRight(float joyRight) {
 void FrontPickup::SetPickupMode(FrontMode mode) {
 	switch (mode) {
 	case fDeployBoth:
-		if (m_ballLoadedSensor) {				// No ball
+		if (m_ballLoadedSensor->Get()) {				// No ball
 			SetSetpoints(0,0);
 			m_rightWheels->Set(1.0);
 			m_leftWheels->Set(1.0);
@@ -202,14 +253,26 @@ void FrontPickup::SetPickupMode(FrontMode mode) {
 		m_leftWheels->Set(1.0);
 		break;
 	case fLowDeploy:
-		if (! m_ballLoadedSensor) {				// Ball loaded
+		if (!m_ballLoadedSensor->Get()) {				// Ball loaded
 			SetSetpoints(0,0);
 			m_frontMode = fLowDeploy;
 		}
+		break;
+	case fMoveToLoad:
+		if(!m_ballLoadedSensor->Get()) {
+			SetSetpoints(80,80);
+			m_frontMode = fMoveToLoad;
+		}
+		break;
+	case fLoad:
 		break;
 	}
 }
 
 FrontPickup::FrontMode FrontPickup::GetFrontPickupMode() {
 	return m_frontMode;
+}
+
+bool FrontPickup::HasBall() {
+	return !m_ballLoadedSensor->Get();
 }

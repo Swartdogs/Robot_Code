@@ -12,7 +12,7 @@
  */
 class BackPickup: public Subsystem {
 public:
-	typedef enum{bDeploy, bStore, bPass}BackMode;
+	typedef enum{bDeploy, bStore, bPass, bMoveToLoad, bLoad}BackMode;
 	
 	BackPickup(RobotLog* log);
 	void InitDefaultCommand();
@@ -23,6 +23,7 @@ public:
 	void SetPickupMode(BackMode mode);
 	
 	BackMode  GetBackPickupMode();
+	bool HasBall();
 	
 private:
 	// It's desirable that everything possible under private except

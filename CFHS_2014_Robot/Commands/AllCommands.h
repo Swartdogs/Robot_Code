@@ -125,6 +125,20 @@ public:
 // FRONTPICKUP //
 /////////////////
 
+class FrontPickupIncrement: public CommandBase {
+public:
+	FrontPickupIncrement(FrontPickup::Pot arm, bool up);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+	
+private:
+	FrontPickup::Pot m_arm;
+	bool m_up;
+};
+
 class FrontPickupJoystickLeft: public CommandBase {
 public:
 	FrontPickupJoystickLeft();
@@ -147,11 +161,35 @@ public:
 
 #endif
 
-//////////////
-// AUTOFIRE //
-//////////////
+////////////
+// PICKUP //
+////////////
+
+class PickupLoad: public CommandBase {
+public:
+	PickupLoad();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+	
+private:
+	typedef enum {pFront, pBack, pNone} Pickup;
+	
+	Pickup m_pickup;
+};
+
+////////////////////
+// COMMAND GROUPS //
+////////////////////
 
 class AutoFire: public CommandGroup {
 public:	
 	AutoFire();
+};
+
+class LoadBall: public CommandGroup {
+public:	
+	LoadBall();
 };

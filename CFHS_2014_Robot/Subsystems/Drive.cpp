@@ -22,6 +22,8 @@ Drive::Drive(RobotLog *robotLog) : Subsystem("Drive") {
 	m_rightEncoder = new Encoder(DI_DRIVE_RIGHT_A, DI_DRIVE_RIGHT_B);
 	m_rightEncoder->SetDistancePerPulse(0.0775);
 	
+	m_tapeSensor = new DigitalInput(DI_DRIVE_TAPE_SENSOR);
+	
 	m_onTarget = false;
 	
 	m_useGyro  = false;
@@ -303,4 +305,8 @@ float Drive::RotateError() {
 			 error;
 	
 	return error;
+}
+
+bool Drive::CrossedTape() {
+	return (!m_tapeSensor->Get());
 }

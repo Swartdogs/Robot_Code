@@ -30,4 +30,5 @@ void CommandBase::Periodic() {
 	frontPickup->Periodic();
 	backPickup->Periodic();
 	ballShooter->Periodic();
+	oi->Periodic(drive->CrossedTape());
 }

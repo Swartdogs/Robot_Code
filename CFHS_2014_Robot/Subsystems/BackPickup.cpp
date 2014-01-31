@@ -90,6 +90,23 @@ void BackPickup::Periodic(){
 		break;
 	case bStore:
 		break;
+	case bMoveToLoad:
+		if(m_onTarget) {
+			m_backMode = bLoad;
+			SetRollers(0.3);
+		}
+		break;
+	case bLoad:
+		if(m_lightSensor->Get()) {
+			if(ballTimerCount > 25) {
+				SetPickupMode(bStore);
+			} else {
+				ballTimerCount++;
+			}
+		} else {
+			ballTimerCount = 0;
+		}
+		break;
 	}
 }
 
@@ -124,6 +141,10 @@ BackPickup::BackMode BackPickup::GetBackPickupMode(){
 	return m_backMode;
 }
 
+bool BackPickup::HasBall() {
+	return !m_lightSensor->Get();
+}
+
 void BackPickup::SetPickupMode(BackMode mode){
 	switch (mode) {
 	case bDeploy:
@@ -134,7 +155,7 @@ void BackPickup::SetPickupMode(BackMode mode){
 		}
 		break;
 	case bPass:
-		if (! m_lightSensor->Get()) {		// Ball loaded
+		if (!m_lightSensor->Get()) {		// Ball loaded
 			SetSetpoint(150);
 			m_backMode = bPass;
 		}
@@ -143,6 +164,14 @@ void BackPickup::SetPickupMode(BackMode mode){
 		SetRollers(0.0);
 		SetSetpoint(0);
 		m_backMode = bStore;
+		break;
+	case bMoveToLoad:
+		if(!m_lightSensor->Get()) {
+			SetSetpoint(230);
+			m_backMode = bMoveToLoad;
+		}
+		break;
+	case bLoad:
 		break;
 	}
 }

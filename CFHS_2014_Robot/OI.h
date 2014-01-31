@@ -20,9 +20,11 @@ private:
 	JoystickButton* tiltButton10;
 	JoystickButton* tiltButton11;
 	
+	InternalButton* comboButton1;
 	
 public:
 	OI();
+	void  Periodic(bool autoFireArm);
 	float GetDriveX();
 	float GetDriveY();
 	float GetDriveZ();

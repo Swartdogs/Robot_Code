@@ -12,13 +12,16 @@
  */
 class FrontPickup: public Subsystem {
 public:
-	typedef enum {fDeployBoth, fDeployLeft, fDeployRight, fPass, fStore, fLowShoot, fLowDeploy} FrontMode;
+	typedef enum {fDeployBoth, fDeployLeft, fDeployRight, fPass, fStore, fLowShoot, fLowDeploy, fMoveToLoad, fLoad} FrontMode;
+	typedef enum {pLeft, pRight} Pot;
 	
 	FrontPickup(RobotLog* log);
 	void InitDefaultCommand();
 	
 	void Periodic();
+	void IncrementArm(Pot arm, bool up);
 	void SetSetpoints(INT32 leftPosition, INT32 rightPosition);
+	void SetSetpoint(INT32 position, Pot arm);
 	void SetUseJoystickLeft(bool use);
 	void SetUseJoystickRight(bool use);
 	void SetJoystickLeft(float joyLeft);
@@ -27,9 +30,9 @@ public:
 	void SetPickupMode(FrontMode mode);
 	FrontMode GetFrontPickupMode();
 	
-private:
+	bool HasBall();
 	
-	typedef enum {pLeft, pRight}Pot;
+private:
 	
 	Victor* 		m_rightArm;
 	Victor* 		m_leftArm;
@@ -60,6 +63,7 @@ private:
 	bool 	m_rightOnTarget;
 	
 	INT32 GetPosition(Pot pot);
+	INT32 LimitValue(Pot pot, INT32 position);
 };
 
 #endif
