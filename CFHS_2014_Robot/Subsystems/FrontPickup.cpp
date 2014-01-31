@@ -127,7 +127,11 @@ void FrontPickup::Periodic() { // need to add support for rollers!
 		
 		break;
 	case fLowShoot:
-		
+		if (m_ballLoadedSensor->Get()) {
+			m_leftWheels->Set(0.0);
+			m_rightWheels->Set(0.0);
+			SetPickupMode(fStore);
+		}
 		break;
 	case fLowDeploy:
 		
@@ -194,7 +198,8 @@ void FrontPickup::SetPickupMode(FrontMode mode) {
 		
 		break;
 	case fLowShoot:
-		
+		m_rightWheels->Set(1.0);
+		m_leftWheels->Set(1.0);
 		break;
 	case fLowDeploy:
 		if (! m_ballLoadedSensor) {				// Ball loaded

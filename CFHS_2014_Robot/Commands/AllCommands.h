@@ -59,6 +59,10 @@ public:
 
 class DriveDistance: public CommandBase {
 private:
+	typedef enum {mRelNoGyro,mRelGyro,mAbsolute} InitMode;
+	
+	InitMode m_currentInitMode;
+	
 	double m_targetDistance;
 	float m_maxSpeed;
 	float m_targetAngle;
@@ -67,7 +71,8 @@ private:
 	bool m_useGyro;
 public:
 	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders);
-	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float targetAngle, bool resetGyro);
+	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float relativeAngle, bool resetGyro);
+	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float absoluteAngle);
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
@@ -141,3 +146,12 @@ public:
 };
 
 #endif
+
+//////////////
+// AUTOFIRE //
+//////////////
+
+class AutoFire: public CommandGroup {
+public:	
+	AutoFire();
+};

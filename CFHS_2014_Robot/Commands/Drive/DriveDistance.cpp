@@ -6,7 +6,7 @@ DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEn
 	m_resetEncoders = resetEncoders;
 	m_targetAngle = 0;
 	m_resetGyro = false;
-	m_useGyro = false;
+	m_currentInitMode = mRelNoGyro;
 	Requires(drive);
 }
 
@@ -16,16 +16,32 @@ DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEn
 	m_resetEncoders = resetEncoders;
 	m_targetAngle = targetAngle;
 	m_resetGyro = resetGyro;
-	m_useGyro = true;
+	m_currentInitMode = mRelGyro;
+	Requires(drive);
+}
+
+DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float absoluteAngle) {
+	m_targetDistance = targetDistance;
+	m_maxSpeed = maxSpeed;
+	m_resetEncoders = resetEncoders;
+	m_targetAngle = absoluteAngle;
+	m_currentInitMode = mAbsolute;
 	Requires(drive);
 }
 
 // Called just before this Command runs the first time
 void DriveDistance::Initialize() {
-	if(m_useGyro) {
+	
+	switch (m_currentInitMode) {
+	case mRelGyro:
 		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders, m_targetAngle, m_resetGyro);
-	} else {
+		break;
+	case mRelNoGyro:
 		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders);
+		break;
+	case mAbsolute:
+		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders, m_targetAngle);
+		break;
 	}
 }
 

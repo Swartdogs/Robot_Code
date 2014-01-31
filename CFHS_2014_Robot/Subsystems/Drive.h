@@ -14,6 +14,7 @@ class Drive: public Subsystem {
 private:
 	// It's desirable that everything possible under private except
 	// for methods that implement subsystem capabilities
+	
 	Victor*     m_leftFront;
 	Victor* 	m_leftCenter;
 	Victor*	   	m_leftRear;
