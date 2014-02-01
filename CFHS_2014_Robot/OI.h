@@ -2,9 +2,12 @@
 #define OI_H
 
 #include "WPILib.h"
+#include "Subsystems/Drive.h"
 
 class OI {
 private:
+	Drive* m_drive;
+	
 	Joystick* driveJoystick;
 	Joystick* tiltJoystick;
 	
@@ -23,8 +26,8 @@ private:
 	InternalButton* comboButton1;
 	
 public:
-	OI();
-	void  Periodic(bool autoFireArm);
+	OI(Drive* drive);
+	void  Periodic();
 	float GetDriveX();
 	float GetDriveY();
 	float GetDriveZ();

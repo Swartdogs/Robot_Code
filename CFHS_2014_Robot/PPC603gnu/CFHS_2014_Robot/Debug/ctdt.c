@@ -37,13 +37,15 @@ void _GLOBAL__I__ZN17DriveWithJoystickC2Ev();
 
 void _GLOBAL__I__ZN18BackPickupJoystickC2Ev();
 
+void _GLOBAL__I__ZN20AutoFireDriveAndLoadC2Ev();
+
 void _GLOBAL__I__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb();
 
 void _GLOBAL__I__ZN23FrontPickupJoystickLeftC2Ev();
 
 void _GLOBAL__I__ZN24FrontPickupJoystickRightC2Ev();
 
-void _GLOBAL__I__ZN2OIC2Ev();
+void _GLOBAL__I__ZN2OIC2EP5Drive();
 
 void _GLOBAL__I__ZN5DriveC2EP8RobotLog();
 
@@ -121,10 +123,11 @@ void (*_ctors[])() =
     _GLOBAL__I__ZN17BackPickupSetModeC2EN10BackPickup8BackModeE,
     _GLOBAL__I__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__I__ZN18BackPickupJoystickC2Ev,
+    _GLOBAL__I__ZN20AutoFireDriveAndLoadC2Ev,
     _GLOBAL__I__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb,
     _GLOBAL__I__ZN23FrontPickupJoystickLeftC2Ev,
     _GLOBAL__I__ZN24FrontPickupJoystickRightC2Ev,
-    _GLOBAL__I__ZN2OIC2Ev,
+    _GLOBAL__I__ZN2OIC2EP5Drive,
     _GLOBAL__I__ZN5DriveC2EP8RobotLog,
     _GLOBAL__I__ZN8AutoFireC2Ev,
     _GLOBAL__I__ZN8LoadBallC2Ev,
@@ -187,13 +190,15 @@ void _GLOBAL__D__ZN17DriveWithJoystickC2Ev();
 
 void _GLOBAL__D__ZN18BackPickupJoystickC2Ev();
 
+void _GLOBAL__D__ZN20AutoFireDriveAndLoadC2Ev();
+
 void _GLOBAL__D__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb();
 
 void _GLOBAL__D__ZN23FrontPickupJoystickLeftC2Ev();
 
 void _GLOBAL__D__ZN24FrontPickupJoystickRightC2Ev();
 
-void _GLOBAL__D__ZN2OIC2Ev();
+void _GLOBAL__D__ZN2OIC2EP5Drive();
 
 void _GLOBAL__D__ZN5DriveC2EP8RobotLog();
 
@@ -261,10 +266,11 @@ void (*_dtors[])() =
     _GLOBAL__D__ZN17BackPickupSetModeC2EN10BackPickup8BackModeE,
     _GLOBAL__D__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__D__ZN18BackPickupJoystickC2Ev,
+    _GLOBAL__D__ZN20AutoFireDriveAndLoadC2Ev,
     _GLOBAL__D__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb,
     _GLOBAL__D__ZN23FrontPickupJoystickLeftC2Ev,
     _GLOBAL__D__ZN24FrontPickupJoystickRightC2Ev,
-    _GLOBAL__D__ZN2OIC2Ev,
+    _GLOBAL__D__ZN2OIC2EP5Drive,
     _GLOBAL__D__ZN5DriveC2EP8RobotLog,
     _GLOBAL__D__ZN8AutoFireC2Ev,
     _GLOBAL__D__ZN8LoadBallC2Ev,

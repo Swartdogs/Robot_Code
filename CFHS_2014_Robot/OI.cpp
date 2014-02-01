@@ -2,7 +2,9 @@
 #include "Commands/AllCommands.h"
 #include "Subsystems/FrontPickup.h"
 
-OI::OI() {
+OI::OI(Drive* drive) {
+	m_drive = drive;
+	
 	// Process operator interface input here.
 	driveJoystick = new Joystick(1);
 	tiltJoystick  = new Joystick(2);
@@ -36,11 +38,11 @@ OI::OI() {
 	tiltButton8->WhenPressed(new FrontPickupIncrement(FrontPickup::pRight, true));
 	tiltButton9->WhenPressed(new FrontPickupIncrement(FrontPickup::pRight, false));
 	
-	comboButton1->WhenPressed(new AutoFire());
+	comboButton1->WhileHeld(new AutoFire());
 }
 
-void OI::Periodic(bool autoFireArm) { // Is there a better way to do this?
-	comboButton1->SetPressed(tiltButton10->Get() && autoFireArm);
+void OI::Periodic() { 
+	comboButton1->SetPressed(tiltButton10->Get() && m_drive->CrossedTape() );
 }
 
 float OI::GetDriveX() {

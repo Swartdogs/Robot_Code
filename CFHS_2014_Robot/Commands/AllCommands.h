@@ -193,3 +193,8 @@ class LoadBall: public CommandGroup {
 public:	
 	LoadBall();
 };
+
+class AutoFireDriveAndLoad: public CommandGroup {
+public:	
+	AutoFireDriveAndLoad();
+};

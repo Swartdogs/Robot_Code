@@ -19,7 +19,7 @@ void CommandBase::Init(RobotLog* logDelegate) {
     // Create a single static instance of all of your subsystems. The following
 	// line should be repeated for each subsystem in the project.
 	drive = new Drive(logDelegate);
-	oi = new OI();
+	oi = new OI(drive);
 	findTarget = new FindTarget();
 	frontPickup = new FrontPickup(logDelegate);
 	backPickup = new BackPickup(logDelegate);
@@ -30,5 +30,5 @@ void CommandBase::Periodic() {
 	frontPickup->Periodic();
 	backPickup->Periodic();
 	ballShooter->Periodic();
-	oi->Periodic(drive->CrossedTape());
+	oi->Periodic();
 }
