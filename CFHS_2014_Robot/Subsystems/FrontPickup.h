@@ -12,7 +12,7 @@
  */
 class FrontPickup: public Subsystem {
 public:
-	typedef enum {fDeployBoth, fDeployLeft, fDeployRight, fPass, fStore, fLowShoot, fLowDeploy, fMoveToLoad, fLoad} FrontMode;
+	typedef enum {fDeployBoth, fDeployLeft, fDeployRight, fPass, fStore, fLowShoot, fLowDeploy, fMoveToLoad, fLoad, fAutoDeploy} FrontMode;
 	typedef enum {pLeft, pRight} Pot;
 	
 	FrontPickup(RobotLog* log);
@@ -36,8 +36,9 @@ private:
 	
 	Victor* 		m_rightArm;
 	Victor* 		m_leftArm;
-	Victor* 		m_rightWheels;
-	Victor* 		m_leftWheels;
+	
+	Relay* 		m_rightWheels;
+	Relay* 		m_leftWheels;
 	
 	AnalogChannel*	m_leftArmPot;
 	AnalogChannel* 	m_rightArmPot;

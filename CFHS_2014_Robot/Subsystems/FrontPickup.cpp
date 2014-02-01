@@ -13,8 +13,9 @@ const INT32 c_incrementValue = 10;
 FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_leftArm = 	new Victor(MOD_FRONT_PICKUP_LEFT_ARM, PWM_FRONT_PICKUP_LEFT_ARM);
 	m_rightArm = 	new Victor(MOD_FRONT_PICKUP_RIGHT_ARM, PWM_FRONT_PICKUP_RIGHT_ARM);
-	m_leftWheels = 	new Victor(MOD_FRONT_PICKUP_LEFT_ROLLERS, PWM_FRONT_PICKUP_LEFT_ROLLERS);
-	m_rightWheels = new Victor(MOD_FRONT_PICKUP_RIGHT_ROLLERS, PWM_FRONT_PICKUP_RIGHT_ROLLERS);
+	
+	m_leftWheels = 	new Relay(MOD_FRONT_PICKUP_LEFT_ROLLERS, RELAY_FRONT_PICKUP_LEFT_ROLLERS, Relay::kBothDirections);
+	m_rightWheels = new Relay(MOD_FRONT_PICKUP_RIGHT_ROLLERS, RELAY_FRONT_PICKUP_RIGHT_ROLLERS, Relay::kBothDirections);
 	
 	m_ballLoadedSensor = new DigitalInput(DI_FRONT_PICKUP_BALL_SENSOR);
 	
@@ -144,8 +145,8 @@ void FrontPickup::Periodic() { // need to add support for rollers!
 		break;
 	case fLowShoot:
 		if (m_ballLoadedSensor->Get()) {
-			m_leftWheels->Set(0.0);
-			m_rightWheels->Set(0.0);
+			m_leftWheels->Set(Relay::kOff);
+			m_rightWheels->Set(Relay::kOff);
 			SetPickupMode(fStore);
 		}
 		break;
@@ -154,8 +155,8 @@ void FrontPickup::Periodic() { // need to add support for rollers!
 		break;
 	case fMoveToLoad:
 		if(m_leftOnTarget && m_rightOnTarget) {
-			m_leftWheels->Set(0.3);
-			m_rightWheels->Set(0.3);
+			m_leftWheels->Set(Relay::kForward);
+			m_rightWheels->Set(Relay::kForward);
 			m_frontMode = fLoad;
 		}
 		break;
@@ -168,6 +169,12 @@ void FrontPickup::Periodic() { // need to add support for rollers!
 			}
 		} else {
 			ballTimerCount = 0;
+		}
+		break;
+	case fAutoDeploy:
+		if(!m_ballLoadedSensor->Get()) {
+			m_leftWheels->Set(Relay::kOff);
+			m_rightWheels->Set(Relay::kOff);
 		}
 		break;
 	}
@@ -228,8 +235,8 @@ void FrontPickup::SetPickupMode(FrontMode mode) {
 	case fDeployBoth:
 		if (m_ballLoadedSensor->Get()) {				// No ball
 			SetSetpoints(0,0);
-			m_rightWheels->Set(1.0);
-			m_leftWheels->Set(1.0);
+			m_rightWheels->Set(Relay::kForward);
+			m_leftWheels->Set(Relay::kForward);
 			m_frontMode = fDeployBoth;
 		}
 		break;
@@ -241,16 +248,16 @@ void FrontPickup::SetPickupMode(FrontMode mode) {
 		break;
 	case fStore:
 		SetSetpoints(50,50);
-		m_rightWheels->Set(0.0);
-		m_leftWheels->Set(0.0);
+		m_rightWheels->Set(Relay::kOff);
+		m_leftWheels->Set(Relay::kOff);
 		m_frontMode = fStore;
 		break;
 	case fPass:
 		
 		break;
 	case fLowShoot:
-		m_rightWheels->Set(1.0);
-		m_leftWheels->Set(1.0);
+		m_rightWheels->Set(Relay::kForward);
+		m_leftWheels->Set(Relay::kForward);
 		break;
 	case fLowDeploy:
 		if (!m_ballLoadedSensor->Get()) {				// Ball loaded
@@ -265,6 +272,14 @@ void FrontPickup::SetPickupMode(FrontMode mode) {
 		}
 		break;
 	case fLoad:
+		break;
+	case fAutoDeploy:
+		if(m_ballLoadedSensor->Get()) {
+			SetSetpoints(0,0);
+			m_rightWheels->Set(Relay::kForward);
+			m_leftWheels->Set(Relay::kForward);
+			m_frontMode = fAutoDeploy;
+		}
 		break;
 	}
 }

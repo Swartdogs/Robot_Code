@@ -41,6 +41,9 @@ public:
 	virtual bool IsFinished();
 	virtual void End();
 	virtual void Interrupted();
+private:
+	bool m_doLowShot;
+	double m_distanceToLowGoal;
 };
 
 class BallShooterLoad: public CommandBase {
@@ -97,6 +100,18 @@ private:
 	float target_angle,reset_gyro;
 };
 
+class DriveToLowGoal: public CommandBase {
+public:
+	DriveToLowGoal();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	double m_distanceToLowGoal;
+};
+
 class DriveWithJoystick: public CommandBase {
 public:
 	DriveWithJoystick();
@@ -111,6 +126,16 @@ public:
 // IMAGE PROCESSING //
 //////////////////////
 
+class CheckForHot: public CommandBase {
+public:
+	CheckForHot();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
 class FindHotTarget: public CommandBase {
 public:
 	FindHotTarget();
@@ -124,6 +149,8 @@ public:
 /////////////////
 // FRONTPICKUP //
 /////////////////
+
+
 
 class FrontPickupIncrement: public CommandBase {
 public:
@@ -159,7 +186,17 @@ public:
 	virtual void Interrupted();
 };
 
-#endif
+class FrontPickupSetMode: public CommandBase {
+public:
+	FrontPickupSetMode(FrontPickup::FrontMode mode);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	FrontPickup::FrontMode m_pickupMode;
+};
 
 ////////////
 // PICKUP //
@@ -189,12 +226,24 @@ public:
 	AutoFire();
 };
 
+class AutoFireDriveAndLoad: public CommandGroup {
+public:	
+	AutoFireDriveAndLoad();
+};
+
 class LoadBall: public CommandGroup {
 public:	
 	LoadBall();
 };
 
-class AutoFireDriveAndLoad: public CommandGroup {
+class OneBallAuto: public CommandGroup {
 public:	
-	AutoFireDriveAndLoad();
+	OneBallAuto();
 };
+
+class TwoBallAuto: public CommandGroup {
+public:	
+	TwoBallAuto();
+};
+
+#endif

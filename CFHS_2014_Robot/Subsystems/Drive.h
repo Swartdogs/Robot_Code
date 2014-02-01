@@ -15,33 +15,33 @@ private:
 	// It's desirable that everything possible under private except
 	// for methods that implement subsystem capabilities
 	
-	Victor*       m_leftFront;
-	Victor* 	  m_leftCenter;
-	Victor*	   	  m_leftRear;
-	Victor*	   	  m_rightFront;
-	Victor*	   	  m_rightCenter;
-	Victor*	   	  m_rightRear;
-	Gyro*         m_gyro;
-	Encoder*      m_leftEncoder;
-	Encoder*      m_rightEncoder;
-	PIDControl*   m_drivePID;
-	PIDControl*	  m_rotatePID;
-	RobotLog*     m_robotLog;
-	DigitalInput* m_tapeSensor;
+	Victor*        m_leftFront;
+	Victor* 	   m_leftCenterRear;
+	Victor*	   	   m_rightFront;
+	Victor*	   	   m_rightCenterRear;
+	Gyro*          m_gyro;
+	Encoder*       m_leftEncoder;
+	Encoder*       m_rightEncoder;
+	PIDControl*    m_drivePID;
+	PIDControl*	   m_rotatePID;
+	RobotLog*      m_robotLog;
+	DigitalInput*  m_tapeSensor;
+	AnalogChannel* m_rangefinder;
 	
-	char		  m_log[100];
-	bool          m_onTarget;
+	bool           m_brakeApplied;
+	bool           m_onTarget;
+	bool           m_rampDone;
+	bool		   m_useGyro;
+	
+	char	       m_log[100];
 
-	bool          m_useGyro;
-	float         m_targetAngle;
-	float         m_relativeZero;
-
-	double        m_targetDistance;
-	double        m_lastDistance;
-	float		  m_driveSpeed;
-	float         m_maxSpeed;
-	bool		  m_rampDone;
-	bool          m_brakeApplied;
+	double         m_lastDistance;
+	double         m_targetDistance;
+	
+	float		   m_driveSpeed;
+	float          m_maxSpeed;
+	float          m_relativeZero;
+	float          m_targetAngle;
 	
 	double EncoderDistance(double val1, double val2);
 	bool   RampSpeed(float& curSpeed, float pidSpeed);
@@ -66,6 +66,8 @@ public:
 	void StopEncoders();
 	void StopMotors();
 	bool CrossedTape();
+	
+	double GetRange();
 };
 
 #endif

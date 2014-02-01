@@ -6,12 +6,10 @@
 Drive::Drive(RobotLog *robotLog) : Subsystem("Drive") {
 	m_robotLog = robotLog;
 	
-	m_leftFront    = new Victor(PWM_DRIVE_LEFT_FRONT);
-	m_leftCenter   = new Victor(PWM_DRIVE_LEFT_CENTER);
-	m_leftRear     = new Victor(PWM_DRIVE_LEFT_REAR);
-	m_rightFront   = new Victor(PWM_DRIVE_RIGHT_FRONT); 
-	m_rightCenter  = new Victor(PWM_DRIVE_RIGHT_CENTER);
-	m_rightRear    = new Victor(PWM_DRIVE_RIGHT_REAR);
+	m_leftFront        = new Victor(PWM_DRIVE_LEFT_FRONT);
+	m_leftCenterRear   = new Victor(PWM_DRIVE_LEFT_CENTER_REAR);
+	m_rightFront       = new Victor(PWM_DRIVE_RIGHT_FRONT); 
+	m_rightCenterRear  = new Victor(PWM_DRIVE_RIGHT_CENTER_REAR);
 	
 	m_gyro = new Gyro(AI_GYRO);
 	m_gyro->SetSensitivity(0.007);
@@ -23,6 +21,8 @@ Drive::Drive(RobotLog *robotLog) : Subsystem("Drive") {
 	m_rightEncoder->SetDistancePerPulse(0.0775);
 	
 	m_tapeSensor = new DigitalInput(DI_DRIVE_TAPE_SENSOR);
+	
+	m_rangefinder = new AnalogChannel(AI_RANGEFINDER);
 	
 	m_onTarget = false;
 	
@@ -38,11 +38,9 @@ Drive::Drive(RobotLog *robotLog) : Subsystem("Drive") {
 	m_brakeApplied = false;
 	
 	m_leftFront->SetExpiration(1.0);
-	m_leftCenter->SetExpiration(1.0);
-	m_leftRear->SetExpiration(1.0);
+	m_leftCenterRear->SetExpiration(1.0);
 	m_rightFront->SetExpiration(1.0);
-	m_rightCenter->SetExpiration(1.0);
-	m_rightRear->SetExpiration(1.0);
+	m_rightCenterRear->SetExpiration(1.0);
 	
 	m_drivePID = new PIDControl(0.025,0,0);
 	m_drivePID->SetInputRange(-200,200);
@@ -59,6 +57,11 @@ void Drive::InitDefaultCommand() {
 	//SetDefaultCommand(new MySpecialCommand());
 	
 	SetDefaultCommand(new DriveWithJoystick());
+}
+
+double Drive::GetRange() {
+	return (m_rangefinder->GetAverageValue() * (12.0/58));
+	
 }
 
 bool Drive::OnTarget() {
@@ -137,11 +140,9 @@ void Drive::DriveArcade(float move, float rotate) {
 	}
 	
 	m_leftFront->Set(pwm[0]);
-	m_leftCenter->Set(pwm[0]);
-	m_leftRear->Set(pwm[0]);
+	m_leftCenterRear->Set(pwm[0]);
 	m_rightFront->Set(-pwm[1]);
-	m_rightCenter->Set(-pwm[1]);
-	m_rightRear->Set(-pwm[1]);
+	m_rightCenterRear->Set(-pwm[1]);
 }
 
 void Drive::ExecuteDistance() {
@@ -226,11 +227,9 @@ void Drive::SetPID(float kP, float kI, float kD, bool drive) {
 
 void Drive::SetSafetyEnabled(bool enabled) {
 	m_leftFront->SetSafetyEnabled(enabled);
-	m_leftCenter->SetSafetyEnabled(enabled);
-	m_leftRear->SetSafetyEnabled(enabled);
+	m_leftCenterRear->SetSafetyEnabled(enabled);
 	m_rightFront->SetSafetyEnabled(enabled);
-	m_rightCenter->SetSafetyEnabled(enabled);
-	m_rightRear->SetSafetyEnabled(enabled);
+	m_rightCenterRear->SetSafetyEnabled(enabled);
 	
 }
 
@@ -241,11 +240,9 @@ void Drive::StopEncoders() {
 
 void Drive::StopMotors() {
 	m_leftFront->Set(0);
-	m_leftCenter->Set(0);
-	m_leftRear->Set(0);
+	m_leftCenterRear->Set(0);
 	m_rightFront->Set(0);
-	m_rightCenter->Set(0);
-	m_rightRear->Set(0);
+	m_rightCenterRear->Set(0);
 }
 
 // PRIVATE 
