@@ -1,25 +1,35 @@
 #include "../AllCommands.h"
 
-DriveRotate::DriveRotate(float target_angle, bool reset_gyro) : target_angle(target_angle) , reset_gyro(reset_gyro) {
+DriveRotate::DriveRotate(float absoluteAngle) {
 	// Use requires() here to declare subsystem dependencies
 	// eg. requires(chassis);
 	
 	Requires(drive);
+	
+	m_angle = absoluteAngle;
+	m_setRelativeZero = false;
+	m_rotateMode = rAbsolute;
 }
 
-// Quick member accessor functions.
-
-float DriveRotate::GetTargetAngle(void) {
-	return target_angle;
-}
-
-bool DriveRotate::GetGyroReset(void) {
-	return reset_gyro;
+DriveRotate::DriveRotate(float relativeAngle, bool setRelativeZero) {
+	Requires(drive);
+	
+	m_angle = relativeAngle;
+	m_setRelativeZero = setRelativeZero;
+	m_rotateMode = rRelative;
 }
 
 // Called just before this Command runs the first time
 void DriveRotate::Initialize() {
-	drive->InitRotate(target_angle,reset_gyro);
+	switch(m_rotateMode) {
+		case rAbsolute:
+			drive->InitRotate(m_angle);
+			break;
+		case rRelative:
+			drive->InitRotate(m_angle, m_setRelativeZero);
+			break;
+		default:;
+	}
 }
 
 // Called repeatedly when this Command is scheduled to run

@@ -13,7 +13,7 @@ void BackPickupJoystick::Initialize() {
 
 // Called repeatedly when this Command is scheduled to run
 void BackPickupJoystick::Execute() {
-	backPickup->SetJoystickSpeed(oi->GetTiltY());
+	backPickup->SetJoystickSpeed(oi->GetMcY(false));
 }
 
 // Make this return true when this Command no longer needs to run execute()

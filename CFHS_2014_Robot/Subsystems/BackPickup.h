@@ -5,51 +5,46 @@
 #include "PIDControl.h"
 #include "../RobotLog.h"
 
-/**
- *
- *
- * @author Neil
- */
 class BackPickup: public Subsystem {
 public:
-	typedef enum{bDeploy, bStore, bPass, bMoveToLoad, bLoad}BackMode;
+	typedef enum{bUnknown, bStore, bDeploy, bWaitToDeploy, bPass, bShoot} BackMode;
+	typedef enum{rIn, rOut, rOff} RollerMode;
+	typedef enum{aUp, aDown} AdjustMode;
 	
 	BackPickup(RobotLog* log);
-	void InitDefaultCommand();
-	void Periodic();
-	void SetUseJoystick(bool use);
-	void SetJoystickSpeed(float speed);
-	bool OnTarget();
-	void SetPickupMode(BackMode mode);
+	BackMode	GetBackPickupMode();
+	INT32 		GetPosition();
+	void 		InitDefaultCommand();
+	bool 		OnTarget();
+	void 		Periodic();
+	void 		SetJoystickSpeed(float speed);
+	void 		SetPickupMode(BackMode mode);
+	void 		SetRollers(RollerMode mode);
+	void 		SetUseJoystick(bool use);
+	void		IncrementArm(AdjustMode mode);
 	
-	BackMode  GetBackPickupMode();
-	bool HasBall();
+	bool    HasBall();
 	
 private:
-	// It's desirable that everything possible under private except
-	// for methods that implement subsystem capabilities
+	char*	GetModeName(BackMode mode);
+	void 	SetSetpoint(INT32 target);
+	bool 	ShooterHasBall();
+	INT32   LimitValue(INT32 position);
 	
-	void SetSetpoint(INT32 target);
-	void SetRollers(float power);
+	Victor* 		m_baseMotor;
+	Victor* 		m_rollers;
 	
-	Victor* m_baseMotor;
-	Victor* m_rollers;
+	DigitalInput*   m_ballSensor;
+	AnalogChannel* 	m_baseMotorPot;
+	PIDControl*    	m_baseMotorPID;
+	RobotLog*      	m_robotLog;
 	
-	DigitalInput*  m_lightSensor;
-	AnalogChannel* m_baseMotorPot;
-	PIDControl*    m_baseMotorPID;
-	RobotLog*      m_log;
-	
-	bool m_useJoystick;
-	
-	float m_joySpeed;
-	
-	INT32 m_baseTarget;
-	bool  m_onTarget;
-	
-	BackMode m_backMode;
-	
-	INT32 GetPosition();
+	BackMode 	m_backMode;
+	INT32 		m_baseTarget;
+	float 		m_joySpeed;
+	char		m_log[100];
+	bool  		m_onTarget;
+	bool		m_useJoystick;
 };
 
 #endif

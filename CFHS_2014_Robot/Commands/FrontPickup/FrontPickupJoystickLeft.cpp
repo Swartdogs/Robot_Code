@@ -11,7 +11,7 @@ void FrontPickupJoystickLeft::Initialize() {
 
 // Called repeatedly when this Command is scheduled to run
 void FrontPickupJoystickLeft::Execute() {
-	frontPickup->SetJoystickLeft(oi->GetTiltY());
+	frontPickup->SetJoystickLeft(oi->GetMcY(true));
 }
 
 // Make this return true when this Command no longer needs to run execute()
@@ -21,11 +21,11 @@ bool FrontPickupJoystickLeft::IsFinished() {
 
 // Called once after isFinished returns true
 void FrontPickupJoystickLeft::End() {
-	frontPickup->SetUseJoystickRight(false);
+	frontPickup->SetUseJoystickLeft(false);
 }
 
 // Called when another command which requires one or more of the same
 // subsystems is scheduled to run
 void FrontPickupJoystickLeft::Interrupted() {
-	frontPickup->SetUseJoystickRight(false);
+	frontPickup->SetUseJoystickLeft(false);
 }

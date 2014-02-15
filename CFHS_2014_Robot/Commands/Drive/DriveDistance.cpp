@@ -1,29 +1,32 @@
 #include "../AllCommands.h"
 
-DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders) {
+DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, double fireDistance) {
 	m_targetDistance = targetDistance;
 	m_maxSpeed = maxSpeed;
 	m_resetEncoders = resetEncoders;
+	m_fireDistance = fireDistance;
 	m_targetAngle = 0;
 	m_resetGyro = false;
 	m_currentInitMode = mRelNoGyro;
 	Requires(drive);
 }
 
-DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float targetAngle, bool resetGyro) {
+DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, double fireDistance, float targetAngle, bool resetGyro) {
 	m_targetDistance = targetDistance;
 	m_maxSpeed = maxSpeed;
 	m_resetEncoders = resetEncoders;
+	m_fireDistance = fireDistance;
 	m_targetAngle = targetAngle;
 	m_resetGyro = resetGyro;
 	m_currentInitMode = mRelGyro;
 	Requires(drive);
 }
 
-DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float absoluteAngle) {
+DriveDistance::DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, double fireDistance, float absoluteAngle) {
 	m_targetDistance = targetDistance;
 	m_maxSpeed = maxSpeed;
 	m_resetEncoders = resetEncoders;
+	m_fireDistance = fireDistance;
 	m_targetAngle = absoluteAngle;
 	m_currentInitMode = mAbsolute;
 	Requires(drive);
@@ -34,13 +37,13 @@ void DriveDistance::Initialize() {
 	
 	switch (m_currentInitMode) {
 	case mRelGyro:
-		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders, m_targetAngle, m_resetGyro);
+		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders, m_fireDistance, m_targetAngle, m_resetGyro);
 		break;
 	case mRelNoGyro:
-		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders);
+		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders, m_fireDistance);
 		break;
 	case mAbsolute:
-		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders, m_targetAngle);
+		drive->InitDistance(m_targetDistance, m_maxSpeed, m_resetEncoders, m_fireDistance, m_targetAngle);
 		break;
 	}
 }

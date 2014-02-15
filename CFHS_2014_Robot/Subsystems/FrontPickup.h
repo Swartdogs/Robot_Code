@@ -12,33 +12,32 @@
  */
 class FrontPickup: public Subsystem {
 public:
-	typedef enum {fDeployBoth, fDeployLeft, fDeployRight, fPass, fStore, fLowShoot, fLowDeploy, fMoveToLoad, fLoad, fAutoDeploy} FrontMode;
+	typedef enum {fUnknown, fDeploy, fWaitToStore, fStore, fWaitToLoad, fLoad, fDropInShooter, fShoot, fLowDeploy, fLowShoot, fAutoLoad} FrontMode;
 	typedef enum {pLeft, pRight} Pot;
+	typedef enum {wIn, wOut, wOff} RollerMode;
 	
 	FrontPickup(RobotLog* log);
-	void InitDefaultCommand();
 	
-	void Periodic();
-	void IncrementArm(Pot arm, bool up);
-	void SetSetpoints(INT32 leftPosition, INT32 rightPosition);
-	void SetSetpoint(INT32 position, Pot arm);
-	void SetUseJoystickLeft(bool use);
-	void SetUseJoystickRight(bool use);
-	void SetJoystickLeft(float joyLeft);
-	void SetJoystickRight(float joyRight);
-	
-	void SetPickupMode(FrontMode mode);
-	FrontMode GetFrontPickupMode();
-	
-	bool HasBall();
+	FrontMode	GetFrontPickupMode();
+	INT32 		GetPosition(Pot pot);
+	bool 		HasBall();
+	void 		IncrementArm(Pot arm, bool up);
+	void 		InitDefaultCommand();
+	bool 		OnTarget();
+	void 		Periodic();
+	void 		SetJoystickLeft(float joyLeft);
+	void 		SetJoystickRight(float joyRight);
+	void 		SetPickupMode(FrontMode mode);
+	void 		SetRollers(RollerMode mode);
+	void 		SetUseJoystickLeft(bool use);
+	void 		SetUseJoystickRight(bool use);
 	
 private:
-	
 	Victor* 		m_rightArm;
 	Victor* 		m_leftArm;
 	
-	Relay* 		m_rightWheels;
-	Relay* 		m_leftWheels;
+	Relay* 			m_rightWheels;
+	Relay* 			m_leftWheels;
 	
 	AnalogChannel*	m_leftArmPot;
 	AnalogChannel* 	m_rightArmPot;
@@ -48,23 +47,22 @@ private:
 	
 	DigitalInput*   m_ballLoadedSensor;
 	
-	RobotLog*       m_log;
+	RobotLog*       m_robotLog;
 
-	INT32 	m_leftArmTarget;
-	INT32 	m_rightArmTarget;
+	FrontMode 		m_frontMode;
+	float   		m_joyLeft;
+	float   		m_joyRight;
+	INT32 			m_leftArmTarget;
+	bool 			m_leftOnTarget;
+	char			m_log[100];
+	INT32 			m_rightArmTarget;
+	bool 			m_rightOnTarget;
+	bool 			m_useJoystickLeft;
+	bool 			m_useJoystickRight;
 	
-	FrontMode m_frontMode;
-	
-	float   m_joyLeft;
-	float   m_joyRight;
-	
-	bool 	m_useJoystickLeft;
-	bool 	m_useJoystickRight;
-	bool 	m_leftOnTarget;
-	bool 	m_rightOnTarget;
-	
-	INT32 GetPosition(Pot pot);
-	INT32 LimitValue(Pot pot, INT32 position);
+	char*	GetModeName(FrontMode mode);
+	INT32 	LimitValue(Pot pot, INT32 position);
+	void 	SetSetpoints(INT32 leftPosition, INT32 rightPosition);
 };
 
 #endif

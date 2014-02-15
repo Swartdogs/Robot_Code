@@ -11,17 +11,17 @@ void _GLOBAL__I__Z20FRC_userClassFactoryv();
 
 void _GLOBAL__I__ZN10BackPickupC2EP8RobotLog();
 
-void _GLOBAL__I__ZN10FindTargetC2Ev();
+void _GLOBAL__I__ZN10FindTargetC2EP8RobotLog();
 
 void _GLOBAL__I__ZN10PickupLoadC2Ev();
 
-void _GLOBAL__I__ZN11BallShooterC2Ev();
+void _GLOBAL__I__ZN11BallShooterC2EP8RobotLog();
 
 void _GLOBAL__I__ZN11CheckForHotC2Ev();
 
 void _GLOBAL__I__ZN11CommandBaseC2EPKc();
 
-void _GLOBAL__I__ZN11DriveRotateC2Efb();
+void _GLOBAL__I__ZN11DriveRotateC2Ef();
 
 void _GLOBAL__I__ZN11FrontPickupC2EP8RobotLog();
 
@@ -29,7 +29,7 @@ void _GLOBAL__I__ZN11OneBallAutoC2Ev();
 
 void _GLOBAL__I__ZN11TwoBallAutoC2Ev();
 
-void _GLOBAL__I__ZN13DriveDistanceC2Edfb();
+void _GLOBAL__I__ZN13DriveDistanceC2Edfbd();
 
 void _GLOBAL__I__ZN13FindHotTargetC2Ev();
 
@@ -39,17 +39,35 @@ void _GLOBAL__I__ZN15BallShooterFireC2Ev();
 
 void _GLOBAL__I__ZN15BallShooterLoadC2Ev();
 
+void _GLOBAL__I__ZN15DriveTapeDetectC2Ev();
+
+void _GLOBAL__I__ZN16DriveRangeDetectC2Ev();
+
 void _GLOBAL__I__ZN17BackPickupSetModeC2EN10BackPickup8BackModeE();
 
 void _GLOBAL__I__ZN17DriveWithJoystickC2Ev();
 
 void _GLOBAL__I__ZN18BackPickupJoystickC2Ev();
 
+void _GLOBAL__I__ZN18DriveResetEncodersC2Ev();
+
 void _GLOBAL__I__ZN18FrontPickupSetModeC2EN11FrontPickup9FrontModeE();
+
+void _GLOBAL__I__ZN19BackPickupIncrementC2EN10BackPickup10AdjustModeE();
 
 void _GLOBAL__I__ZN20AutoFireDriveAndLoadC2Ev();
 
+void _GLOBAL__I__ZN20BackPickupSetRollersC2EN10BackPickup10RollerModeE();
+
 void _GLOBAL__I__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb();
+
+void _GLOBAL__I__ZN21BackPickupWaitForModeC2EN10BackPickup8BackModeE();
+
+void _GLOBAL__I__ZN21FrontPickupSetRollersC2EN11FrontPickup10RollerModeE();
+
+void _GLOBAL__I__ZN22BallShooterWaitForModeC2EN11BallShooter10ShootStateE();
+
+void _GLOBAL__I__ZN22FrontPickupWaitForModeC2EN11FrontPickup9FrontModeE();
 
 void _GLOBAL__I__ZN23FrontPickupJoystickLeftC2Ev();
 
@@ -120,26 +138,35 @@ void (*_ctors[])() =
     {
     _GLOBAL__I__Z20FRC_userClassFactoryv,
     _GLOBAL__I__ZN10BackPickupC2EP8RobotLog,
-    _GLOBAL__I__ZN10FindTargetC2Ev,
+    _GLOBAL__I__ZN10FindTargetC2EP8RobotLog,
     _GLOBAL__I__ZN10PickupLoadC2Ev,
-    _GLOBAL__I__ZN11BallShooterC2Ev,
+    _GLOBAL__I__ZN11BallShooterC2EP8RobotLog,
     _GLOBAL__I__ZN11CheckForHotC2Ev,
     _GLOBAL__I__ZN11CommandBaseC2EPKc,
-    _GLOBAL__I__ZN11DriveRotateC2Efb,
+    _GLOBAL__I__ZN11DriveRotateC2Ef,
     _GLOBAL__I__ZN11FrontPickupC2EP8RobotLog,
     _GLOBAL__I__ZN11OneBallAutoC2Ev,
     _GLOBAL__I__ZN11TwoBallAutoC2Ev,
-    _GLOBAL__I__ZN13DriveDistanceC2Edfb,
+    _GLOBAL__I__ZN13DriveDistanceC2Edfbd,
     _GLOBAL__I__ZN13FindHotTargetC2Ev,
     _GLOBAL__I__ZN14DriveToLowGoalC2Ev,
     _GLOBAL__I__ZN15BallShooterFireC2Ev,
     _GLOBAL__I__ZN15BallShooterLoadC2Ev,
+    _GLOBAL__I__ZN15DriveTapeDetectC2Ev,
+    _GLOBAL__I__ZN16DriveRangeDetectC2Ev,
     _GLOBAL__I__ZN17BackPickupSetModeC2EN10BackPickup8BackModeE,
     _GLOBAL__I__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__I__ZN18BackPickupJoystickC2Ev,
+    _GLOBAL__I__ZN18DriveResetEncodersC2Ev,
     _GLOBAL__I__ZN18FrontPickupSetModeC2EN11FrontPickup9FrontModeE,
+    _GLOBAL__I__ZN19BackPickupIncrementC2EN10BackPickup10AdjustModeE,
     _GLOBAL__I__ZN20AutoFireDriveAndLoadC2Ev,
+    _GLOBAL__I__ZN20BackPickupSetRollersC2EN10BackPickup10RollerModeE,
     _GLOBAL__I__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb,
+    _GLOBAL__I__ZN21BackPickupWaitForModeC2EN10BackPickup8BackModeE,
+    _GLOBAL__I__ZN21FrontPickupSetRollersC2EN11FrontPickup10RollerModeE,
+    _GLOBAL__I__ZN22BallShooterWaitForModeC2EN11BallShooter10ShootStateE,
+    _GLOBAL__I__ZN22FrontPickupWaitForModeC2EN11FrontPickup9FrontModeE,
     _GLOBAL__I__ZN23FrontPickupJoystickLeftC2Ev,
     _GLOBAL__I__ZN24FrontPickupJoystickRightC2Ev,
     _GLOBAL__I__ZN2OIC2EP5Drive,
@@ -179,17 +206,17 @@ void _GLOBAL__D__Z20FRC_userClassFactoryv();
 
 void _GLOBAL__D__ZN10BackPickupC2EP8RobotLog();
 
-void _GLOBAL__D__ZN10FindTargetC2Ev();
+void _GLOBAL__D__ZN10FindTargetC2EP8RobotLog();
 
 void _GLOBAL__D__ZN10PickupLoadC2Ev();
 
-void _GLOBAL__D__ZN11BallShooterC2Ev();
+void _GLOBAL__D__ZN11BallShooterC2EP8RobotLog();
 
 void _GLOBAL__D__ZN11CheckForHotC2Ev();
 
 void _GLOBAL__D__ZN11CommandBaseC2EPKc();
 
-void _GLOBAL__D__ZN11DriveRotateC2Efb();
+void _GLOBAL__D__ZN11DriveRotateC2Ef();
 
 void _GLOBAL__D__ZN11FrontPickupC2EP8RobotLog();
 
@@ -197,7 +224,7 @@ void _GLOBAL__D__ZN11OneBallAutoC2Ev();
 
 void _GLOBAL__D__ZN11TwoBallAutoC2Ev();
 
-void _GLOBAL__D__ZN13DriveDistanceC2Edfb();
+void _GLOBAL__D__ZN13DriveDistanceC2Edfbd();
 
 void _GLOBAL__D__ZN13FindHotTargetC2Ev();
 
@@ -207,17 +234,35 @@ void _GLOBAL__D__ZN15BallShooterFireC2Ev();
 
 void _GLOBAL__D__ZN15BallShooterLoadC2Ev();
 
+void _GLOBAL__D__ZN15DriveTapeDetectC2Ev();
+
+void _GLOBAL__D__ZN16DriveRangeDetectC2Ev();
+
 void _GLOBAL__D__ZN17BackPickupSetModeC2EN10BackPickup8BackModeE();
 
 void _GLOBAL__D__ZN17DriveWithJoystickC2Ev();
 
 void _GLOBAL__D__ZN18BackPickupJoystickC2Ev();
 
+void _GLOBAL__D__ZN18DriveResetEncodersC2Ev();
+
 void _GLOBAL__D__ZN18FrontPickupSetModeC2EN11FrontPickup9FrontModeE();
+
+void _GLOBAL__D__ZN19BackPickupIncrementC2EN10BackPickup10AdjustModeE();
 
 void _GLOBAL__D__ZN20AutoFireDriveAndLoadC2Ev();
 
+void _GLOBAL__D__ZN20BackPickupSetRollersC2EN10BackPickup10RollerModeE();
+
 void _GLOBAL__D__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb();
+
+void _GLOBAL__D__ZN21BackPickupWaitForModeC2EN10BackPickup8BackModeE();
+
+void _GLOBAL__D__ZN21FrontPickupSetRollersC2EN11FrontPickup10RollerModeE();
+
+void _GLOBAL__D__ZN22BallShooterWaitForModeC2EN11BallShooter10ShootStateE();
+
+void _GLOBAL__D__ZN22FrontPickupWaitForModeC2EN11FrontPickup9FrontModeE();
 
 void _GLOBAL__D__ZN23FrontPickupJoystickLeftC2Ev();
 
@@ -278,26 +323,35 @@ void (*_dtors[])() =
     {
     _GLOBAL__D__Z20FRC_userClassFactoryv,
     _GLOBAL__D__ZN10BackPickupC2EP8RobotLog,
-    _GLOBAL__D__ZN10FindTargetC2Ev,
+    _GLOBAL__D__ZN10FindTargetC2EP8RobotLog,
     _GLOBAL__D__ZN10PickupLoadC2Ev,
-    _GLOBAL__D__ZN11BallShooterC2Ev,
+    _GLOBAL__D__ZN11BallShooterC2EP8RobotLog,
     _GLOBAL__D__ZN11CheckForHotC2Ev,
     _GLOBAL__D__ZN11CommandBaseC2EPKc,
-    _GLOBAL__D__ZN11DriveRotateC2Efb,
+    _GLOBAL__D__ZN11DriveRotateC2Ef,
     _GLOBAL__D__ZN11FrontPickupC2EP8RobotLog,
     _GLOBAL__D__ZN11OneBallAutoC2Ev,
     _GLOBAL__D__ZN11TwoBallAutoC2Ev,
-    _GLOBAL__D__ZN13DriveDistanceC2Edfb,
+    _GLOBAL__D__ZN13DriveDistanceC2Edfbd,
     _GLOBAL__D__ZN13FindHotTargetC2Ev,
     _GLOBAL__D__ZN14DriveToLowGoalC2Ev,
     _GLOBAL__D__ZN15BallShooterFireC2Ev,
     _GLOBAL__D__ZN15BallShooterLoadC2Ev,
+    _GLOBAL__D__ZN15DriveTapeDetectC2Ev,
+    _GLOBAL__D__ZN16DriveRangeDetectC2Ev,
     _GLOBAL__D__ZN17BackPickupSetModeC2EN10BackPickup8BackModeE,
     _GLOBAL__D__ZN17DriveWithJoystickC2Ev,
     _GLOBAL__D__ZN18BackPickupJoystickC2Ev,
+    _GLOBAL__D__ZN18DriveResetEncodersC2Ev,
     _GLOBAL__D__ZN18FrontPickupSetModeC2EN11FrontPickup9FrontModeE,
+    _GLOBAL__D__ZN19BackPickupIncrementC2EN10BackPickup10AdjustModeE,
     _GLOBAL__D__ZN20AutoFireDriveAndLoadC2Ev,
+    _GLOBAL__D__ZN20BackPickupSetRollersC2EN10BackPickup10RollerModeE,
     _GLOBAL__D__ZN20FrontPickupIncrementC2EN11FrontPickup3PotEb,
+    _GLOBAL__D__ZN21BackPickupWaitForModeC2EN10BackPickup8BackModeE,
+    _GLOBAL__D__ZN21FrontPickupSetRollersC2EN11FrontPickup10RollerModeE,
+    _GLOBAL__D__ZN22BallShooterWaitForModeC2EN11BallShooter10ShootStateE,
+    _GLOBAL__D__ZN22FrontPickupWaitForModeC2EN11FrontPickup9FrontModeE,
     _GLOBAL__D__ZN23FrontPickupJoystickLeftC2Ev,
     _GLOBAL__D__ZN24FrontPickupJoystickRightC2Ev,
     _GLOBAL__D__ZN2OIC2EP5Drive,

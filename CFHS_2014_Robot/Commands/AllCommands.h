@@ -7,6 +7,18 @@
 // BACKPICKUP //
 ////////////////
 
+class BackPickupIncrement: public CommandBase {
+public:
+	BackPickupIncrement(BackPickup::AdjustMode mode);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	BackPickup::AdjustMode m_mode;
+};
+
 class BackPickupJoystick: public CommandBase {
 public:
 	BackPickupJoystick();
@@ -29,6 +41,30 @@ private:
 	BackPickup::BackMode m_pickupMode;
 };
 
+class BackPickupSetRollers: public CommandBase {
+public:
+	BackPickupSetRollers(BackPickup::RollerMode mode);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	BackPickup::RollerMode m_mode;
+};
+
+class BackPickupWaitForMode: public CommandBase {
+public:
+	BackPickupWaitForMode(BackPickup::BackMode mode);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	BackPickup::BackMode m_mode;
+};
+
 /////////////////
 // BALLSHOOTER //
 /////////////////
@@ -41,9 +77,6 @@ public:
 	virtual bool IsFinished();
 	virtual void End();
 	virtual void Interrupted();
-private:
-	bool m_doLowShot;
-	double m_distanceToLowGoal;
 };
 
 class BallShooterLoad: public CommandBase {
@@ -56,6 +89,18 @@ public:
 	virtual void Interrupted();
 };
 
+class BallShooterWaitForMode: public CommandBase {
+public:
+	BallShooterWaitForMode(BallShooter::ShootState mode);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	BallShooter::ShootState m_mode;
+};
+
 ///////////
 // DRIVE //
 ///////////
@@ -66,16 +111,38 @@ private:
 	
 	InitMode m_currentInitMode;
 	
-	double m_targetDistance;
-	float m_maxSpeed;
-	float m_targetAngle;
-	bool m_resetEncoders;
-	bool m_resetGyro;
-	bool m_useGyro;
+	double	m_targetDistance;
+	double 	m_fireDistance;
+	float 	m_maxSpeed;
+	float 	m_targetAngle;
+	bool 	m_resetEncoders;
+	bool 	m_resetGyro;
+	bool 	m_useGyro;
+	
 public:
-	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders);
-	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float relativeAngle, bool resetGyro);
-	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, float absoluteAngle);
+	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, double fireDistance);
+	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, double fireDistance, float relativeAngle, bool resetGyro);
+	DriveDistance(double targetDistance, float maxSpeed, bool resetEncoders, double fireDistance, float absoluteAngle);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
+class DriveRangeDetect: public CommandBase {
+public:
+	DriveRangeDetect();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
+class DriveResetEncoders: public CommandBase {
+public:
+	DriveResetEncoders();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
@@ -85,7 +152,8 @@ public:
 
 class DriveRotate: public CommandBase {
 public:
-	DriveRotate(float target_angle, bool reset_gyro);
+	DriveRotate(float absoluteAngle);
+	DriveRotate(float relativeAngle, bool setRelativeZero);
 	
 	virtual void Initialize();
 	virtual void Execute();
@@ -93,11 +161,22 @@ public:
 	virtual void End();
 	virtual void Interrupted();
 	
-	float GetTargetAngle(void);
-	bool GetGyroReset(void);
-	
 private:
-	float target_angle,reset_gyro;
+	typedef enum {rAbsolute, rRelative} RotateMode;
+	
+	RotateMode m_rotateMode;
+	float m_angle;
+	float m_setRelativeZero;
+};
+
+class DriveTapeDetect: public CommandBase {
+public:
+	DriveTapeDetect();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
 };
 
 class DriveToLowGoal: public CommandBase {
@@ -196,6 +275,31 @@ public:
 	virtual void Interrupted();
 private:
 	FrontPickup::FrontMode m_pickupMode;
+};
+
+class FrontPickupSetRollers: public CommandBase {
+public:
+	FrontPickupSetRollers(FrontPickup::RollerMode mode);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	FrontPickup::RollerMode m_rollerMode;
+};
+
+class FrontPickupWaitForMode: public CommandBase {
+public:
+	FrontPickupWaitForMode(FrontPickup::FrontMode mode);
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+	
+private:
+	FrontPickup::FrontMode m_mode;
 };
 
 ////////////

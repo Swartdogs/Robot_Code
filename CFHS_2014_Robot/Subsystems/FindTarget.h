@@ -5,6 +5,7 @@
 #include "WPILib.h"
 #include "Vision/RGBImage.h"
 #include "Vision/BinaryImage.h"
+#include "../RobotLog.h"
 
 /**
  *
@@ -44,8 +45,11 @@ private:
 	int				m_verticalCount;
 	bool 			m_foundHotTarget;
 	
+	RobotLog*       m_robotLog;
+	char            m_log[100];
+	
 public:
-	FindTarget();
+	FindTarget(RobotLog *logDelegate);
 	void InitDefaultCommand();
 	
 	void Init();

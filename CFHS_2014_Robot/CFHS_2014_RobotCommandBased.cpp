@@ -2,7 +2,9 @@
 #include "IterativeRobot525.h"
 #include "Commands/Command.h"
 #include "CommandBase.h"
+#include "RobotMap.h"
 #include "RobotLog.h"
+#include "Commands/AllCommands.h"
 
 class CommandBasedRobot : public IterativeRobot525, public RobotLog {
 private:
@@ -21,6 +23,9 @@ private:
 	double     			m_periodicLastStart;
 	double     			m_periodicTotalTime;
 	RunMode    			m_runMode;
+	
+	Solenoid*           m_sensorPower1;
+	Solenoid*  			m_sensorPower2;
 
 	void EndOfPeriodic() {										
 		m_periodicCount++;										
@@ -55,9 +60,17 @@ private:
 
 	virtual void RobotInit() {
 		m_runMode = mInit;
-		
+		printf("Starting init\n");
 		CommandBasedRobot::SetPeriod(0.02);
 		CommandBase::Init(this);
+		
+		m_sensorPower1 = new Solenoid(SOLENOID_SENSOR_POWER1);
+		m_sensorPower2 = new Solenoid(SOLENOID_SENSOR_POWER2);
+		
+		m_sensorPower1->Set(true);
+		m_sensorPower2->Set(true);
+		
+		printf("Initialized\n");
 
 		m_DriverMessage = DriverStationLCD::GetInstance();	
 
@@ -103,11 +116,49 @@ private:
 		m_DriverMessage->UpdateLCD();
 		
 		LogWrite("2014 Robot Disabled Init");
-		fclose(m_logFile);										// Close Log File
+		fclose(m_logFile);												// Close Log File
 		m_runMode = mDisabled;
+		
+		CommandBase::backPickup->SetPickupMode(BackPickup::bStore);
 	}
 
 	virtual void DisabledPeriodic() {
+		static int CameraStartDelay = 250;
+		
+		if (CameraStartDelay > 0) {										// Start Camera after delay
+			CameraStartDelay--;											// (Waiting for completion of camera bootup)
+			if (CameraStartDelay == 0) {
+				CommandBase::findTarget->StartCamera("10.5.25.9");		// Start Camera
+				LogWrite("Start Camera");
+			}
+		}
+
+		if (CommandBase::oi->GetButtonPress(9)) {						// Change Autonomous Selection
+			if (m_autoSelect < 4) {
+				m_autoSelect++;
+			} else {
+				m_autoSelect = 0;
+			}
+			
+			m_DriverMessage->Printf(DriverStationLCD::kUser_Line5, 1, "Auto=%d  Delay=%d    ", m_autoSelect, m_autoDelay * 250);
+			m_DriverMessage->UpdateLCD();
+		
+		} else if (CommandBase::oi->GetButtonPress(10)) {				// Change Autonomous Delay		
+			if (m_autoDelay < 20) {
+				m_autoDelay++;
+			} else {
+				m_autoDelay = 0;
+			}
+			
+			m_DriverMessage->Printf(DriverStationLCD::kUser_Line5, 1, "Auto=%d  Delay=%d    ", m_autoSelect, m_autoDelay * 250);
+			m_DriverMessage->UpdateLCD();
+		}
+
+		if(CommandBase::backPickup->HasBall()) printf("BackPickup: Ball Detected\n");
+//		printf("Back Pot: %d\n", CommandBase::backPickup->GetPosition());
+//		printf("Range: %.3f\n", CommandBase::drive->GetRange());
+//		printf("Shooter Position=%d\n", CommandBase::ballShooter->GetShooterPosition());
+//		printf("Front Arms: Left=%d, Right=%d\n", CommandBase::frontPickup->GetPosition(FrontPickup::pLeft), CommandBase::frontPickup->GetPosition(FrontPickup::pRight));
 		
 	}
 	
@@ -120,12 +171,17 @@ private:
 		m_periodicTotalTime = 0;
 
 		switch(m_autoSelect) {									// Create instance of selected Autonomous Command Group
-			case 0: m_autoCommand = NULL;
-					break;
+		case 1: m_autoCommand = new OneBallAuto();
+				break;
+		case 2: m_autoCommand = new TwoBallAuto();
+				break;
+		default: m_autoCommand = NULL;
 		}
 		
 		if (m_autoCommand != NULL) m_autoCommand->Start();		// Start Autonomous Command Group
 
+		CommandBase::ballShooter->Load();
+		
 		m_DriverMessage->Printf(DriverStationLCD::kUser_Line1, 1, "Auto: Executing %d   ", m_autoSelect);
 		m_DriverMessage->UpdateLCD();
 
@@ -164,8 +220,10 @@ private:
 		m_DriverMessage->Printf(DriverStationLCD::kUser_Line1, 1, "Teleop: Executing   ");
 		m_DriverMessage->UpdateLCD();
 	
+		CommandBase::ballShooter->Load();
+		
 		m_logFile = fopen("Log525.txt", "a");					// Open Log File
-		LogWrite("SuitcaseBot Teleop Init");
+		LogWrite("Robot 2014 Teleop Init");
 	}
 	
 	virtual void TeleopPeriodic() {
@@ -184,6 +242,9 @@ private:
 	}
 	
 	virtual void TestInit() {
+		if (m_autoCommand != NULL) m_autoCommand->Cancel();
+		Scheduler::GetInstance()->Run();
+		
 		m_runMode = mTest;										
 		m_periodicCount = 0;
 		m_periodicLastStart = GetClock() * 1000;
@@ -195,10 +256,20 @@ private:
 		m_DriverMessage->UpdateLCD();
 
 		m_logFile = fopen("Log525.txt", "a");					// Open Log File
-		LogWrite("SuitcaseBot Test Init");
+		LogWrite("2014 Robot Test Init");
 	}
 
 	virtual void TestPeriodic() {
+		if (CommandBase::oi->GetButtonPress(11)) {
+			CommandBase::ballShooter->Release();
+		}
+
+		if (CommandBase::ballShooter->GetShootState() != BallShooter::sIdle) {
+			CommandBase::ballShooter->Periodic();
+		}
+		
+		printf("BackPickup ball detected %d\n", CommandBase::backPickup->HasBall());
+	
 	}
 };
 

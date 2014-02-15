@@ -386,7 +386,8 @@
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPIErrors.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h \
-  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../Robotmap.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../RobotLog.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../RobotMap.h \
   C:/WindRiver/vxworks-6.3/target/h/math.h
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/FindTarget.h:
@@ -1159,6 +1160,8 @@ C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/RGBImage.h:
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/Vision/BinaryImage.h:
 
-C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../Robotmap.h:
+C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../RobotLog.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/../RobotMap.h:
 
 C:/WindRiver/vxworks-6.3/target/h/math.h:

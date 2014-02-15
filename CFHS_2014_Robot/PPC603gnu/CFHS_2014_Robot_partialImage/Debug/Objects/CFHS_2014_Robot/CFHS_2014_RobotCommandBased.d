@@ -401,7 +401,10 @@
   C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BallShooter.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/OI.h \
-  C:/WindRiver/workspace/CFHS_2014_Robot/RobotLog.h
+  C:/WindRiver/workspace/CFHS_2014_Robot/RobotLog.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/RobotMap.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/AllCommands.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../CommandBase.h
 
 C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h:
 
@@ -1204,3 +1207,9 @@ C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BallShooter.h:
 C:/WindRiver/workspace/CFHS_2014_Robot/OI.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/RobotLog.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/RobotMap.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/AllCommands.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/../CommandBase.h:

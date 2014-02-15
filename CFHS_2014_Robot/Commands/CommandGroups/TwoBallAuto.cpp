@@ -1,13 +1,17 @@
 #include "../AllCommands.h"
 
 TwoBallAuto::TwoBallAuto() {
-	AddParallel(new FrontPickupSetMode(FrontPickup::fAutoDeploy));
-	AddParallel(new BallShooterLoad());
-	AddSequential(new DriveDistance(96.0, 0.7, true, 0));
+	AddParallel(new FrontPickupSetMode(FrontPickup::fAutoLoad));		// Store ball and move to Low Deploy
+	AddSequential(new BackPickupSetMode(BackPickup::bDeploy));			// Pickup ball behind robot
 	
-	AddSequential(new BallShooterFire());
+	AddSequential(new BackPickupWaitForMode(BackPickup::bStore));		// Wait until ball is loaded
 	
-	AddSequential(new PickupLoad());
+	AddParallel(new DriveDistance(132, 0.7, true, 24, 0));					// Start drive sequence that shoots ball
+	AddSequential(new BallShooterWaitForMode(BallShooter::sLoad));		// Wait until shooter is moving to load position
 	
-	AddSequential(new BallShooterFire());
+	AddSequential(new FrontPickupSetMode(FrontPickup::fLoad));			// Load front ball
+	
+	AddSequential(new FrontPickupWaitForMode(FrontPickup::fStore));		// Wait until front pickup is out of the way
+	
+	AddSequential(new BallShooterFire());								// Shoot ball
 }

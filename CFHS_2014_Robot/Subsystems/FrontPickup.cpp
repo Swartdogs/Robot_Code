@@ -3,32 +3,42 @@
 #include <math.h>
 #include "../Commands/AllCommands.h"
 
-const INT32 c_leftArmZeroOffset = 0;
-const INT32 c_leftArmMaxPosition = 500;
-const INT32 c_rightArmZeroOffset = 0;
-const INT32 c_rightArmMaxPosition = 500;
-const INT32 c_armTargetDeadband = 2;
+const INT32 c_leftArmZeroOffset = 768;		
+const INT32 c_leftArmMaxPosition = 730;
+
+const INT32 c_rightArmZeroOffset = 130;		
+const INT32 c_rightArmMaxPosition = 730;
+
+const INT32 c_armTargetDeadband = 4;	
 const INT32 c_incrementValue = 10;
 
+
 FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
-	m_leftArm = 	new Victor(MOD_FRONT_PICKUP_LEFT_ARM, PWM_FRONT_PICKUP_LEFT_ARM);
-	m_rightArm = 	new Victor(MOD_FRONT_PICKUP_RIGHT_ARM, PWM_FRONT_PICKUP_RIGHT_ARM);
+	m_robotLog = log;
+
+	m_leftArm = 	new Victor(PWM_FRONT_PICKUP_LEFT_ARM);
+	m_rightArm = 	new Victor(PWM_FRONT_PICKUP_RIGHT_ARM);
 	
-	m_leftWheels = 	new Relay(MOD_FRONT_PICKUP_LEFT_ROLLERS, RELAY_FRONT_PICKUP_LEFT_ROLLERS, Relay::kBothDirections);
-	m_rightWheels = new Relay(MOD_FRONT_PICKUP_RIGHT_ROLLERS, RELAY_FRONT_PICKUP_RIGHT_ROLLERS, Relay::kBothDirections);
+	m_leftWheels = 	new Relay(RELAY_FRONT_PICKUP_LEFT_ROLLERS, Relay::kBothDirections);
+	m_rightWheels = new Relay(RELAY_FRONT_PICKUP_RIGHT_ROLLERS, Relay::kBothDirections);
 	
 	m_ballLoadedSensor = new DigitalInput(DI_FRONT_PICKUP_BALL_SENSOR);
 	
 	m_leftArmPot = 	new AnalogChannel(AI_FRONT_PICKUP_LEFT_ARM_POT);
+	m_leftArmPot->SetAverageBits(2);
+	m_leftArmPot->SetOversampleBits(0);
+
 	m_rightArmPot = new AnalogChannel(AI_FRONT_PICKUP_RIGHT_ARM_POT);
+	m_rightArmPot->SetAverageBits(2);
+	m_rightArmPot->SetOversampleBits(0);
 	
-	m_leftArmPID = 	new PIDControl(0, 0, 0);
+	m_leftArmPID = 	new PIDControl(0.004, 0.0, 0.01);
 	m_leftArmPID->SetInputRange(0, 1000);
-	m_leftArmPID->SetOutputRange(-1.0, 1.0);
+	m_leftArmPID->SetOutputRange(-0.7, 0.7);
 	
-	m_rightArmPID = new PIDControl(0, 0, 0);
+	m_rightArmPID = new PIDControl(0.004, 0.0, 0.01);
 	m_rightArmPID->SetInputRange(0, 1000);
-	m_rightArmPID->SetOutputRange(-1.0, 1.0);
+	m_rightArmPID->SetOutputRange(-0.7, 0.7);
 	
 	m_leftArmTarget = GetPosition(pLeft);
 	m_rightArmTarget = GetPosition(pRight);
@@ -40,147 +50,27 @@ FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_useJoystickRight = false;
 	m_joyLeft = 0;
 	m_joyRight = 0;
-	
-	m_log = log;
 }
 
-void FrontPickup::InitDefaultCommand() {
+FrontPickup::FrontMode FrontPickup::GetFrontPickupMode() {				// GET MODE
+	return m_frontMode;
 }
 
-INT32 FrontPickup::GetPosition(Pot pot) {
-	switch(pot) {
+INT32 FrontPickup::GetPosition(Pot pot) {								// GET ARM POSITION
+	switch(pot) {														// Arm position relative to offset
 		case pLeft:
-			return (m_leftArmPot->GetAverageValue() - c_leftArmZeroOffset);
+			return (c_leftArmZeroOffset - m_leftArmPot->GetAverageValue());
 		case pRight:
 			return (m_rightArmPot->GetAverageValue() - c_rightArmZeroOffset);
 	}
 	return 0;
 }
 
-INT32 FrontPickup::LimitValue(Pot arm, INT32 position) {
-	if(arm == pLeft) {
-		position = (position > c_leftArmMaxPosition) ? c_leftArmMaxPosition :
-				   (position < c_leftArmZeroOffset)  ? c_leftArmZeroOffset  : 
-													   position;
-	} else {
-		position = (position > c_rightArmMaxPosition) ? c_rightArmMaxPosition :
-				   (position < c_rightArmZeroOffset)  ? c_rightArmZeroOffset  :
-														position;
-	}
-	
-	return position;
+bool FrontPickup::HasBall() {											// HAS BALL
+	return !m_ballLoadedSensor->Get();
 }
 
-void FrontPickup::Periodic() { // need to add support for rollers!
-	static float leftSpeed = 0;
-	static float rightSpeed = 0;
-	
-	static int ballTimerCount = 0;
-	
-	bool isTooHigh;
-	bool isTooLow;
-	
-	INT32 curLeftPosition = GetPosition(pLeft);
-	INT32 curRightPosition = GetPosition(pRight);
-	
-	leftSpeed = m_leftArmPID->Calculate((float) curLeftPosition);
-	rightSpeed = m_rightArmPID->Calculate((float) curRightPosition);
-	
-	if(m_useJoystickLeft) {
-		m_leftArmTarget = curLeftPosition;
-		m_leftArmPID->SetSetpoint(m_leftArmTarget);
-		
-		isTooHigh = curLeftPosition > (c_leftArmMaxPosition - c_armTargetDeadband);
-		isTooLow = curLeftPosition < (c_leftArmZeroOffset + c_armTargetDeadband);
-		
-		if(((m_joyLeft > 0) && isTooHigh) || ((m_joyLeft < 0) && isTooLow)) {
-			leftSpeed = 0;
-		} else if((m_joyLeft*leftSpeed < 0) || (m_joyLeft > leftSpeed)) {
-			leftSpeed = m_joyLeft;
-		}
-	} else {
-		if(abs(curLeftPosition - m_leftArmTarget) <= c_armTargetDeadband) {
-			m_leftOnTarget = true;
-		}
-	}
-	
-	if(m_useJoystickRight) {
-		m_rightArmTarget = curRightPosition;
-		m_rightArmPID->SetSetpoint(m_rightArmTarget);
-		
-		isTooHigh = curRightPosition > (c_rightArmMaxPosition - c_armTargetDeadband);
-		isTooLow = curRightPosition < (c_rightArmZeroOffset + c_armTargetDeadband);
-		
-		if(((m_joyRight > 0) && isTooHigh) || ((m_joyRight < 0) && isTooLow)) {
-			rightSpeed = 0;
-		} else if((m_joyRight*rightSpeed < 0) || (m_joyRight > rightSpeed)) {
-			rightSpeed = m_joyRight;
-		}
-	} else {
-		if(abs(curRightPosition - m_rightArmTarget) <= c_armTargetDeadband) {
-			m_rightOnTarget = true;
-		}
-	}
-	
-	m_leftArm->Set(leftSpeed);
-	m_rightArm->Set(rightSpeed);
-	
-	switch (m_frontMode) {
-	case fDeployBoth:
-		if (! m_ballLoadedSensor->Get()) {
-			SetPickupMode(fStore);
-		}
-		break;
-	case fDeployLeft:
-		
-		break;
-	case fDeployRight:
-		
-		break;
-	case fStore:
-		
-		break;
-	case fPass:
-		
-		break;
-	case fLowShoot:
-		if (m_ballLoadedSensor->Get()) {
-			m_leftWheels->Set(Relay::kOff);
-			m_rightWheels->Set(Relay::kOff);
-			SetPickupMode(fStore);
-		}
-		break;
-	case fLowDeploy:
-		
-		break;
-	case fMoveToLoad:
-		if(m_leftOnTarget && m_rightOnTarget) {
-			m_leftWheels->Set(Relay::kForward);
-			m_rightWheels->Set(Relay::kForward);
-			m_frontMode = fLoad;
-		}
-		break;
-	case fLoad:
-		if(m_ballLoadedSensor->Get()) {
-			if(ballTimerCount > 25) {
-				SetPickupMode(fStore);
-			} else {
-				ballTimerCount++;
-			}
-		} else {
-			ballTimerCount = 0;
-		}
-		break;
-	case fAutoDeploy:
-		if(!m_ballLoadedSensor->Get()) {
-			m_leftWheels->Set(Relay::kOff);
-			m_rightWheels->Set(Relay::kOff);
-		}
-		break;
-	}
-}
-
-void FrontPickup::IncrementArm(Pot arm, bool up) {
+void FrontPickup::IncrementArm(Pot arm, bool up) {						// INCREMENT ARM TARGETS
 	if(arm == pLeft) {
 		m_leftArmTarget += (up) ? c_incrementValue : -c_incrementValue;
 		m_leftArmTarget = LimitValue(pLeft, m_leftArmTarget);
@@ -192,102 +82,313 @@ void FrontPickup::IncrementArm(Pot arm, bool up) {
 	}
 }
 
-void FrontPickup::SetSetpoints(INT32 leftPosition, INT32 rightPosition){
-	
-	m_leftOnTarget = false;
-	m_rightOnTarget = false;
-	
-	m_leftArmTarget = LimitValue(pLeft, leftPosition);
-	m_rightArmTarget = LimitValue(pRight, rightPosition);
-	
-	m_leftArmPID->SetSetpoint(m_leftArmTarget);
-	m_rightArmPID->SetSetpoint(m_rightArmTarget);
+void FrontPickup::InitDefaultCommand() {
 }
 
-void FrontPickup::SetSetpoint(INT32 position, Pot arm) {
-	if(arm == pLeft) {
-		m_leftArmTarget = LimitValue(arm, position);
-		m_leftArmPID->SetSetpoint(m_leftArmTarget);
+bool FrontPickup::OnTarget() {											// ARMS AT TARGET POSITION
+	return (m_leftOnTarget && m_rightOnTarget);
+}
+
+void FrontPickup::Periodic() { 											// PERIODIC (Called every periodic loop)
+	static int delayCount = 0;
+	
+	float leftSpeed;
+	float rightSpeed;
+	float syncFactor;
+	bool  isTooHigh;
+	bool  isTooLow;
+	
+	INT32 curLeftPosition = GetPosition(pLeft);							// Current arm positions
+	INT32 curRightPosition = GetPosition(pRight);
+	
+	INT32 curLeftError = abs(curLeftPosition - m_leftArmTarget);		// Error between position and target
+	INT32 curRightError = abs(curRightPosition - m_rightArmTarget);
+																		// Use sync if targets are the same and error > 10
+	bool syncArms = (m_leftArmTarget == m_rightArmTarget && abs(curLeftError - curRightError) > 10);
+	
+	if(curLeftError <= 100) {											// Apply I coefficient if near target
+		m_leftArmPID->SetPID(0.004, 0.0005, 0.01);	
 	} else {
-		m_rightArmTarget = LimitValue(arm, position);
+		m_leftArmPID->SetPID(0.004, 0.0, 0.01);
+	}
+	leftSpeed = m_leftArmPID->Calculate((float) curLeftPosition);		// Calculate PID speed
+	
+	if(curRightError <= 100) {											// Apply I coefficent if near target
+		m_rightArmPID->SetPID(0.004, 0.0005, 0.01);
+	} else {
+		m_rightArmPID->SetPID(0.004, 0.0, 0.01);
+	}
+	rightSpeed = m_rightArmPID->Calculate((float) curRightPosition);	// Calculate PID speed
+	
+	if(m_useJoystickLeft) {
+		m_leftArmTarget = curLeftPosition;												// Set PID target
+		m_leftArmPID->SetSetpoint(m_leftArmTarget);
+		
+		isTooHigh = curLeftPosition > (c_leftArmMaxPosition - c_armTargetDeadband);		// Is position outside limits
+		isTooLow = curLeftPosition < c_armTargetDeadband;
+		
+		if(((m_joyLeft > 0) && isTooHigh) || ((m_joyLeft < 0) && isTooLow)) {			// Inhibit travel outside of limits
+			leftSpeed = 0;
+		} else if((m_joyLeft * leftSpeed < 0) || (fabs(m_joyLeft) > fabs(leftSpeed))) { // Use joystick value if greater than PID value
+			leftSpeed = m_joyLeft;														// or in opposite direction
+			m_frontMode = fUnknown;					
+		}
+	
+	} else if(curLeftError <= c_armTargetDeadband) {									// Error within deadband 
+		m_leftOnTarget = true;
+		if (fabs(leftSpeed) < .05) leftSpeed = 0;
+		m_leftArmPID->Reset();
+
+	} else if (syncArms && curRightError > curLeftError && curLeftError > 30) {			// Left arm moving faster and error > 30
+		syncFactor = (curRightError - curLeftError) * 0.002; // 0.005					// Calculate and apply sync factor
+		if (leftSpeed > 0) {
+			leftSpeed = (leftSpeed > syncFactor) ? leftSpeed -= syncFactor : 0; 
+		} else {
+			leftSpeed = (leftSpeed < syncFactor) ? leftSpeed += syncFactor : 0;
+		}
+	}
+	
+	if(m_useJoystickRight) {
+		m_rightArmTarget = curRightPosition;											// Set PID target
 		m_rightArmPID->SetSetpoint(m_rightArmTarget);
+		
+		isTooHigh = curRightPosition > (c_rightArmMaxPosition - c_armTargetDeadband);	// Is position outside limits
+		isTooLow = curRightPosition < c_armTargetDeadband;
+		
+		if(((m_joyRight > 0) && isTooHigh) || ((m_joyRight < 0) && isTooLow)) {			// Inhibit tarvel outside of limits
+			rightSpeed = 0;
+		} else if((m_joyRight * rightSpeed < 0) || (fabs(m_joyRight) > fabs(rightSpeed))) {	// Use joystick value if greater than PID value
+			rightSpeed = m_joyRight;														// or in opposite direction
+			m_frontMode = fUnknown;
+		}
+	
+	} else if(curRightError <= c_armTargetDeadband) {									// Error within deadband
+		m_rightOnTarget = true;
+		if (fabs(rightSpeed) < 0.05) rightSpeed = 0;
+		m_rightArmPID->Reset();
+
+	} else if (syncArms && curLeftError > curRightError && curRightError > 30) {		// Right arm moving faster and error > 30
+		syncFactor = (curLeftError - curRightError) * 0.002; // 0.005					// Calculate and apply sync factor
+		if (rightSpeed > 0) {
+			rightSpeed = (rightSpeed > syncFactor) ? rightSpeed -= syncFactor : 0; 
+		} else {
+			rightSpeed = (rightSpeed < syncFactor) ? rightSpeed += syncFactor : 0;
+		}
+	}
+	//printf("Pot Left=%f   Right = %f\n", m_leftArmPot->GetAverageVoltage(), m_rightArmPot->GetAverageVoltage());
+	//printf("Left: %d Right: %d\n", curLeftPosition, curRightPosition);
+	//printf("Left Arm=%d  Pot=%d  Right Arm=%d  Pot=%d\n",curLeftPosition, m_leftArmPot->GetAverageValue(), curRightPosition, m_rightArmPot->GetAverageValue());
+	//printf("Left: %d LeftPWM: %.3f Right: %d RightPWM: %.3f Difference: %d\n", curLeftError, leftSpeed, curRightError, rightSpeed, (curLeftError - curRightError));
+	
+	m_leftArm->Set(leftSpeed);											// Set motor PWMs
+	m_rightArm->Set(rightSpeed);
+	
+	switch (m_frontMode) {
+	case fDeploy:														// Pickup Deployed
+		if(!HasBall()) {												// No ball detected
+			delayCount = 0;
+		} else if(delayCount > 0) {										// Delay expired
+			delayCount = 0;
+			if(CommandBase::ballShooter->HasBall()) {					// Ball in the shooter
+				SetPickupMode(fLowDeploy);								// Move to Low Deploy position
+			} else if(CommandBase::ballShooter->GetShootState() != BallShooter::sReady) {	// Shooter not ready
+				SetPickupMode(fWaitToStore);							// Wait to store
+			} else {													
+				SetPickupMode(fStore);									// Move to Store position
+			}
+		} else {														// Increment delay counter
+			delayCount++;
+		}
+		break;
+	
+	case fWaitToStore:													// Waiting for shooter
+		if(CommandBase::ballShooter->GetShootState() == BallShooter::sReady) SetPickupMode(fStore);		// Move to Store position
+		break;
+
+	case fWaitToLoad:													// Waiting for shooter
+		if(CommandBase::ballShooter->GetShootState() == BallShooter::sReady) SetPickupMode(fLoad);		// Move to Load position
+		break;
+
+	case fLoad:															// Moving to load position
+		if(m_leftOnTarget && m_rightOnTarget) SetPickupMode(fDropInShooter);	// Drop in Shooter when in position
+		break;
+
+	case fDropInShooter:												// Dropping ball in shooter
+		if(!HasBall()) {												// No Ball
+			delayCount = 0;
+			SetPickupMode(fStore);										// Move to store position
+		} else if(delayCount > 50) {									// Timeout
+			delayCount = 0;
+			SetPickupMode(fStore);										// Move to store position
+		} else {
+			delayCount++;												// Increment delay counter
+		}
+		break;
+	
+	case fLowShoot:														// Shooting ball from Low position
+		if(HasBall()) {													// Still has ball
+			delayCount = 0;
+		} else if(delayCount > 5) {										// Delay expired
+			delayCount = 0;
+			SetPickupMode(fStore);										// Move to store position
+		} else {
+			delayCount++;												// Increment delay counter
+		}
+		break;
+		
+	case fAutoLoad:														// Loading ball in Autonomous											
+		if(HasBall()) SetRollers(wOff);
+
+	default:;
 	}
 }
 
-void FrontPickup::SetUseJoystickLeft(bool use) {
-	m_useJoystickLeft = use;
+void FrontPickup::SetJoystickLeft(float joyLeft) {						// SET LEFT JOYSTICK SPEED
+	m_joyLeft = 0.7 * joyLeft;
 }
 
-void FrontPickup::SetUseJoystickRight(bool use) {
-	m_useJoystickRight = use;
+void FrontPickup::SetJoystickRight(float joyRight) {					// SET RIGHT JOYSTICK SPEED
+	m_joyRight = 0.7 * joyRight;
 }
 
-void FrontPickup::SetJoystickLeft(float joyLeft) {
-	m_joyLeft = joyLeft;
-}
-
-void FrontPickup::SetJoystickRight(float joyRight) {
-	m_joyRight = joyRight;
-}
-
-void FrontPickup::SetPickupMode(FrontMode mode) {
+void FrontPickup::SetPickupMode(FrontMode mode) {						// SET PICKUP MODE
+	FrontMode startMode = m_frontMode;
+	m_leftWheels->Set(Relay::kOff);
+	m_rightWheels->Set(Relay::kOff);
+	
 	switch (mode) {
-	case fDeployBoth:
-		if (m_ballLoadedSensor->Get()) {				// No ball
-			SetSetpoints(0,0);
-			m_rightWheels->Set(Relay::kForward);
+	case fDeploy:														// Deploy pickup
+		if (!HasBall()) {												// Inhibit if ball already in pickup
+			SetSetpoints(5,5);											// Move to position			
+			m_rightWheels->Set(Relay::kForward);						// Start rollers
 			m_leftWheels->Set(Relay::kForward);
-			m_frontMode = fDeployBoth;
+			CommandBase::ballShooter->Load();							// Move shooter to ready position
+			CommandBase::backPickup->SetPickupMode(BackPickup::bStore); // Move backpickup to store position
+			m_frontMode = fDeploy;
 		}
 		break;
-	case fDeployLeft:
-		
-		break;
-	case fDeployRight:
-		
-		break;
-	case fStore:
-		SetSetpoints(50,50);
-		m_rightWheels->Set(Relay::kOff);
-		m_leftWheels->Set(Relay::kOff);
+	
+	case fStore:														// Store pickup
+		SetSetpoints(570,570);			
 		m_frontMode = fStore;
 		break;
-	case fPass:
-		
+	
+	case fLoad:															// Load ball into Shooter
+		if(HasBall() && !CommandBase::ballShooter->HasBall()) {			// Inhibit if no ball or ball already in shooter
+			if(CommandBase::ballShooter->GetShootState() == BallShooter::sReady) {		// Shooter in ready position
+				SetSetpoints(570, 570);									// Move to load position
+				m_frontMode = fLoad;
+			} else {
+				CommandBase::ballShooter->Load();						// Move shooter to ready position
+				m_frontMode = fWaitToLoad;								// Wait for shooter
+			}
+		}
 		break;
-	case fLowShoot:
-		m_rightWheels->Set(Relay::kForward);
-		m_leftWheels->Set(Relay::kForward);
+
+	case fDropInShooter:												// Drop ball in the shooter
+		SetSetpoints(720, 500);			
+		m_frontMode = fDropInShooter;
 		break;
-	case fLowDeploy:
-		if (!m_ballLoadedSensor->Get()) {				// Ball loaded
-			SetSetpoints(0,0);
+	
+	case fShoot:														// Move to shoot position
+		if(HasBall()) {													// Position dependent on ball possession
+			SetSetpoints(116, 116);
+		} else {
+			SetSetpoints(350, 350);
+		}
+		m_frontMode = fShoot;
+		break;
+
+	case fLowDeploy:													// Move to Low Goal position
+		if(HasBall()) {													// Inhibit if no ball
+			SetSetpoints(116,116);
 			m_frontMode = fLowDeploy;
 		}
 		break;
-	case fMoveToLoad:
-		if(!m_ballLoadedSensor->Get()) {
-			SetSetpoints(80,80);
-			m_frontMode = fMoveToLoad;
-		}
-		break;
-	case fLoad:
-		break;
-	case fAutoDeploy:
-		if(m_ballLoadedSensor->Get()) {
-			SetSetpoints(0,0);
-			m_rightWheels->Set(Relay::kForward);
-			m_leftWheels->Set(Relay::kForward);
-			m_frontMode = fAutoDeploy;
-		}
-		break;
+		
+	case fAutoLoad:														// Loading ball in Autonomous
+		if(!HasBall()) SetRollers(wIn);
+		SetSetpoints(116, 116);
+		CommandBase::ballShooter->Load();								// Make sure shooter is ready to load
+		m_frontMode = fAutoLoad;										
+
+	default:
+		m_frontMode = mode;
+	}
+
+	if (m_frontMode != startMode) {
+		sprintf(m_log, "Front Pickup: Mode=%s", GetModeName(mode));
+		m_robotLog->LogWrite(m_log);
+	
 	}
 }
 
-FrontPickup::FrontMode FrontPickup::GetFrontPickupMode() {
-	return m_frontMode;
+void FrontPickup::SetRollers(RollerMode mode) {							// SET ROLLER MODE
+	if(mode == wIn) {
+		m_leftWheels->Set(Relay::kForward);
+		m_rightWheels->Set(Relay::kForward);
+	} else if(mode == wOut) {
+		m_leftWheels->Set(Relay::kReverse);
+		m_rightWheels->Set(Relay::kReverse);
+	} else {
+		m_leftWheels->Set(Relay::kOff);
+		m_rightWheels->Set(Relay::kOff);
+	}
 }
 
-bool FrontPickup::HasBall() {
-	return !m_ballLoadedSensor->Get();
+void FrontPickup::SetUseJoystickLeft(bool use) {						// SET USE LEFT JOYSTICK FLAG
+	m_useJoystickLeft = use;
+	m_robotLog->LogWrite("Front Pickup: Use joystick on Left");
 }
+
+void FrontPickup::SetUseJoystickRight(bool use) {						// SET USE RIGHT JOYSTICK FLAG
+	m_useJoystickRight = use;
+	m_robotLog->LogWrite("Front Pickup: Use joystick on Right");
+}
+
+
+//  ******************** PRIVATE ********************
+
+
+char* FrontPickup::GetModeName(FrontMode mode) {
+	switch(mode) {
+	case fUnknown:  		return "Unknown";
+	case fDeploy:			return "Deploy";
+	case fWaitToStore:		return "WaitToStore";
+	case fStore:			return "Store";
+	case fWaitToLoad:		return "WaitToLoad";
+	case fLoad:				return "Load";
+	case fDropInShooter: 	return "DropInShooter";
+	case fShoot:			return "Shoot";
+	case fLowDeploy:		return "LowDeploy";
+	case fLowShoot:			return "LowShoot";
+	case fAutoLoad:			return "AutoLoad";
+	default:				return "?";
+	}
+}
+
+INT32 FrontPickup::LimitValue(Pot arm, INT32 position) {				// LIMIT POSITIONS TO WITHIN RANGE
+	
+	if(arm == pLeft) {
+		position = (position > c_leftArmMaxPosition) ? c_leftArmMaxPosition :
+				   (position < 0) ? 0  : position;
+	} else {
+		position = (position > c_rightArmMaxPosition) ? c_rightArmMaxPosition :
+				   (position < 0) ? 0  : position;
+	}
+	
+	return position;
+}
+
+void FrontPickup::SetSetpoints(INT32 leftPosition, INT32 rightPosition){	// SET POSITION SETPOINTS
+	
+	m_leftArmTarget = LimitValue(pLeft, leftPosition);
+	m_leftArmPID->SetSetpoint(m_leftArmTarget);
+	m_leftOnTarget = false;
+	
+	m_rightArmTarget = LimitValue(pRight, rightPosition);
+	m_rightArmPID->SetSetpoint(m_rightArmTarget);
+	m_rightOnTarget = false;
+}
+
+

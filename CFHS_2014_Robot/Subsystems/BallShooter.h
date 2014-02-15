@@ -3,6 +3,7 @@
 #include "Commands/Subsystem.h"
 #include "WPILib.h"
 #include "PIDControl.h"
+#include "../RobotLog.h"
 
 /**
  *
@@ -12,29 +13,33 @@
 class BallShooter: public Subsystem {
 
 public:
-	typedef enum {sIdle, sStart, sLoad, sReady, sFire} ShootState;
+	typedef enum {sIdle, sStart, sLoad, sReady, sFire, sRelease} ShootState;
 	
-	BallShooter();
-	void InitDefaultCommand();
+	BallShooter(RobotLog* log);
+
+	void  		Fire();
+	INT32 		GetShooterPosition();
+	ShootState	GetShootState();
+	bool  		HasBall();
+	void  		InitDefaultCommand();
+	void  		Load();
+	void  		Periodic();
+	void		Release();
 	
-	void  Periodic();
 	
-	INT32 GetShooterPosition();
-	void  Load();
-	void  Fire();
-	
-	ShootState GetShootState();
 private:
-	// It's desirable that everything possible under private except
-	// for methods that implement subsystem capabilities
-	
-	
 	Victor*        m_shootMotor;
 	AnalogChannel* m_shootPot;
 	
 	PIDControl*    m_shootPID;
 	ShootState     m_shootState;
-		
+	
+	DigitalInput*  m_ballSensor;
+	
+	RobotLog*	   m_robotLog;
+	char		   m_log[100];
+	
+	char*	GetStateName(ShootState state);
 };
 
 #endif

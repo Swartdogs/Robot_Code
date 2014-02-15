@@ -6,23 +6,19 @@ PickupLoad::PickupLoad() {
 	Requires(frontPickup);
 	Requires(backPickup);
 	
-	m_pickup = (frontPickup->HasBall()) ? pFront : (backPickup->HasBall()) ? pBack : pNone;
+	m_pickup = (frontPickup->HasBall()) ? pFront : (ballShooter->HasBall()) ? pBack : pNone;
 }
 
 // Called just before this Command runs the first time
 void PickupLoad::Initialize() {
 	switch(m_pickup) {
 		case pFront:
-			frontPickup->SetPickupMode(FrontPickup::fMoveToLoad);
-			if(backPickup->GetBackPickupMode() == BackPickup::bMoveToLoad || backPickup->GetBackPickupMode() == BackPickup::bLoad) {
-				backPickup->SetPickupMode(BackPickup::bStore);
-			}
+			frontPickup->SetPickupMode(FrontPickup::fLoad);
+			backPickup->SetPickupMode(BackPickup::bStore);
 			break;
 		case pBack:
-			backPickup->SetPickupMode(BackPickup::bMoveToLoad);
-			if(frontPickup->GetFrontPickupMode() == FrontPickup::fMoveToLoad || frontPickup->GetFrontPickupMode() == FrontPickup::fLoad) {
-				frontPickup->SetPickupMode(FrontPickup::fStore);
-			}
+			backPickup->SetPickupMode(BackPickup::bStore);
+			frontPickup->SetPickupMode(FrontPickup::fStore);
 			break;
 		default:;
 	}
@@ -35,13 +31,9 @@ void PickupLoad::Execute() {
 
 // Make this return true when this Command no longer needs to run execute()
 bool PickupLoad::IsFinished() {
-	if(m_pickup == pFront) {
-		return (frontPickup->GetFrontPickupMode() == FrontPickup::fStore);
-	} else if(m_pickup == pBack) {
-		return (backPickup->GetBackPickupMode() == BackPickup::bStore);
-	} else {
-		return true;
-	}
+	return (m_pickup == pFront) ? (frontPickup->GetFrontPickupMode() == FrontPickup::fStore) : 
+			(m_pickup == pBack) ? (backPickup->GetBackPickupMode() == BackPickup::bStore) :
+								  true;
 }
 
 // Called once after isFinished returns true
