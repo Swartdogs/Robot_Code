@@ -83,6 +83,8 @@ void _GLOBAL__I__ZN8AutoFireC2Ev();
 
 void _GLOBAL__I__ZN8LoadBallC2Ev();
 
+void _GLOBAL__I__ZN9INIParserC2EPc();
+
 void _GLOBAL__I__ZN12PrintCommandC2EPKc();
 
 void _GLOBAL__I__ZN9Scheduler9_instanceE();
@@ -176,6 +178,7 @@ void (*_ctors[])() =
     _GLOBAL__I__ZN5DriveC2EP8RobotLog,
     _GLOBAL__I__ZN8AutoFireC2Ev,
     _GLOBAL__I__ZN8LoadBallC2Ev,
+    _GLOBAL__I__ZN9INIParserC2EPc,
     _GLOBAL__I__ZN12PrintCommandC2EPKc,
     _GLOBAL__I__ZN9Scheduler9_instanceE,
     _GLOBAL__I__ZN11WaitCommandC2Ed,
@@ -281,6 +284,8 @@ void _GLOBAL__D__ZN8AutoFireC2Ev();
 
 void _GLOBAL__D__ZN8LoadBallC2Ev();
 
+void _GLOBAL__D__ZN9INIParserC2EPc();
+
 void _GLOBAL__D__ZN9Scheduler9_instanceE();
 
 void _GLOBAL__D_wpi_error_s_ModuleIndexOutOfRange();
@@ -364,6 +369,7 @@ void (*_dtors[])() =
     _GLOBAL__D__ZN5DriveC2EP8RobotLog,
     _GLOBAL__D__ZN8AutoFireC2Ev,
     _GLOBAL__D__ZN8LoadBallC2Ev,
+    _GLOBAL__D__ZN9INIParserC2EPc,
     _GLOBAL__D__ZN9Scheduler9_instanceE,
     _GLOBAL__D_wpi_error_s_ModuleIndexOutOfRange,
     _GLOBAL__D__ZN17MotorSafetyHelper12m_headHelperE,

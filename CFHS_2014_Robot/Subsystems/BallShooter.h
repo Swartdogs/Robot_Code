@@ -27,6 +27,7 @@ public:
 	void		Release();
 	void		StopMotors();
 	
+	void 		UpdateConstants();
 	
 private:
 	Victor*        m_shootMotor;
@@ -41,6 +42,9 @@ private:
 	char		   m_log[100];
 	
 	char*	GetStateName(ShootState state);
+	
+	INT32 f_triggerPosition;
+	INT32 f_releasePosition;
 };
 
 #endif

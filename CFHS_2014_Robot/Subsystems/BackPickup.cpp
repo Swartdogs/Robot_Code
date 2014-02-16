@@ -30,6 +30,9 @@ BackPickup::BackPickup(RobotLog* log) : Subsystem("BackPickup") {
 	m_joySpeed = 0;
 	
 	SetPickupMode(bStore);
+	
+	// INIParser stuff
+	UpdateConstants();
 }
 
 void BackPickup::IncrementArm(AdjustMode mode){
@@ -210,6 +213,14 @@ void BackPickup::StopMotors() {
 	m_rollers->Set(0.0);
 }
 
+void BackPickup::UpdateConstants() {
+	CommandBase::iniParser->SetSubsystem("BACKPICKUP");
+	f_baseMotorDeadband = CommandBase::iniParser->FindValue("baseMotorDeadband", c_baseMotorDeadband);
+	f_baseZeroOffset    = CommandBase::iniParser->FindValue("baseZerOffset", c_baseZeroOffset);
+	f_baseMaxPosition   = CommandBase::iniParser->FindValue("baseMaxPosition", c_baseMaxPosition);
+	f_incrementValue    = CommandBase::iniParser->FindValue("incrementValue", c_incrementValue);
+}
+
 
 //  ******************** PRIVATE ********************
 
@@ -250,4 +261,3 @@ bool BackPickup::ShooterHasBall() {										// GET BALL IN SHOOTER STATUS
 bool BackPickup::HasBall() {
 	return (!m_ballSensor->Get());
 }
-

@@ -7,6 +7,7 @@
 #include "Subsystems/FrontPickup.h"
 #include "Subsystems/BackPickup.h"
 #include "Subsystems/BallShooter.h"
+#include "Subsystems/INIParser.h"
 #include "OI.h"
 #include "RobotLog.h"
 
@@ -25,12 +26,13 @@ public:
 	static void StopMotors();
 
 	// Create a single static instance of all of your subsystems
-	static Drive* drive;
-	static FindTarget* findTarget;
-	static OI* oi;
+	static Drive*       drive;
+	static FindTarget*  findTarget;
+	static OI*          oi;
 	static FrontPickup* frontPickup;
-	static BackPickup* backPickup;
+	static BackPickup*  backPickup;
 	static BallShooter* ballShooter;
+	static INIParser*   iniParser;
 };
 
 #endif

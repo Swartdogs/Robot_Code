@@ -20,6 +20,9 @@ BallShooter::BallShooter(RobotLog* log) : Subsystem("BallShooter") {
 	m_shootPID->SetOutputRange(-1.0, 1.0);
 	
 	m_ballSensor = new DigitalInput(DI_BALL_SHOOTER_SENSOR);
+	
+	// INIParser Stuff
+	UpdateConstants();
 }
     
 void BallShooter::Fire() {
@@ -144,6 +147,12 @@ void BallShooter::Release() {
 
 void BallShooter::StopMotors() {
 	m_shootMotor->Set(0.0);
+}
+
+void BallShooter::UpdateConstants() {
+	CommandBase::iniParser->SetSubsystem("BALLSHOOTER");
+	f_triggerPosition = CommandBase::iniParser->FindValue("triggerPosition", c_triggerPosition);
+	f_releasePosition = CommandBase::iniParser->FindValue("releasePosition", c_releasePosition);
 }
 
 //  ******************** PRIVATE ********************

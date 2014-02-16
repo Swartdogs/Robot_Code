@@ -395,6 +395,7 @@
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/FrontPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/BackPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/BallShooter.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/INIParser.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../OI.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../RobotLog.h
@@ -1186,6 +1187,8 @@ C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/F
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/BackPickup.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/BallShooter.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../Subsystems/INIParser.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/CommandGroups/../../OI.h:
 

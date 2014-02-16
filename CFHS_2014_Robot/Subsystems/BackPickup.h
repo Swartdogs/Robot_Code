@@ -24,7 +24,9 @@ public:
 	void 		SetUseJoystick(bool use);
 	void        StopMotors();
 	
-	bool    HasBall();
+	bool    	HasBall();
+	
+	void 		UpdateConstants();
 	
 private:
 	char*	GetModeName(BackMode mode);
@@ -46,6 +48,11 @@ private:
 	char		m_log[100];
 	bool  		m_onTarget;
 	bool		m_useJoystick;
+	
+	INT32 f_baseMotorDeadband;
+	INT32 f_baseZeroOffset;	// 841	
+	INT32 f_baseMaxPosition;
+	INT32 f_incrementValue;
 };
 
 #endif

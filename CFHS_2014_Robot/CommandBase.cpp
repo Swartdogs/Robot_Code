@@ -13,8 +13,10 @@ FrontPickup*	CommandBase::frontPickup = NULL;
 BackPickup*		CommandBase::backPickup = NULL;
 BallShooter* 	CommandBase::ballShooter = NULL;
 OI* 			CommandBase::oi = NULL;
+INIParser*      CommandBase::iniParser = NULL;
 
 void CommandBase::Init(RobotLog* logDelegate) {
+	iniParser =     new INIParser("525Init.ini");
 	drive = 		new Drive(logDelegate);
 	findTarget = 	new FindTarget(logDelegate);
 	frontPickup = 	new FrontPickup(logDelegate);

@@ -395,6 +395,7 @@
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/FrontPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/BackPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/BallShooter.h \
+  C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/INIParser.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../OI.h \
   C:/WindRiver/vxworks-6.3/target/h/WPILib/WPILib.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../RobotLog.h
@@ -1186,6 +1187,8 @@ C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/Fro
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/BackPickup.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/BallShooter.h:
+
+C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../Subsystems/INIParser.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Commands/FrontPickup/../../OI.h:
 

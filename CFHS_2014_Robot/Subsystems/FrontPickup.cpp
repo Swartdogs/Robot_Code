@@ -50,6 +50,9 @@ FrontPickup::FrontPickup(RobotLog* log) : Subsystem("FrontPickup") {
 	m_useJoystickRight = false;
 	m_joyLeft = 0;
 	m_joyRight = 0;
+	
+	// INIParser Stuff
+	UpdateConstants();
 }
 
 FrontPickup::FrontMode FrontPickup::GetFrontPickupMode() {				// GET MODE
@@ -351,6 +354,16 @@ void FrontPickup::StopMotors() {
 	m_rightArm->Set(0.0);
 	m_leftWheels->Set(Relay::kOff);
 	m_rightWheels->Set(Relay::kOff);
+}
+
+void FrontPickup::UpdateConstants() {
+	CommandBase::iniParser->SetSubsystem("FRONTPICKUP");
+	f_leftArmZeroOffset   = CommandBase::iniParser->FindValue("leftArmZeroOffset", c_leftArmZeroOffset);
+	f_leftArmMaxPosition  = CommandBase::iniParser->FindValue("leftArmMaxPosition", c_leftArmMaxPosition);
+	f_rightArmZeroOffset  = CommandBase::iniParser->FindValue("rightArmZeroOffset", c_rightArmZeroOffset);
+	f_rightArmMaxPosition = CommandBase::iniParser->FindValue("rightArmMaxPosition", c_rightArmMaxPosition);
+	f_armTargetDeadband   = CommandBase::iniParser->FindValue("armTargetDeadband", c_armTargetDeadband);
+	f_incrementValue      = CommandBase::iniParser->FindValue("incrementValue", c_incrementValue);
 }
 
 //  ******************** PRIVATE ********************

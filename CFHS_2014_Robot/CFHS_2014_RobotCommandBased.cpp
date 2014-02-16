@@ -263,6 +263,13 @@ private:
 		if (CommandBase::oi->GetButtonPress(11)) {
 			CommandBase::ballShooter->Release();
 		}
+		
+		if(CommandBase::oi->GetButtonPress(10)) {
+			CommandBase::backPickup->UpdateConstants();
+			CommandBase::ballShooter->UpdateConstants();
+			CommandBase::frontPickup->UpdateConstants();
+			printf("Updated Constants");
+		}
 
 		if (CommandBase::ballShooter->GetShootState() != BallShooter::sIdle) {
 			CommandBase::ballShooter->Periodic();

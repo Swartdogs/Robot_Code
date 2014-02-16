@@ -33,6 +33,8 @@ public:
 	void 		SetUseJoystickRight(bool use);
 	void        StopMotors();
 	
+	void 		UpdateConstants();
+	
 private:
 	Victor* 		m_rightArm;
 	Victor* 		m_leftArm;
@@ -60,6 +62,13 @@ private:
 	bool 			m_rightOnTarget;
 	bool 			m_useJoystickLeft;
 	bool 			m_useJoystickRight;
+	
+	INT32 			f_leftArmZeroOffset;
+	INT32			f_leftArmMaxPosition;
+	INT32			f_rightArmZeroOffset;
+	INT32			f_rightArmMaxPosition;
+	INT32			f_armTargetDeadband;
+	INT32			f_incrementValue;
 	
 	char*	GetModeName(FrontMode mode);
 	INT32 	LimitValue(Pot pot, INT32 position);
