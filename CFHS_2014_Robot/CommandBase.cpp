@@ -31,3 +31,10 @@ void CommandBase::Periodic() {
 	
 //	printf("Left Arm: %d, Right Arm: %d, Shooter: %d, Back: %d\n", frontPickup->GetPosition(FrontPickup::pLeft), frontPickup->GetPosition(FrontPickup::pRight), ballShooter->GetShooterPosition(), backPickup->GetPosition());
 }
+
+void CommandBase::StopMotors() {
+	drive->StopMotors();
+	frontPickup->StopMotors();
+	backPickup->StopMotors();
+	ballShooter->StopMotors();
+}

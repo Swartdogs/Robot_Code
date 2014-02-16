@@ -25,6 +25,7 @@ public:
 	void  		Load();
 	void  		Periodic();
 	void		Release();
+	void		StopMotors();
 	
 	
 private:

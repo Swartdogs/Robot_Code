@@ -48,9 +48,12 @@ OI::OI(Drive* drive) {
 	
 //----------------------------------------------- Testing Scheme ----------------------------------------------------//
 	
-	driveButton1->WhileHeld(new DriveRangeDetect());
+//	driveButton1->WhileHeld(new DriveRangeDetect());
+	driveButton1->WhenPressed(new BallShooterFire());
 	driveButton2->WhileHeld(new DriveTapeDetect());
-	driveButton11->WhenPressed(new FindHotTarget());
+	//driveButton11->WhenPressed(new FindHotTarget());
+	
+	driveButton11->WhenPressed(new DriveResetGyro());
 	
 //---------------------------------------- One Joystick/Button Box Scheme -------------------------------------------//
 	
@@ -61,6 +64,8 @@ OI::OI(Drive* drive) {
 	mcJoy1Button6->WhenPressed(new FrontPickupSetMode(FrontPickup::fStore));		// Store FrontPickup
 	mcJoy1Button7->WhenPressed(new FrontPickupSetMode(FrontPickup::fDeploy));		// Deploy FrontPickup
 	mcJoy1Button8->WhenPressed(new BallShooterFire());								// Fire BallShooter
+	mcJoy1Button9->WhileHeld(new BackPickupSetRollers(BackPickup::rIn));
+	
 	mcJoy1Button10->WhenPressed(new FrontPickupSetMode(FrontPickup::fLowDeploy));	// Low Deploy FrontPickup
 	mcJoy1Button11->WhileHeld(new FrontPickupSetRollers(FrontPickup::wOut));		// Shoot FrontPickup
 	

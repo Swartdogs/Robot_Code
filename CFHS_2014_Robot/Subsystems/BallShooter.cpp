@@ -142,6 +142,9 @@ void BallShooter::Release() {
 	}
 }
 
+void BallShooter::StopMotors() {
+	m_shootMotor->Set(0.0);
+}
 
 //  ******************** PRIVATE ********************
 

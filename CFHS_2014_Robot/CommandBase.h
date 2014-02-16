@@ -22,6 +22,7 @@ public:
 
 	static void Init(RobotLog* logDelegate);
 	static void Periodic();
+	static void StopMotors();
 
 	// Create a single static instance of all of your subsystems
 	static Drive* drive;

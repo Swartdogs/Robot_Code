@@ -31,6 +31,7 @@ public:
 	void 		SetRollers(RollerMode mode);
 	void 		SetUseJoystickLeft(bool use);
 	void 		SetUseJoystickRight(bool use);
+	void        StopMotors();
 	
 private:
 	Victor* 		m_rightArm;

@@ -100,14 +100,16 @@ void BackPickup::Periodic(){											// PERIODIC (Called every periodic loop)
 	
 	switch (m_backMode) {
 	case bDeploy:
-		if(HasBall() || ballTimerCount > 0) {												// Move to Store after ball is detected and short delay
-			printf("ballTimerCount: %d\n", ballTimerCount);
-			if(ballTimerCount > 25 || ShooterHasBall()) {									// Due to ball bounce, ignore sensor after delay starts
+		if(HasBall()) {												// Move to Store after ball is detected and short delay
+			if(ballTimerCount > 50 || ShooterHasBall()) {									// Due to ball bounce, ignore sensor after delay starts
+				printf("ballTimerCount: %d  ShooterHasBall=%d\n", ballTimerCount > 35, ShooterHasBall());
 				ballTimerCount = 0;
 				SetPickupMode(bStore);
 			} else {
 				ballTimerCount++;
 			}
+		} else {
+			ballTimerCount = 0;
 		}
 		break;
 		
@@ -120,12 +122,12 @@ void BackPickup::Periodic(){											// PERIODIC (Called every periodic loop)
 	case bPass:															
 		if(m_onTarget) {															// Arm is in pass position
 			if(!ShooterHasBall() || ballTimerCount > 0) {							// Move to Store after ball is gone and short delay
-					if(ballTimerCount > 25) {										// Due to ball bounce, ignore sensor after delay starts
-						ballTimerCount = 0;
-						SetPickupMode(bStore);
-					} else {
-						ballTimerCount++;
-					}
+				if(ballTimerCount > 25) {										// Due to ball bounce, ignore sensor after delay starts
+					ballTimerCount = 0;
+					SetPickupMode(bStore);
+				} else {
+					ballTimerCount++;
+				}
 			}
 		}
 		break;
@@ -201,6 +203,11 @@ void BackPickup::SetRollers(RollerMode mode) {							// SET ROLLER STATE
 
 void BackPickup::SetUseJoystick(bool use) {								// SET USE JOYSTICK FLAG
 	m_useJoystick = use;
+}
+
+void BackPickup::StopMotors() {
+	m_baseMotor->Set(0.0);
+	m_rollers->Set(0.0);
 }
 
 

@@ -140,7 +140,7 @@ void FrontPickup::Periodic() { 											// PERIODIC (Called every periodic loo
 		m_leftArmPID->Reset();
 
 	} else if (syncArms && curRightError > curLeftError && curLeftError > 30) {			// Left arm moving faster and error > 30
-		syncFactor = (curRightError - curLeftError) * 0.002; // 0.005					// Calculate and apply sync factor
+		syncFactor = (curRightError - curLeftError) * 0.000; // 0.002					// Calculate and apply sync factor
 		if (leftSpeed > 0) {
 			leftSpeed = (leftSpeed > syncFactor) ? leftSpeed -= syncFactor : 0; 
 		} else {
@@ -168,7 +168,7 @@ void FrontPickup::Periodic() { 											// PERIODIC (Called every periodic loo
 		m_rightArmPID->Reset();
 
 	} else if (syncArms && curLeftError > curRightError && curRightError > 30) {		// Right arm moving faster and error > 30
-		syncFactor = (curLeftError - curRightError) * 0.002; // 0.005					// Calculate and apply sync factor
+		syncFactor = (curLeftError - curRightError) * 0.000; // 0.002					// Calculate and apply sync factor
 		if (rightSpeed > 0) {
 			rightSpeed = (rightSpeed > syncFactor) ? rightSpeed -= syncFactor : 0; 
 		} else {
@@ -346,6 +346,12 @@ void FrontPickup::SetUseJoystickRight(bool use) {						// SET USE RIGHT JOYSTICK
 	m_robotLog->LogWrite("Front Pickup: Use joystick on Right");
 }
 
+void FrontPickup::StopMotors() {
+	m_leftArm->Set(0.0);
+	m_rightArm->Set(0.0);
+	m_leftWheels->Set(Relay::kOff);
+	m_rightWheels->Set(Relay::kOff);
+}
 
 //  ******************** PRIVATE ********************
 

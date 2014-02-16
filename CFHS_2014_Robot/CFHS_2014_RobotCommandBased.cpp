@@ -90,7 +90,7 @@ private:
 			LogWrite(m_log);
 		}
 
-		CommandBase::drive->StopMotors();
+		CommandBase::StopMotors();
 		CommandBase::drive->SetSafetyEnabled(false);
 		
 		m_periodicCount = 0;

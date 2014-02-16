@@ -62,7 +62,7 @@ Drive::Drive(RobotLog *robotLog) : Subsystem("Drive") {
 	
 	m_startCollection = false;
 	
-	m_tapeDetectLED->Set(true);
+//	m_tapeDetectLED->Set(true);
 }
 
 bool Drive::CrossedTape() {
@@ -390,6 +390,10 @@ Drive::RangeMode Drive::GetRangeMode() {
 
 void Drive::SetRangeMode(RangeMode mode) {
 	m_rangeMode = mode;
+}
+
+void Drive::ResetGyro() {
+	m_gyro->Reset();
 }
 
 

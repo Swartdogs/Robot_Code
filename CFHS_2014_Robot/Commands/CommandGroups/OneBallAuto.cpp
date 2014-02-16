@@ -8,7 +8,7 @@ OneBallAuto::OneBallAuto() {
 //	AddSequential(new CheckForHot());
 //	
 //	AddSequential(new BallShooterFire());
-	
+	AddParallel(new FrontPickupSetMode(FrontPickup::fShoot));
 	AddSequential(new BallShooterWaitForMode(BallShooter::sReady));
-	AddSequential(new DriveDistance(120, 0.7, true, 60));
+	AddSequential(new DriveDistance(120, 0.7, true, 60, 0));
 }

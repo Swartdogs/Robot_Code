@@ -150,6 +150,16 @@ public:
 	virtual void Interrupted();
 };
 
+class DriveResetGyro: public CommandBase {
+public:
+	DriveResetGyro();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+};
+
 class DriveRotate: public CommandBase {
 public:
 	DriveRotate(float absoluteAngle);

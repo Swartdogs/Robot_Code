@@ -33,6 +33,8 @@ void _GLOBAL__I__ZN13DriveDistanceC2Edfbd();
 
 void _GLOBAL__I__ZN13FindHotTargetC2Ev();
 
+void _GLOBAL__I__ZN14DriveResetGyroC2Ev();
+
 void _GLOBAL__I__ZN14DriveToLowGoalC2Ev();
 
 void _GLOBAL__I__ZN15BallShooterFireC2Ev();
@@ -149,6 +151,7 @@ void (*_ctors[])() =
     _GLOBAL__I__ZN11TwoBallAutoC2Ev,
     _GLOBAL__I__ZN13DriveDistanceC2Edfbd,
     _GLOBAL__I__ZN13FindHotTargetC2Ev,
+    _GLOBAL__I__ZN14DriveResetGyroC2Ev,
     _GLOBAL__I__ZN14DriveToLowGoalC2Ev,
     _GLOBAL__I__ZN15BallShooterFireC2Ev,
     _GLOBAL__I__ZN15BallShooterLoadC2Ev,
@@ -227,6 +230,8 @@ void _GLOBAL__D__ZN11TwoBallAutoC2Ev();
 void _GLOBAL__D__ZN13DriveDistanceC2Edfbd();
 
 void _GLOBAL__D__ZN13FindHotTargetC2Ev();
+
+void _GLOBAL__D__ZN14DriveResetGyroC2Ev();
 
 void _GLOBAL__D__ZN14DriveToLowGoalC2Ev();
 
@@ -334,6 +339,7 @@ void (*_dtors[])() =
     _GLOBAL__D__ZN11TwoBallAutoC2Ev,
     _GLOBAL__D__ZN13DriveDistanceC2Edfbd,
     _GLOBAL__D__ZN13FindHotTargetC2Ev,
+    _GLOBAL__D__ZN14DriveResetGyroC2Ev,
     _GLOBAL__D__ZN14DriveToLowGoalC2Ev,
     _GLOBAL__D__ZN15BallShooterFireC2Ev,
     _GLOBAL__D__ZN15BallShooterLoadC2Ev,

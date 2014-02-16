@@ -14,6 +14,7 @@ public:
 	BackPickup(RobotLog* log);
 	BackMode	GetBackPickupMode();
 	INT32 		GetPosition();
+	void		IncrementArm(AdjustMode mode);
 	void 		InitDefaultCommand();
 	bool 		OnTarget();
 	void 		Periodic();
@@ -21,7 +22,7 @@ public:
 	void 		SetPickupMode(BackMode mode);
 	void 		SetRollers(RollerMode mode);
 	void 		SetUseJoystick(bool use);
-	void		IncrementArm(AdjustMode mode);
+	void        StopMotors();
 	
 	bool    HasBall();
 	

@@ -35,6 +35,7 @@ public:
 	void 	SetSafetyEnabled(bool enabled);
 	void 	StopEncoders();
 	void 	StopMotors();
+	void    ResetGyro();
 	
 	TapeMode GetTapeMode();
 	void     SetTapeMode(TapeMode mode);
