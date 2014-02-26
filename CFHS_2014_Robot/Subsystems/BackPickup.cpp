@@ -3,13 +3,19 @@
 #include "../Robotmap.h"
 #include <math.h>
 
-const INT32 c_baseMotorDeadband = 3;
-const INT32 c_baseZeroOffset = 830;	// 841	
-const INT32 c_baseMaxPosition = 800;
-const INT32 c_incrementValue = 10;
-
-
 BackPickup::BackPickup(RobotLog* log) : Subsystem("BackPickup") {
+	f_baseMotorDeadband = 3;
+	f_baseZeroOffset = 830;	
+	f_baseMaxPosition = 800;
+	f_incrementValue = 10;
+	
+	f_storeSetpoint = 520;
+	f_deploySetpoint = 265;
+	f_passSetpoint = 570;
+	f_shootSetpoint = 420;
+	f_catchSetpoint = 420;
+	f_startSetpoint = 610;	
+	
 	m_baseMotor = new Victor(PWM_BACK_PICKUP_BASE_MOTOR);
 	m_rollers = new Victor(PWM_BACK_PICKUP_ROLLERS);
 	
@@ -29,16 +35,22 @@ BackPickup::BackPickup(RobotLog* log) : Subsystem("BackPickup") {
 	m_onTarget = false;
 	m_joySpeed = 0;
 	
-	SetPickupMode(bStore);
 	
-	// INIParser stuff
-	UpdateConstants();
+	SetPickupMode(bStore);
 }
 
 void BackPickup::IncrementArm(AdjustMode mode){
-	m_baseTarget += (mode == aUp) ? c_incrementValue : -c_incrementValue;
+	if (mode == aUp) {
+		m_baseTarget += f_incrementValue;
+	} else {
+		m_baseTarget -= f_incrementValue;
+	}
+	
 	m_baseTarget = LimitValue(m_baseTarget);
 	m_baseMotorPID->SetSetpoint(m_baseTarget);
+	
+	sprintf(m_log, "BackPickup:  Increment Arm to %d", m_baseTarget);
+	m_robotLog->LogWrite(m_log);
 }
 
 BackPickup::BackMode BackPickup::GetBackPickupMode(){					// GET MODE
@@ -46,7 +58,11 @@ BackPickup::BackMode BackPickup::GetBackPickupMode(){					// GET MODE
 }
 
 INT32 BackPickup::GetPosition() {										// GET ARM POSITION
-	return (c_baseZeroOffset - m_baseMotorPot->GetAverageValue());		// Arm position relative to offset
+	return (f_baseZeroOffset - m_baseMotorPot->GetAverageValue());		// Arm position relative to offset
+}
+
+bool BackPickup::HasBall() {
+	return (!m_ballSensor->Get());
 }
 
 void BackPickup::InitDefaultCommand() {
@@ -77,8 +93,8 @@ void BackPickup::Periodic(){											// PERIODIC (Called every periodic loop)
 	if(m_useJoystick) {
 		m_baseTarget = curPosition;										// Set PID target
 		m_baseMotorPID->SetSetpoint(m_baseTarget);
-		isTooHigh = curPosition > (c_baseMaxPosition - c_baseMotorDeadband);
-		isTooLow = curPosition < c_baseMotorDeadband;
+		isTooHigh = curPosition > (f_baseMaxPosition - f_baseMotorDeadband);
+		isTooLow = curPosition < f_baseMotorDeadband;
 		
 		if(((m_joySpeed > 0) && isTooHigh) || ((m_joySpeed < 0) && isTooLow)) {					// Inhibit travel outside of limits
 			motorPower = 0;
@@ -90,7 +106,7 @@ void BackPickup::Periodic(){											// PERIODIC (Called every periodic loop)
 		//printf("Back Position: %d\n", curPosition);
 		
 	} else {
-		if(abs(curPosition - m_baseTarget) <= c_baseMotorDeadband) {	// Error within deadband
+		if(abs(curPosition - m_baseTarget) <= f_baseMotorDeadband) {	// Error within deadband
 			m_onTarget = true;											
 			motorPower = 0;
 			m_baseMotorPID->Reset();
@@ -102,17 +118,18 @@ void BackPickup::Periodic(){											// PERIODIC (Called every periodic loop)
 	m_baseMotor->Set(motorPower);										// Set motor PWM
 	
 	switch (m_backMode) {
+	case bStore:
+		if(m_onTarget && m_rollerMode != rManualIn) SetRollerMode(rOff);
+		break;
+	
 	case bDeploy:
-		if(HasBall()) {												// Move to Store after ball is detected and short delay
-			if(ballTimerCount > 50 || ShooterHasBall()) {									// Due to ball bounce, ignore sensor after delay starts
-				printf("ballTimerCount: %d  ShooterHasBall=%d\n", ballTimerCount > 35, ShooterHasBall());
+		if (HasBall() || ballTimerCount > 0) {
+			if (ballTimerCount > 80 || ShooterHasBall()) {
 				ballTimerCount = 0;
 				SetPickupMode(bStore);
 			} else {
 				ballTimerCount++;
 			}
-		} else {
-			ballTimerCount = 0;
 		}
 		break;
 		
@@ -138,7 +155,71 @@ void BackPickup::Periodic(){											// PERIODIC (Called every periodic loop)
 	default:;
 	}
 	
-//	if(ShooterHasBall()) printf("Ball Detected\n");
+	// Roller Mode
+	switch(m_rollerMode) {
+	case rIn:
+	case rManualIn:
+		m_rollers->Set(1.0);
+		break;
+	case rOut:
+		m_rollers->Set(-1.0);
+		break;
+	default:
+		m_rollers->Set(0.0);
+	}
+}
+
+void BackPickup::SetConstant(const char* key, INT32 value) {
+	if(strcmp(key,"baseMotorDeadband") == 0) {
+		f_baseMotorDeadband = value;
+		sprintf(m_log, "BackPickup:  Set BaseMotorDeadband=%d", value);
+		m_robotLog->LogWrite(m_log);
+	
+	} else if(strcmp(key,"baseZeroOffset") == 0) {
+		f_baseZeroOffset = value;
+		sprintf(m_log, "BackPickup:  Set BaseZeroOffset=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"baseMaxPosition") == 0) {
+		f_baseMaxPosition = value;
+		sprintf(m_log, "BackPickup:  Set BaseMaxPosition=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"incrementValue") == 0) {
+		f_incrementValue = value;
+		sprintf(m_log, "BackPickup:  Set IncrementValue=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"storeSetpoint") == 0) {
+		f_storeSetpoint = value;
+		sprintf(m_log, "BackPickup:  Set StoreSetpoint=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"deploySetpoint") == 0) {
+		f_deploySetpoint = value;
+		sprintf(m_log, "BackPickup:  Set DeploySetpoint=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"passSetpoint") == 0) {
+		f_passSetpoint = value;
+		sprintf(m_log, "BackPickup:  Set PassSetpoint=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"shootSetpoint") == 0) {
+		f_shootSetpoint = value;
+		sprintf(m_log, "BackPickup:  Set ShootSetpoint=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"catchSetpoint") == 0) {
+		f_catchSetpoint = value;
+		sprintf(m_log, "BackPickup:  Set CatchSetpoint=%d", value);
+		m_robotLog->LogWrite(m_log);
+		
+	} else if(strcmp(key,"startSetpoint") == 0) {
+		f_startSetpoint = value;
+		sprintf(m_log, "BackPickup:  Set StartSetpoint=%d", value);
+		m_robotLog->LogWrite(m_log);
+	}
 }
 
 void BackPickup::SetJoystickSpeed(float speed) {						// SET JOYSTICK SPEED
@@ -148,15 +229,18 @@ void BackPickup::SetJoystickSpeed(float speed) {						// SET JOYSTICK SPEED
 
 void BackPickup::SetPickupMode(BackMode mode){							// SET PICKUP MODE
 	BackMode startMode = m_backMode;
-	SetRollers(rOff);
+	
+	if(mode != bStore) {
+		SetRollerMode(rOff);
+	}
 	
 	switch (mode) {
 	case bDeploy:
 		if(!ShooterHasBall()) {											// No ball in Shooter
 			if(CommandBase::ballShooter->GetShootState() == BallShooter::sReady && 
 			  (CommandBase::frontPickup->GetFrontPickupMode() == ((CommandBase::frontPickup->HasBall()) ? FrontPickup::fShoot : FrontPickup::fStore))) { // Shooter is ready and Front Pickup not in the way
-				SetRollers(rIn);										// Start rollers and deploy pickup
-				SetSetpoint(265);
+				SetRollerMode(rIn);										// Start rollers and deploy pickup
+				SetSetpoint(f_deploySetpoint);	// 272
 				m_backMode = bDeploy;
 					
 			} else {
@@ -169,20 +253,31 @@ void BackPickup::SetPickupMode(BackMode mode){							// SET PICKUP MODE
 		
 	case bPass:
 		if(ShooterHasBall()) {											// Ball in the Shooter
-			SetRollers(rOut);		
-			SetSetpoint(570);
+			SetRollerMode(rOut);		
+			SetSetpoint(f_passSetpoint);	// 570
 			m_backMode = bPass;
 		}
 		break;
 		
 	case bStore:
-		SetSetpoint(520);
+		SetSetpoint(f_storeSetpoint);	// 520
 		m_backMode = bStore;
 		break;
 		
 	case bShoot:
-		SetSetpoint(420);
+		SetSetpoint(f_shootSetpoint);	// 420
 		m_backMode = bShoot;
+		break;
+		
+	case bCatch:
+		SetSetpoint(f_catchSetpoint);	// 420
+		m_backMode = bCatch;
+		break;
+		
+	case bStart:
+		SetSetpoint(f_startSetpoint);	// 610
+		m_backMode = bStart;
+		break;
 		
 	default:
 		m_backMode = mode;
@@ -194,14 +289,8 @@ void BackPickup::SetPickupMode(BackMode mode){							// SET PICKUP MODE
 	}
 }
 
-void BackPickup::SetRollers(RollerMode mode) {							// SET ROLLER STATE
-	if(mode == rIn) {
-		m_rollers->Set(1.0);
-	} else if(mode == rOut) {
-		m_rollers->Set(-1.0);
-	} else {
-		m_rollers->Set(0.0);
-	}
+void BackPickup::SetRollerMode(RollerMode mode) {							// SET ROLLER STATE
+	m_rollerMode = mode;
 }
 
 void BackPickup::SetUseJoystick(bool use) {								// SET USE JOYSTICK FLAG
@@ -213,13 +302,7 @@ void BackPickup::StopMotors() {
 	m_rollers->Set(0.0);
 }
 
-void BackPickup::UpdateConstants() {
-	CommandBase::iniParser->SetSubsystem("BACKPICKUP");
-	f_baseMotorDeadband = CommandBase::iniParser->FindValue("baseMotorDeadband", c_baseMotorDeadband);
-	f_baseZeroOffset    = CommandBase::iniParser->FindValue("baseZerOffset", c_baseZeroOffset);
-	f_baseMaxPosition   = CommandBase::iniParser->FindValue("baseMaxPosition", c_baseMaxPosition);
-	f_incrementValue    = CommandBase::iniParser->FindValue("incrementValue", c_incrementValue);
-}
+
 
 
 //  ******************** PRIVATE ********************
@@ -232,12 +315,14 @@ char* BackPickup::GetModeName(BackMode mode) {
 	case bWaitToDeploy:		return "WaitToDeploy";
 	case bPass:				return "Pass";
 	case bShoot:			return "Shoot";
+	case bStart:			return "Start";
+	case bCatch:			return "Catch";
 	default: 				return "?";
 	}
 }
 
 INT32 BackPickup::LimitValue(INT32 position){
-	position = (position > c_baseMaxPosition) ? c_baseMaxPosition :
+	position = (position > f_baseMaxPosition) ? f_baseMaxPosition :
 			   (position < 0) ? 0 : position;
 	
 	return position;
@@ -245,7 +330,7 @@ INT32 BackPickup::LimitValue(INT32 position){
 
 void BackPickup::SetSetpoint(INT32 target){								// SET ARM SETPOINT
 	
-	target = (target > c_baseMaxPosition) ? c_baseMaxPosition:			// Verify within limits
+	target = (target > f_baseMaxPosition) ? f_baseMaxPosition:			// Verify within limits
 			 	 	 	 	 (target < 0) ? 0:
 										    target;
 	
@@ -258,6 +343,3 @@ bool BackPickup::ShooterHasBall() {										// GET BALL IN SHOOTER STATUS
 	return CommandBase::ballShooter->HasBall();
 }
 
-bool BackPickup::HasBall() {
-	return (!m_ballSensor->Get());
-}

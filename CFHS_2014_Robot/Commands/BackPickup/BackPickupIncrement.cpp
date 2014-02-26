@@ -11,6 +11,7 @@ BackPickupIncrement::BackPickupIncrement(BackPickup::AdjustMode mode) {
 
 // Called just before this Command runs the first time
 void BackPickupIncrement::Initialize() {
+	printf("BackPickup Increment Command %d\n", m_mode);
 	backPickup->IncrementArm(m_mode);
 }
 

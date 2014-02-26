@@ -400,7 +400,6 @@
   C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/FrontPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BallShooter.h \
-  C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/INIParser.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/OI.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/RobotLog.h \
   C:/WindRiver/workspace/CFHS_2014_Robot/RobotMap.h \
@@ -1204,8 +1203,6 @@ C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/FrontPickup.h:
 C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BackPickup.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/BallShooter.h:
-
-C:/WindRiver/workspace/CFHS_2014_Robot/Subsystems/INIParser.h:
 
 C:/WindRiver/workspace/CFHS_2014_Robot/OI.h:
 

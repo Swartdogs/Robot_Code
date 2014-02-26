@@ -11,7 +11,7 @@ void FrontPickupJoystickRight::Initialize() {
 
 // Called repeatedly when this Command is scheduled to run
 void FrontPickupJoystickRight::Execute() {
-	frontPickup->SetJoystickRight(oi->GetMcY(false));
+	frontPickup->SetJoystickRight(-oi->GetMcY(false));
 }
 
 // Make this return true when this Command no longer needs to run execute()

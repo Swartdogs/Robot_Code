@@ -12,7 +12,7 @@
  */
 class FrontPickup: public Subsystem {
 public:
-	typedef enum {fUnknown, fDeploy, fWaitToStore, fStore, fWaitToLoad, fLoad, fDropInShooter, fShoot, fLowDeploy, fLowShoot, fAutoLoad} FrontMode;
+	typedef enum {fUnknown, fDeploy, fWaitToStore, fStore, fWaitToLoad, fLoad, fDropInShooter, fShoot, fLowDeploy, fLowShoot, fAutoLoad, fCatch, fStart} FrontMode;
 	typedef enum {pLeft, pRight} Pot;
 	typedef enum {wIn, wOut, wOff} RollerMode;
 	
@@ -25,6 +25,7 @@ public:
 	void 		InitDefaultCommand();
 	bool 		OnTarget();
 	void 		Periodic();
+	void        SetConstant(const char* key, INT32 value);
 	void 		SetJoystickLeft(float joyLeft);
 	void 		SetJoystickRight(float joyRight);
 	void 		SetPickupMode(FrontMode mode);
@@ -32,8 +33,6 @@ public:
 	void 		SetUseJoystickLeft(bool use);
 	void 		SetUseJoystickRight(bool use);
 	void        StopMotors();
-	
-	void 		UpdateConstants();
 	
 private:
 	Victor* 		m_rightArm;
@@ -69,6 +68,16 @@ private:
 	INT32			f_rightArmMaxPosition;
 	INT32			f_armTargetDeadband;
 	INT32			f_incrementValue;
+	
+	INT32 			f_deploySetpoint;
+	INT32			f_storeSetpoint;
+	INT32			f_loadSetpoint;
+	INT32			f_dropInShooterLeftSetpoint;
+	INT32			f_dropInShooterRightSetpoint;
+	INT32			f_shootSetpoint;
+	INT32			f_lowDeploySetpoint;
+	INT32			f_catchSetpoint;
+	INT32			f_startSetpoint;
 	
 	char*	GetModeName(FrontMode mode);
 	INT32 	LimitValue(Pot pot, INT32 position);

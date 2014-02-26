@@ -68,7 +68,7 @@ private:
 	bool            m_rampDone;
 	bool		    m_useGyro;
 	bool		    m_startCollection;
-	
+	bool			m_tapeDetected;
 	char	        m_log[100];
 
 	double          m_lastDistance;

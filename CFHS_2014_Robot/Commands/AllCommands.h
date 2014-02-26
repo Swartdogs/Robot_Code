@@ -79,9 +79,9 @@ public:
 	virtual void Interrupted();
 };
 
-class BallShooterLoad: public CommandBase {
+class BallShooterReset: public CommandBase {
 public:
-	BallShooterLoad();
+	BallShooterReset();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
@@ -189,18 +189,6 @@ public:
 	virtual void Interrupted();
 };
 
-class DriveToLowGoal: public CommandBase {
-public:
-	DriveToLowGoal();
-	virtual void Initialize();
-	virtual void Execute();
-	virtual bool IsFinished();
-	virtual void End();
-	virtual void Interrupted();
-private:
-	double m_distanceToLowGoal;
-};
-
 class DriveWithJoystick: public CommandBase {
 public:
 	DriveWithJoystick();
@@ -209,6 +197,20 @@ public:
 	virtual bool IsFinished();
 	virtual void End();
 	virtual void Interrupted();
+};
+
+class TwoBallHotDecision: public CommandBase {
+public:
+	TwoBallHotDecision();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
+private:
+	typedef enum {dLeft, dRight} Decision;
+	
+	Decision m_decision;
 };
 
 //////////////////////
@@ -253,6 +255,16 @@ public:
 private:
 	FrontPickup::Pot m_arm;
 	bool m_up;
+};
+
+class FrontPickupJoystickBoth: public CommandBase {
+public:
+	FrontPickupJoystickBoth();
+	virtual void Initialize();
+	virtual void Execute();
+	virtual bool IsFinished();
+	virtual void End();
+	virtual void Interrupted();
 };
 
 class FrontPickupJoystickLeft: public CommandBase {
@@ -316,39 +328,19 @@ private:
 // PICKUP //
 ////////////
 
-class PickupLoad: public CommandBase {
+class PickupCatch: public CommandBase {
 public:
-	PickupLoad();
+	PickupCatch();
 	virtual void Initialize();
 	virtual void Execute();
 	virtual bool IsFinished();
 	virtual void End();
 	virtual void Interrupted();
-	
-private:
-	typedef enum {pFront, pBack, pNone} Pickup;
-	
-	Pickup m_pickup;
 };
 
 ////////////////////
 // COMMAND GROUPS //
 ////////////////////
-
-class AutoFire: public CommandGroup {
-public:	
-	AutoFire();
-};
-
-class AutoFireDriveAndLoad: public CommandGroup {
-public:	
-	AutoFireDriveAndLoad();
-};
-
-class LoadBall: public CommandGroup {
-public:	
-	LoadBall();
-};
 
 class OneBallAuto: public CommandGroup {
 public:	
@@ -358,6 +350,11 @@ public:
 class TwoBallAuto: public CommandGroup {
 public:	
 	TwoBallAuto();
+};
+
+class TwoBallHotAuto: public CommandGroup {
+public:	
+	TwoBallHotAuto();
 };
 
 #endif

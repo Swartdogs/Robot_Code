@@ -5,18 +5,16 @@
 OI::OI(Drive* drive) {
 	m_drive = drive;
 	
-	// Process operator interface input here.
-	driveJoystick = new Joystick(1);
+	driveJoystick =  new Joystick(1);
 	mcJoystick[0]  = new Joystick(2);
-	mcJoystick[1] = new Joystick(3);
-	
-	// Forgot most of the mappings, so make sure to change!
-	// Also didn't want to mess around with light sensor stuff
+	mcJoystick[1] =  new Joystick(3);
 	
 	driveButton1  = new JoystickButton(driveJoystick, 1);
 	driveButton2  = new JoystickButton(driveJoystick, 2);
 	driveButton3  = new JoystickButton(driveJoystick, 3);
+	driveButton7  = new JoystickButton(driveJoystick, 7);
 	driveButton11 = new JoystickButton(driveJoystick, 11);
+	driveButton12 = new JoystickButton(driveJoystick, 12);
 	
 	mcJoy1Button1   = new JoystickButton(mcJoystick[0], 1);		// Left Front Pickup Enable
 	mcJoy1Button2   = new JoystickButton(mcJoystick[0], 2);		// Right Front Pickup Enable
@@ -45,18 +43,23 @@ OI::OI(Drive* drive) {
 	comboButton1    = new InternalButton();
 	comboButton2    = new InternalButton();
 	comboButton3    = new InternalButton();
+	joyLeft 		= new InternalButton();
+	joyRight		= new InternalButton();
+	joyBoth			= new InternalButton();
 	
 //----------------------------------------------- Testing Scheme ----------------------------------------------------//
 	
 //	driveButton1->WhileHeld(new DriveRangeDetect());
-	driveButton1->WhenPressed(new BallShooterFire());
-	driveButton2->WhileHeld(new DriveTapeDetect());
-	//driveButton11->WhenPressed(new FindHotTarget());
-	
-	driveButton11->WhenPressed(new DriveResetGyro());
+//	driveButton1->WhenPressed(new BallShooterFire());
+//	driveButton11->WhileHeld(new DriveTapeDetect());
+//	driveButton7->WhenPressed(new DriveResetGyro());
+//	driveButton2->WhenPressed(new FindHotTarget());
+//	driveButton3->WhileHeld(new DriveRangeDetect());
+		
 	
 //---------------------------------------- One Joystick/Button Box Scheme -------------------------------------------//
 	
+	/*
 	mcJoy1Button1->WhenPressed(new BackPickupSetMode(BackPickup::bPass));			// Pass From BackPickup
 	mcJoy1Button2->WhenPressed(new BackPickupSetMode(BackPickup::bStore));			// Store BackPickup
 	mcJoy1Button3->WhenPressed(new BackPickupSetMode(BackPickup::bDeploy));			// Deploy BackPickup
@@ -68,12 +71,18 @@ OI::OI(Drive* drive) {
 	
 	mcJoy1Button10->WhenPressed(new FrontPickupSetMode(FrontPickup::fLowDeploy));	// Low Deploy FrontPickup
 	mcJoy1Button11->WhileHeld(new FrontPickupSetRollers(FrontPickup::wOut));		// Shoot FrontPickup
+	*/
 	
-//--------------------------------------------- Two Joystick Scheme -------------------------------------------------//
+//--------------------------------------------- Competition Joystick Scheme -------------------------------------------------//
 	
-	/*
+	driveButton1->WhenPressed(new BallShooterFire());
+	driveButton2->WhileHeld(new DriveRangeDetect());
+	driveButton7->WhenPressed(new DriveResetGyro());
+	driveButton11->WhenPressed(new PickupCatch());
+	driveButton12->WhileHeld(new DriveTapeDetect());
+	
 	mcJoy1Button1->WhenPressed(new BackPickupIncrement(BackPickup::aDown));
-	mcJoy1Button3->WhileHeld(new FrontPickupJoystickLeft());
+	mcJoy1Button2->WhenPressed(new BackPickupIncrement(BackPickup::aUp));
 	mcJoy1Button4->WhenPressed(new FrontPickupIncrement(FrontPickup::pLeft, false));
 	mcJoy1Button5->WhenPressed(new FrontPickupIncrement(FrontPickup::pLeft, true));
 	mcJoy1Button6->WhenPressed(new BackPickupSetMode(BackPickup::bPass));
@@ -81,36 +90,33 @@ OI::OI(Drive* drive) {
 	mcJoy1Button8->WhenPressed(new BackPickupSetMode(BackPickup::bDeploy));
 	mcJoy1Button10->WhenPressed(new FrontPickupSetMode(FrontPickup::fLoad));
 //	mcJoy1Button11->WhenPressed();
-
-	mcJoy2Button1->WhenPressed(new BackPickupIncrement(BackPickup::aUp));
-	mcJoy2Button3->WhileHeld(new FrontPickupJoystickRight());
+	joyLeft->WhileHeld(new FrontPickupJoystickLeft());
+	
+//	mcJoy2Button1->WhenPressed(new BackPickupIncrement(BackPickup::aUp));
+	mcJoy2Button2->WhileHeld(new BackPickupJoystick());
 	mcJoy2Button4->WhenPressed(new FrontPickupIncrement(FrontPickup::pRight, false));
 	mcJoy2Button5->WhenPressed(new FrontPickupIncrement(FrontPickup::pRight, true));
 	mcJoy2Button6->WhileHeld(new FrontPickupSetRollers(FrontPickup::wOut));
 	mcJoy2Button7->WhenPressed(new FrontPickupSetMode(FrontPickup::fLowDeploy));
 	mcJoy2Button9->WhenPressed(new FrontPickupSetMode(FrontPickup::fDeploy));
 	mcJoy2Button10->WhenPressed(new FrontPickupSetMode(FrontPickup::fStore));
+	mcJoy2Button11->WhileHeld(new BackPickupSetRollers(BackPickup::rManualIn));
 //	mcJoy1Button11->WhenPressed();
+	joyRight->WhileHeld(new FrontPickupJoystickRight());
 	
 	comboButton2->WhenPressed(new BallShooterFire());
-	comboButton3->WhileHeld(new BackPickupJoystick());
-	*/
-	
-//--------------------------------------------- Drive Joystick Scheme -----------------------------------------------//	
-	
-	/*
-	driveButton1->WhileHeld(new DriveResetEncoders);
-	driveButton2->WhenPressed(new DriveRotate(90, true));
-	driveButton3->WhenPressed(new DriveRotate(270));
-	driveButton11->WhenPressed(new FindHotTarget());
-	*/
+	//comboButton3->WhileHeld(new BackPickupJoystick());
+	joyBoth->WhileHeld(new FrontPickupJoystickBoth());
 	
 }
 
 void OI::Periodic() { 
-	// comboButton1->SetPressed(mcJoy1Button10->Get() && m_drive->CrossedTape() );
+//  comboButton1->SetPressed(mcJoy1Button10->Get() && m_drive->CrossedTape() );
 	comboButton2->SetPressed(mcJoy1Button9->Get() && mcJoy2Button8->Get());
-	comboButton3->SetPressed(mcJoy1Button2->Get() || mcJoy2Button2->Get());
+//  comboButton3->SetPressed(mcJoy1Button2->Get() || mcJoy2Button2->Get());
+	joyLeft->SetPressed(mcJoy1Button3->Get() && !mcJoy2Button3->Get());
+	joyRight->SetPressed(!mcJoy1Button3->Get() && mcJoy2Button3->Get());
+	joyBoth->SetPressed(mcJoy1Button3->Get() && mcJoy2Button3->Get());
 }
 
 bool OI::GetButtonPress(UINT32 button) {

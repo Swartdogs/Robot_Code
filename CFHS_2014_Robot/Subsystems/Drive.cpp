@@ -61,6 +61,7 @@ Drive::Drive(RobotLog *robotLog) : Subsystem("Drive") {
 	m_rightEncoder->Start();
 	
 	m_startCollection = false;
+	m_tapeDetected = false;
 	
 //	m_tapeDetectLED->Set(true);
 }
@@ -93,88 +94,59 @@ void Drive::DriveArcade(float moveValue, float rotateValue) {
 	float leftMotorOutput;
 	float rightMotorOutput;
 	
-	if (moveValue > 0.0)
-		{
-			if (rotateValue > 0.0)
-			{
-				leftMotorOutput = moveValue - rotateValue;
-				rightMotorOutput = max(moveValue, rotateValue);
-			}
-			else
-			{
-				leftMotorOutput = max(moveValue, -rotateValue);
-				rightMotorOutput = moveValue + rotateValue;
-			}
+	if (moveValue > 0.0) {
+		if (rotateValue > 0.0) {
+			leftMotorOutput = moveValue - rotateValue;
+			rightMotorOutput = max(moveValue, rotateValue);
+		} else {
+			leftMotorOutput = max(moveValue, -rotateValue);
+			rightMotorOutput = moveValue + rotateValue;
 		}
-		else
-		{
-			if (rotateValue > 0.0)
-			{
-				leftMotorOutput = - max(-moveValue, rotateValue);
-				rightMotorOutput = moveValue + rotateValue;
-			}
-			else
-			{
-				leftMotorOutput = moveValue - rotateValue;
-				rightMotorOutput = - max(-moveValue, -rotateValue);
-			}
+	} else {
+		if (rotateValue > 0.0) {
+			leftMotorOutput = - max(-moveValue, rotateValue);
+			rightMotorOutput = moveValue + rotateValue;
+		} else {
+			leftMotorOutput = moveValue - rotateValue;
+			rightMotorOutput = - max(-moveValue, -rotateValue);
 		}
-		m_leftFront->Set(-leftMotorOutput);
-		m_leftCenterRear->Set(-leftMotorOutput);
-		m_rightFront->Set(rightMotorOutput);
-		m_rightCenterRear->Set(rightMotorOutput);
+	}
+	m_leftFront->Set(-leftMotorOutput);
+	m_leftCenterRear->Set(-leftMotorOutput);
+	m_rightFront->Set(rightMotorOutput);
+	m_rightCenterRear->Set(rightMotorOutput);
 	
 	// printf("Left: %.3f, Right: %.3f\n", leftMotorOutput, rightMotorOutput);
 	// printf(Left: );
-	
-//	printf("Left=%d  Right=%d\n", m_leftEncoder->GetRaw(), m_rightEncoder->GetRaw());
-	//	printf("RangeFinder: %.3f\n", GetRange());
-	
-//	static bool encoderTest = false;
-//	
-//	if (!encoderTest && m_startCollection) {
-//		printf("Start Collection\n");
-//		encoderTest = true;
-//		m_leftEncoder->Reset();
-//		m_rightEncoder->Reset();
-//	} else if (encoderTest && !m_startCollection) {
-//		encoderTest = false;
-//		m_endLeftDistance = m_leftEncoder->GetRaw();
-//		m_endRightDistance = m_rightEncoder->GetRaw();
-//		printf("Left Distance: %d Right Distance %d\n", m_endLeftDistance, m_endRightDistance);
-//	}
-	
-	static int gyroCounter = 0;
-	
-	if(gyroCounter < 25) gyroCounter++;
-	else{
-		gyroCounter = 0;
-		//printf("Gyro: %f\n", GetGyroAngle());
-	}
 }
 
 void Drive::TapeDetectExecute(float move, float rotate) {
-	static bool tapeDetected = false;
 	switch(m_tapeMode) {
-		case tDetect:
-			//ExecuteDistance();
-			if(m_onTarget || !CommandBase::ballShooter->HasBall()) m_tapeMode = tOff;
-			break;
-		case tArm:
-			if(CrossedTape() && !tapeDetected) {
-				//InitDistance(132, 0.7, true, 24, 0);
-				//m_tapeMode = tDetect;
-				tapeDetected = true;
-				m_tapeDetectLED->Set(true);
-				printf("Tape Detected\n");
-			} 
-			DriveArcade(move, rotate);
-			break;
-		case tOff:
-			m_tapeDetectLED->Set(false);
-			DriveArcade(move, rotate);
-			break;
-		default:;
+	case tOff:
+		m_tapeDetected = false;
+		m_tapeDetectLED->Set(false);
+		DriveArcade(move, rotate);
+		break;
+	
+	case tArm:
+		if(CrossedTape() && !m_tapeDetected) {
+			m_tapeDetected = true;
+			InitDistance(132, 0.7, true, 24, 0);
+			m_tapeMode = tDetect;
+			m_tapeDetectLED->Set(true);
+			
+			sprintf(m_log, "Drive    Tape Detected: Angle=%5.1f", GetGyroAngle());
+			m_robotLog->LogWrite(m_log);
+		} 
+		
+		DriveArcade(move, rotate);
+		break;
+	
+	case tDetect:
+		ExecuteDistance();
+		if(m_onTarget) m_tapeMode = tOff;
+		break;
+	default:;
 	}
 }
 
@@ -203,7 +175,6 @@ void Drive::ExecuteDistance() {
 	if (m_fireDistance > 0) {
 		if (curDistance >= m_fireDistance) {
 			CommandBase::ballShooter->Fire();
-			printf("Called From Drive\n");
 			m_fireDistance = 0;
 		}
 	}
@@ -272,7 +243,7 @@ void Drive::ExecuteRotate() {
 		counter = 5;
 	}
 	
-	printf("RotateError: %f  RotateSpeed: %f\n", error, rotateSpeed);
+//	printf("RotateError: %f  RotateSpeed: %f\n", error, rotateSpeed);
 	
 	DriveArcade(0, rotateSpeed);
 }
@@ -382,6 +353,14 @@ Drive::TapeMode Drive::GetTapeMode() {
 }
 void Drive::SetTapeMode(TapeMode mode) {
 	m_tapeMode = mode;
+	
+	if (m_tapeMode == tOff) {
+		m_tapeDetected = false;
+		m_tapeDetectLED->Set(false);
+		
+	} else if (m_tapeMode == tArm) { 
+		m_robotLog->LogWrite("Drive    Tape Detect Arm");
+	}
 }
 
 Drive::RangeMode Drive::GetRangeMode() {
@@ -390,10 +369,20 @@ Drive::RangeMode Drive::GetRangeMode() {
 
 void Drive::SetRangeMode(RangeMode mode) {
 	m_rangeMode = mode;
+	
+	if (m_rangeMode == rOff)  {
+		m_tapeDetectLED->Set(false);
+	} else {
+		m_robotLog->LogWrite("Drive    Initiate Range Mode");
+	}
 }
 
 void Drive::ResetGyro() {
+	sprintf(m_log, "Drive    Reset Gyro from %5.1f", GetGyroAngle());
+	m_robotLog->LogWrite(m_log);
 	m_gyro->Reset();
+	m_gyro->GetAngle();
+	m_gyro->GetAngle();
 }
 
 

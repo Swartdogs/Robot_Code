@@ -25,9 +25,9 @@ public:
 	void  		Load();
 	void  		Periodic();
 	void		Release();
+	void        Reset();
+	void		SetConstant(const char* key, INT32 value);
 	void		StopMotors();
-	
-	void 		UpdateConstants();
 	
 private:
 	Victor*        m_shootMotor;
@@ -45,6 +45,8 @@ private:
 	
 	INT32 f_triggerPosition;
 	INT32 f_releasePosition;
+	
+	INT32 m_maxReadyPosition;
 };
 
 #endif

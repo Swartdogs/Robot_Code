@@ -13,15 +13,13 @@ FrontPickup*	CommandBase::frontPickup = NULL;
 BackPickup*		CommandBase::backPickup = NULL;
 BallShooter* 	CommandBase::ballShooter = NULL;
 OI* 			CommandBase::oi = NULL;
-INIParser*      CommandBase::iniParser = NULL;
 
 void CommandBase::Init(RobotLog* logDelegate) {
-	iniParser =     new INIParser("525Init.ini");
 	drive = 		new Drive(logDelegate);
 	findTarget = 	new FindTarget(logDelegate);
+	ballShooter = 	new BallShooter(logDelegate);
 	frontPickup = 	new FrontPickup(logDelegate);
 	backPickup = 	new BackPickup(logDelegate);
-	ballShooter = 	new BallShooter(logDelegate);
 	oi = 			new OI(drive);
 }
 
@@ -30,8 +28,6 @@ void CommandBase::Periodic() {
 	backPickup->Periodic();
 	ballShooter->Periodic();
 	oi->Periodic();
-	
-//	printf("Left Arm: %d, Right Arm: %d, Shooter: %d, Back: %d\n", frontPickup->GetPosition(FrontPickup::pLeft), frontPickup->GetPosition(FrontPickup::pRight), ballShooter->GetShooterPosition(), backPickup->GetPosition());
 }
 
 void CommandBase::StopMotors() {

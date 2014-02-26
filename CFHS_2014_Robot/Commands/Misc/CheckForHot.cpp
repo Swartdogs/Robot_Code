@@ -8,7 +8,7 @@ CheckForHot::CheckForHot() {
 
 // Called just before this Command runs the first time
 void CheckForHot::Initialize() {
-	if(findTarget->GetHotTarget()) SetTimeout(0.0);
+	if(findTarget->GetHotTarget()) SetTimeout(0.5);
 	else SetTimeout(4.0);
 }
 

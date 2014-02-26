@@ -2,10 +2,10 @@
 #include "../Robotmap.h"
 #include "../CommandBase.h"
 
-INT32 const c_triggerPosition = 930; 
-INT32 const c_releasePosition = 100;
-
 BallShooter::BallShooter(RobotLog* log) : Subsystem("BallShooter") {
+	f_triggerPosition = 900;
+	f_releasePosition = 160;
+
 	m_robotLog = log;
 	
 	m_shootMotor = new Victor(PWM_SHOOT_MOTOR);
@@ -15,20 +15,19 @@ BallShooter::BallShooter(RobotLog* log) : Subsystem("BallShooter") {
 	m_shootPot->SetOversampleBits(0);
 	
 	m_shootState = sIdle;
+	m_maxReadyPosition = 0;
+	
 	m_shootPID = new PIDControl(0.015, 0.0, 0);
 	m_shootPID->SetInputRange(0, 1000);       
 	m_shootPID->SetOutputRange(-1.0, 1.0);
 	
 	m_ballSensor = new DigitalInput(DI_BALL_SHOOTER_SENSOR);
-	
-	// INIParser Stuff
-	UpdateConstants();
 }
     
 void BallShooter::Fire() {
 	if(HasBall()) {
 		m_shootState = sFire;
-		sprintf(m_log, "Shooter: State=%s", GetStateName(sFire));
+		sprintf(m_log, "Shooter: State=%s  MaxReady=%d", GetStateName(sFire), m_maxReadyPosition);
 		m_robotLog->LogWrite(m_log);
 	}
 }
@@ -79,21 +78,22 @@ void BallShooter::Periodic() {
 
 	switch(m_shootState) {
 	case sStart:
-		m_shootPID->SetPID(0.015, 0, 0); // 0.015, 0, 0
+		m_shootPID->SetPID(0.010, 0, 0); // 0.015, 0, 0
 		m_shootPID->Reset();
-		m_shootPID->SetSetpoint((float) c_triggerPosition);
+		m_shootPID->SetSetpoint((float) f_triggerPosition);
 		m_shootState = sLoad;
 		shootSpeed = 1.0;
 		break;
 	
 	case sLoad:
-		if(curPosition > c_triggerPosition || curPosition < 100) {
+		if(curPosition > f_triggerPosition || curPosition < 100) {
 			shootSpeed = 1.0;
 		} else {
 			shootSpeed = m_shootPID->Calculate(curPosition);
 			
-			if(curPosition > (c_triggerPosition - 100)) {
-				m_shootPID->SetPID(0.015, 0.001, 0); 
+			if(curPosition > (f_triggerPosition - 100)) {
+				m_maxReadyPosition = curPosition;
+				m_shootPID->SetPID(0.010, 0.0006, 0);    //  0.015  0.001  0
 				m_shootState = sReady;
 			}
 		}
@@ -101,9 +101,12 @@ void BallShooter::Periodic() {
 	
 	case sReady:
 		shootSpeed = m_shootPID->Calculate(curPosition);
+		if (m_maxReadyPosition < curPosition) m_maxReadyPosition = curPosition;
 		break;
 	
 	case sFire:
+		shootSpeed = m_shootPID->Calculate(curPosition);
+		
 		if(CommandBase::backPickup->GetBackPickupMode() != BackPickup::bShoot) {
 			CommandBase::backPickup->SetPickupMode(BackPickup::bShoot);
 		
@@ -111,7 +114,7 @@ void BallShooter::Periodic() {
 			CommandBase::frontPickup->SetPickupMode(FrontPickup::fShoot);
 		
 		} else if(CommandBase::backPickup->OnTarget() && CommandBase::frontPickup->OnTarget()) {
-			if(abs(curPosition - c_triggerPosition) < 100) {
+			if(abs(curPosition - f_triggerPosition) < 100) {
 				shootSpeed = 1.0;
 			} else {
 				m_shootState = sStart;
@@ -122,7 +125,7 @@ void BallShooter::Periodic() {
 		
 	case sRelease:
 		shootSpeed = m_shootPID->Calculate(curPosition);
-		if (curPosition < c_releasePosition + 10) m_shootState = sIdle;
+		if (curPosition < f_releasePosition + 10 || curPosition > f_triggerPosition + 10) m_shootState = sIdle;
 		break;
 		
 	default:;
@@ -138,10 +141,34 @@ void BallShooter::Periodic() {
 
 void BallShooter::Release() {
 	if (m_shootState == sReady) {
-		m_shootPID->SetPID(0.015, 0, 0);
+		m_shootPID->SetPID(0.010, 0, 0);
 		m_shootPID->Reset();
-		m_shootPID->SetSetpoint((float) c_releasePosition);
+		m_shootPID->SetSetpoint((float) f_releasePosition);
 		m_shootState = sRelease;
+		sprintf(m_log, "Shooter: State=%s", GetStateName(sRelease));
+		m_robotLog->LogWrite(m_log);
+	}
+}
+
+void BallShooter::Reset() {
+	if (m_shootState == sReady && !HasBall()) {
+		f_triggerPosition -= 5;
+		m_shootState = sStart;
+		sprintf(m_log, "Shooter: Reset to %d  MaxReady=%d", f_triggerPosition, m_maxReadyPosition);
+		m_robotLog->LogWrite(m_log);
+	}
+}
+
+void BallShooter::SetConstant(const char* key, INT32 value) {
+	if(strcmp(key,"triggerPosition") == 0) {
+		f_triggerPosition = value;
+		sprintf(m_log, "BallShooter: Set TriggerPosition=%d", value);
+		m_robotLog->LogWrite(m_log);
+	
+	} else if(strcmp(key,"releasePosition") == 0) {
+		f_releasePosition = value;
+		sprintf(m_log, "BallShooter: Set ReleasePosition=%d", value);
+		m_robotLog->LogWrite(m_log);
 	}
 }
 
@@ -149,11 +176,6 @@ void BallShooter::StopMotors() {
 	m_shootMotor->Set(0.0);
 }
 
-void BallShooter::UpdateConstants() {
-	CommandBase::iniParser->SetSubsystem("BALLSHOOTER");
-	f_triggerPosition = CommandBase::iniParser->FindValue("triggerPosition", c_triggerPosition);
-	f_releasePosition = CommandBase::iniParser->FindValue("releasePosition", c_releasePosition);
-}
 
 //  ******************** PRIVATE ********************
 

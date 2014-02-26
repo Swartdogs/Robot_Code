@@ -14,7 +14,9 @@ private:
 	JoystickButton* driveButton1;
 	JoystickButton* driveButton2;
 	JoystickButton* driveButton3;
+	JoystickButton* driveButton7;
 	JoystickButton* driveButton11;
+	JoystickButton* driveButton12;
 	
 	JoystickButton* mcJoy1Button1;
 	JoystickButton* mcJoy1Button2;
@@ -43,6 +45,9 @@ private:
 	InternalButton* comboButton1;
 	InternalButton* comboButton2;
 	InternalButton* comboButton3;
+	InternalButton* joyLeft;
+	InternalButton* joyRight;
+	InternalButton* joyBoth;
 	
 public:
 	OI(Drive* drive);

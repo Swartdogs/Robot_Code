@@ -9,7 +9,7 @@ BackPickupSetRollers::BackPickupSetRollers(BackPickup::RollerMode mode) {
 
 // Called just before this Command runs the first time
 void BackPickupSetRollers::Initialize() {
-	backPickup->SetRollers(m_mode);
+	backPickup->SetRollerMode(m_mode);
 }
 
 // Called repeatedly when this Command is scheduled to run
@@ -24,11 +24,11 @@ bool BackPickupSetRollers::IsFinished() {
 
 // Called once after isFinished returns true
 void BackPickupSetRollers::End() {
-	backPickup->SetRollers(BackPickup::rOff);
+	backPickup->SetRollerMode(BackPickup::rOff);
 }
 
 // Called when another command which requires one or more of the same
 // subsystems is scheduled to run
 void BackPickupSetRollers::Interrupted() {
-	backPickup->SetRollers(BackPickup::rOff);
+	backPickup->SetRollerMode(BackPickup::rOff);
 }
