@@ -10,31 +10,40 @@ OI*			MyRobot::oi = NULL;
 void MyRobot::RobotInit() {
 	robotLog = 	new RobotLog();
 	robotLog->Write("");
-	robotLog->Write("Mario: Robot Init (Build 2015)");
+	robotLog->Write("Otis: Robot Init (Build 2015)");
 
 	drive = 		new Drive();
 	elevator = 		new Elevator();
 
-	dashboard = 	new TcpHost(20, 14, 1);
+	dashboard = 	new TcpHost(18, 14, 1);
 	powerPanel = 	new PdpData();
 	oi = 			new OI();
 
 	m_autoDelay = m_autoSelect = 0;
 	m_autoCommand = NULL;
+
 	IniParser();
+
 	powerPanel->SetEnabled(true);
+
+	m_compressor = new Compressor();
+	m_compressor->ClearAllPCMStickyFaults();
+//	m_compressor->Stop();
+
+	m_powerPanel = new PowerDistributionPanel();
+	m_powerPanel->ClearStickyFaults();
 }
 	
 void MyRobot::DisabledInit() {
 	robotLog->SetMode(RobotLog::mDisabled);
 	robotLog->Write("");
-	robotLog->Write("Mario: Disabled Init");
+	robotLog->Write("Otis: Disabled Init");
 
 	if (m_autoCommand != NULL) m_autoCommand->Cancel();
 
 	dashboard->SetRobotMode(1);
 	powerPanel->SetLogEnabled(false);
-	robotLog->Write("Mario: Disabled Periodic");
+	robotLog->Write("Otis: Disabled Periodic");
 	robotLog->Close();
 }
 
@@ -48,7 +57,7 @@ void MyRobot::DisabledPeriodic() {
 void MyRobot::AutonomousInit() {
 	robotLog->SetMode(RobotLog::mAutonomous);
 	robotLog->Write("");
-	robotLog->Write("Mario: Autonomous Init");
+	robotLog->Write("Otis: Autonomous Init");
 
 	dashboard->SetRobotMode(2);
 	powerPanel->SetLogEnabled(dashboard->GetDashButton(0, DB_PDP_LOG));
@@ -62,7 +71,7 @@ void MyRobot::AutonomousInit() {
 
 	if (m_autoCommand != NULL) m_autoCommand->Start();
 
-	sprintf(m_log, "Mario: Autonomous Periodic  Command=%d  Delay=%d", m_autoSelect, m_autoDelay * 250);
+	sprintf(m_log, "Otis: Autonomous Periodic  Command=%d  Delay=%d", m_autoSelect, m_autoDelay * 250);
 	robotLog->Write(m_log);
 }
 
@@ -79,14 +88,14 @@ void MyRobot::AutonomousPeriodic() {
 void MyRobot::TeleopInit() {
 	robotLog->SetMode(RobotLog::mTeleop);
 	robotLog->Write("");
-	robotLog->Write("Mario: Teleop Init");
+	robotLog->Write("Otis: Teleop Init");
 
 	if (m_autoCommand != NULL) m_autoCommand->Cancel();
 
 	dashboard->SetRobotMode(3);
 	powerPanel->SetLogEnabled(dashboard->GetDashButton(0, DB_PDP_LOG));
 
-	robotLog->Write("Mario: Teleop Periodic");
+	robotLog->Write("Otis: Teleop Periodic");
 }
 
 void MyRobot::TeleopPeriodic() {
@@ -102,17 +111,26 @@ void MyRobot::TeleopPeriodic() {
 void MyRobot::TestInit() {
 	robotLog->SetMode(RobotLog::mTest);
 	robotLog->Write("");
-	robotLog->Write("Mario: Test Init");
+	robotLog->Write("Otis: Test Init");
 
 	if (m_autoCommand != NULL) m_autoCommand->Cancel();
 
 	dashboard->SetRobotMode(4);
 
-	robotLog->Write("Mario: Test Periodic");
+	robotLog->Write("Otis: Test Periodic");
 }
 
 void MyRobot::TestPeriodic() {
 	static int tunePID = 0;
+	SetDashSensorData();
+
+//	if (dashboard->GetDashButton(0, DB_TUNE_PID)) {
+//		elevator->SetBrake(Elevator::bOn);
+//	} else {
+//		elevator->SetBrake(Elevator::bOff);
+//	}
+//
+//	return;
 
 	if (dashboard->GetDashButton(0, DB_TUNE_PID)) {
 		if (tunePID == 0) {
@@ -134,7 +152,7 @@ void MyRobot::TestPeriodic() {
 					break;
 			case 2: drive->ExecuteRotate(true);
 					break;
-			case 3: elevator->RunWithPID();
+			case 3: elevator->RunWithPID(true);
 					break;
 			default:;
 		}
@@ -142,11 +160,11 @@ void MyRobot::TestPeriodic() {
 	} else {
 		if (tunePID != 0) {
 			switch(tunePID) {
-				case 1: drive->SetDrivePID();
+				case 1: drive->SetDrivePID(0);
 						break;
 				case 2: drive->SetRotatePID();
 						break;
-				case 3: elevator->SetElevPID();
+				case 3: elevator->SetElevPID(Elevator::dUp);
 						break;
 				default:;
 			}
@@ -236,8 +254,6 @@ void MyRobot::SetDashSensorData() {
 	dashboard->SetRobotValue(RV_DRIVE_ENCODER_L, (int32_t)(drive->GetEncoderDistance(Drive::eLeft) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_ENCODER_R, (int32_t)(drive->GetEncoderDistance(Drive::eRight) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_GYRO, (int32_t)(drive->GetGyroAngle() * 10 + 0.5));
-	dashboard->SetRobotValue(RV_ELEV_UP_LIMIT, (int32_t)elevator->GetLimitSwitch(Elevator::lUp));
-	dashboard->SetRobotValue(RV_ELEV_DOWN_LIMIT, (int32_t)elevator->GetLimitSwitch(Elevator::lDown));
 	dashboard->SetRobotValue(RV_ELEV_POSITION, elevator->GetPosition());
 }
 

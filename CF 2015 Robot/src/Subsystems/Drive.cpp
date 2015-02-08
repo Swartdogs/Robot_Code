@@ -3,17 +3,6 @@
 #include "../Commands/AllCommands.h"
 #include <math.h>
 
-float const c_drivePID_P 		= 0.025;					// Drive PID Coefficients
-float const c_drivePID_I 		= 0.0;
-float const c_drivePID_Da 		= 0.0;
-float const c_drivePID_Db		= 0.3;
-
-float const c_rotatePID_P 		= 0.04;						// Rotate PID Coefficients
-float const c_rotatePID_It      = 10.0;
-float const c_rotatePID_Ia 		= 0.0;
-float const c_rotatePID_Ib      = 0.006;
-float const c_rotatePID_D 		= 0.2;
-
 Drive::Drive() : Subsystem("Drive") {						// Create objects and initialize variables
 	m_motorLF = new Victor(PWM_DRIVE_LF);
 	m_motorLR = new Victor(PWM_DRIVE_LR);
@@ -21,7 +10,7 @@ Drive::Drive() : Subsystem("Drive") {						// Create objects and initialize vari
 	m_motorRR = new Victor(PWM_DRIVE_RR);
 
 	m_gyro = new Gyro(AI_GYRO);
-	m_gyro->SetSensitivity(0.007);
+	m_gyro->SetSensitivity(0.0064);
 
 	m_leftEncoder = new Encoder(DI_ENCODER_LEFT_A, DI_ENCODER_LEFT_B, true);
 	m_leftEncoder->SetDistancePerPulse(0.036);
@@ -30,7 +19,6 @@ Drive::Drive() : Subsystem("Drive") {						// Create objects and initialize vari
 	m_rightEncoder->SetDistancePerPulse(0.036);
 
 	m_drivePID = new PIDControl();
-	SetDrivePID();
 
 	m_rotatePID = new PIDControl();
 	SetRotatePID();
@@ -63,6 +51,7 @@ void Drive::DriveWithJoystick(float drive, float rotate) {
 
 void Drive::DriveWithJoystick(float drive, float strafe, float rotate, DriveWheels driveWheels) {
 	MecanumDrive(drive, strafe, rotate, driveWheels);
+	//printf("Left=%d  Right=%d\n", m_leftEncoder->GetRaw(), m_rightEncoder->GetRaw());
 }
 
 void Drive::ExecuteDistance(bool showPID) {
@@ -128,7 +117,7 @@ void Drive::ExecuteRotate(bool showPID){
 }
 
 Drive::DriveMode Drive::GetDriveMode(){
-	return mArcade;
+	return mMecanum;
 }
 
 double Drive::GetEncoderDistance(WhichEncoder which){
@@ -161,9 +150,9 @@ void Drive::InitDistance(double distance, float maxPWM, bool resetEncoders, bool
 	}
 
 	if (useBrake) {
-		m_drivePID->SetCoefficient('D', (float)(m_targetDistance * 0.15), c_drivePID_Da, c_drivePID_Db);
+		SetDrivePID((float)(m_targetDistance * 0.15));
 	} else {
-		m_drivePID->SetCoefficient('D', 0, c_drivePID_Da, c_drivePID_Db);
+		SetDrivePID(0);
 	}
 
 	if (angleFrom == fNewMark) {							// Determine heading and reset Rotate PID
@@ -208,22 +197,27 @@ bool Drive::IsOnTarget() {									// Drive and/or Rotate positions are at targe
 	return m_onTarget;
 }
 
+void Drive::ResetEncoders() {
+	m_leftEncoder->Reset();
+	m_rightEncoder->Reset();
+}
+
 void Drive::SetConstant(std::string key, int32_t value) {
 
 }
-void Drive::SetDrivePID() {
-	m_drivePID->SetCoefficient('P', 0, c_drivePID_P, 0);
-	m_drivePID->SetCoefficient('I', 0, c_drivePID_I, 0);
-	m_drivePID->SetCoefficient('D', 0, c_drivePID_Da, c_drivePID_Db);
+void Drive::SetDrivePID(float dThreshold) {
+	m_drivePID->SetCoefficient('P', 0, 0.025, 0);
+	m_drivePID->SetCoefficient('I', 0, 0, 0);
+	m_drivePID->SetCoefficient('D', dThreshold, 0, 0.3);
 
 	m_drivePID->SetInputRange(-200, 200);
 	m_drivePID->SetOutputRange(-0.6, 0.6);
 }
 
 void Drive::SetRotatePID() {
-	m_rotatePID->SetCoefficient('P', 0, c_rotatePID_P, 0);
-	m_rotatePID->SetCoefficient('I', c_rotatePID_It, c_rotatePID_Ia, c_rotatePID_Ib);
-	m_rotatePID->SetCoefficient('D', 0, c_rotatePID_D, 0);
+	m_rotatePID->SetCoefficient('P', 0, 0.04, 0);
+	m_rotatePID->SetCoefficient('I', 10, 0, 0.006);
+	m_rotatePID->SetCoefficient('D', 0, 0.2, 0);
 
 	m_rotatePID->SetInputRange(-360.0, 360.0);
 	m_rotatePID->SetOutputRange(-0.7, 0.7);
@@ -232,14 +226,14 @@ void Drive::SetRotatePID() {
 
 void Drive::TuneDrivePID() {
 	m_drivePID->SetCoefficient('P', (float)MyRobot::dashboard->GetDashValue(DV_PID_P_THRESHOLD),
-									(float)MyRobot::dashboard->GetDashValue(DV_PID_P_ABOVE) / 1000,
-									(float)MyRobot::dashboard->GetDashValue(DV_PID_P_BELOW) / 1000);
+									(float)MyRobot::dashboard->GetDashValue(DV_PID_P_ABOVE) / 10000,
+									(float)MyRobot::dashboard->GetDashValue(DV_PID_P_BELOW) / 10000);
 	m_drivePID->SetCoefficient('I', (float)MyRobot::dashboard->GetDashValue(DV_PID_I_THRESHOLD),
-									(float)MyRobot::dashboard->GetDashValue(DV_PID_I_ABOVE) / 1000,
-									(float)MyRobot::dashboard->GetDashValue(DV_PID_I_BELOW) / 1000);
+									(float)MyRobot::dashboard->GetDashValue(DV_PID_I_ABOVE) / 10000,
+									(float)MyRobot::dashboard->GetDashValue(DV_PID_I_BELOW) / 10000);
 	m_drivePID->SetCoefficient('D', (float)MyRobot::dashboard->GetDashValue(DV_PID_D_THRESHOLD),
-									(float)MyRobot::dashboard->GetDashValue(DV_PID_D_ABOVE) / 1000,
-									(float)MyRobot::dashboard->GetDashValue(DV_PID_D_BELOW) / 1000);
+									(float)MyRobot::dashboard->GetDashValue(DV_PID_D_ABOVE) / 10000,
+									(float)MyRobot::dashboard->GetDashValue(DV_PID_D_BELOW) / 10000);
 
 	InitDistance((double)MyRobot::dashboard->GetDashValue(DV_PID_SETPOINT),
 				 (float)MyRobot::dashboard->GetDashValue(DV_PID_MAX_PWM) / 100, true, true, 0, Drive::fNewMark);
@@ -247,14 +241,14 @@ void Drive::TuneDrivePID() {
 
 void Drive::TuneRotatePID() {
 	m_rotatePID->SetCoefficient('P', (float)MyRobot::dashboard->GetDashValue(DV_PID_P_THRESHOLD),
-									 (float)MyRobot::dashboard->GetDashValue(DV_PID_P_ABOVE) / 1000,
-									 (float)MyRobot::dashboard->GetDashValue(DV_PID_P_BELOW) / 1000);
+									 (float)MyRobot::dashboard->GetDashValue(DV_PID_P_ABOVE) / 10000,
+									 (float)MyRobot::dashboard->GetDashValue(DV_PID_P_BELOW) / 10000);
 	m_rotatePID->SetCoefficient('I', (float)MyRobot::dashboard->GetDashValue(DV_PID_I_THRESHOLD),
-									 (float)MyRobot::dashboard->GetDashValue(DV_PID_I_ABOVE) / 1000,
-									 (float)MyRobot::dashboard->GetDashValue(DV_PID_I_BELOW) / 1000);
+									 (float)MyRobot::dashboard->GetDashValue(DV_PID_I_ABOVE) / 10000,
+									 (float)MyRobot::dashboard->GetDashValue(DV_PID_I_BELOW) / 10000);
 	m_rotatePID->SetCoefficient('D', (float)MyRobot::dashboard->GetDashValue(DV_PID_D_THRESHOLD),
-									 (float)MyRobot::dashboard->GetDashValue(DV_PID_D_ABOVE) / 1000,
-									 (float)MyRobot::dashboard->GetDashValue(DV_PID_D_BELOW) / 1000);
+									 (float)MyRobot::dashboard->GetDashValue(DV_PID_D_ABOVE) / 10000,
+									 (float)MyRobot::dashboard->GetDashValue(DV_PID_D_BELOW) / 10000);
 
 	float maxPWM = (float)MyRobot::dashboard->GetDashValue(DV_PID_MAX_PWM) / 100;
 	m_rotatePID->SetOutputRange(-maxPWM, maxPWM);
@@ -367,11 +361,10 @@ void Drive::MecanumDrive(float drive, float strafe, float rotate, DriveWheels dr
 }
 
 bool Drive::RampPWM(float& curPWM, float pidPWM) {			// Ramp current PWM until >= to PID PWM
-	float	direction;
 	float	myPWM;
 	bool	vReturn = false;
 
-	direction = (pidPWM < 0 ? -1.0 : 1.0);
+	float direction = (pidPWM < 0 ? -1.0 : 1.0);
 
 	pidPWM = fabs(pidPWM);									// Use absolute value for PWMs
 	myPWM = fabs(curPWM);

@@ -3,6 +3,8 @@
 
 #include "WPILib.h"
 
+#define MY_ROBOT 1					// 0=Otis;  1=Schumacher
+
 // RoboRIO Analog Inputs
 
 #define AI_GYRO 0
@@ -14,8 +16,6 @@
 #define DI_ENCODER_LEFT_B 1
 #define DI_ENCODER_RIGHT_A 2
 #define DI_ENCODER_RIGHT_B 3
-#define DI_ELEVATOR_UP 4
-#define DI_ELEVATOR_DOWN 5
 
 //RoboRIO Solenoids
 
@@ -75,7 +75,5 @@
 #define RV_DRIVE_ENCODER_R 15
 #define RV_DRIVE_GYRO 16
 #define RV_ELEV_POSITION 17
-#define RV_ELEV_UP_LIMIT 18
-#define RV_ELEV_DOWN_LIMIT 19
 
 #endif

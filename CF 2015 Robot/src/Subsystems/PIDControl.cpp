@@ -24,6 +24,7 @@ PIDControl::PIDControl() {
 	m_minimumInput = 0;
 	m_setpoint = 0;
 	m_prevError = 0;
+	m_prevReset = true;
 	m_totalError = 0;
 }
 
@@ -32,8 +33,14 @@ PIDControl::~PIDControl() {
 
 float PIDControl::Calculate(float input, bool showResults) {		// Calculate output based on input
 	float error = m_setpoint - input;								// Current Error
+	float errorDiff = error - m_prevError;							// Difference between current error and previous error
 
-	if (m_P.threshold > 0) {											// Compare error to threshold for variable coefficients
+	if (m_prevReset) {
+		m_prevReset = false;
+		errorDiff = 0;
+	}
+
+	if (m_P.threshold > 0) {										// Compare error to threshold for variable coefficients
 		if (fabs(error) < m_P.threshold) {
 			m_P.kNow = m_P.kBelow;
 		} else {
@@ -57,7 +64,7 @@ float PIDControl::Calculate(float input, bool showResults) {		// Calculate outpu
 		if (fabs(error) < m_D.threshold) {
 			m_D.kNow = m_D.kBelow;
 		} else {
-			m_D.kNow = m_P.kAbove;
+			m_D.kNow = m_D.kAbove;
 		}
 	}
 
@@ -81,7 +88,6 @@ float PIDControl::Calculate(float input, bool showResults) {		// Calculate outpu
 		}
 	}
 																	
-	float errorDiff = error - m_prevError;
 	float output = m_P.kNow * error + m_I.kNow * m_totalError + m_D.kNow * errorDiff;
 
 	if (output > m_maximumOutput) {									// Limit result to within Minimum-Maximum range
@@ -101,7 +107,7 @@ float PIDControl::Calculate(float input, bool showResults) {		// Calculate outpu
 }
 
 void PIDControl::Reset() {
-	m_prevError = 0;
+	m_prevReset = true;
 	m_totalError = 0;
 }
 

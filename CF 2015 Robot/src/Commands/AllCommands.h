@@ -33,6 +33,16 @@ public:
 	void Interrupted();
 };
 
+class DriveResetEncoder: public Command {
+public:
+	DriveResetEncoder();
+	void Initialize();
+	void Execute();
+	bool IsFinished();
+	void End();
+	void Interrupted();
+};
+
 class ElevJoystick: public Command {
 public:
 	ElevJoystick();

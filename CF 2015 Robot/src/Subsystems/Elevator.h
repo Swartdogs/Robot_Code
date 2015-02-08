@@ -21,19 +21,18 @@ public:
 				 pFeederTote} ElevPosition;
 
 	typedef enum{bOff, bOn} BrakeState;
-	typedef enum{lUp, lDown} WhichLimitSwitch;
+	typedef enum{dUp, dDown, dDownTooFar} ElevDirection;
 
 	Elevator();
 	~Elevator();
 	
 	int32_t GetPosition();
-	bool	GetLimitSwitch(WhichLimitSwitch which);
 	void	InitDefaultCommand();
-	void 	RunWithJoystick(float speed);
-	void	RunWithPID();
+	void 	RunWithJoystick(float joyPWM);
+	void	RunWithPID(bool showPID);
 	void	SetBrake(BrakeState state);
 	void	SetConstant(std::string key, int32_t value);
-	void    SetElevPID();
+	void    SetElevPID(ElevDirection direction);
 	void	SetElevPosition(ElevPosition position);
 	void	TuneElevPID();
 	
@@ -41,21 +40,29 @@ private:
 	void			SetSetpoint(int32_t target);
 
 	PIDControl*		m_elevPID;
-	Victor*			m_motor1;
-	Victor*			m_motor2;
 	AnalogInput*	m_elevPot;
-	DigitalInput*	m_limitUp;
-	DigitalInput*	m_limitDown;
 	Solenoid*		m_elevBrake;
 	
-	char			m_log[100];
+	#if (MY_ROBOT == 0)							// Otis
+		VictorSP*		m_motor1;
+		VictorSP*		m_motor2;
+	#else										// Schumacher
+		Victor*			m_motor1;
+		Victor*			m_motor2;
+	#endif
 
-	bool			m_onTarget;
+	ElevDirection   m_elevDirection;
+	float 			m_elevPWM;
 	int32_t			m_elevTarget;
+	char			m_log[100];
+	bool			m_onTarget;
+	bool			m_rampDone;
 
 	int32_t 		f_elevMaxPosition;
 	int32_t 		f_elevReadyLift;
 	int32_t 		f_elevZeroOffset;
+
+	bool	RampPWM(float& curPWM, float pidPWM);
 };
 
 #endif

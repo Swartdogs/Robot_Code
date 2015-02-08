@@ -5,7 +5,6 @@ ElevJoystick::ElevJoystick() {
 }
 
 void ElevJoystick::Initialize() {
-	MyRobot::elevator->SetBrake(Elevator::bOff);
 }
 
 void ElevJoystick::Execute() {

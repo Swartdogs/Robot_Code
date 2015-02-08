@@ -8,7 +8,7 @@ OI::OI() {
 	jbDriveRotate = new JoystickButton(driveJoystick, 11);
 	jbElevDrive =  	new JoystickButton(elevJoystick, 1);
 
-	jbDriveRotate->WhenPressed(new DriveRotate(45, Drive::fNewMark));
+	jbDriveRotate->WhenPressed(new DriveResetEncoder());
 	jbElevDrive->WhileHeld(new ElevJoystick());
 }
 
@@ -25,7 +25,7 @@ float OI::GetDriveZ() {
 }
 
 float OI::GetElevY(){
-	return -ApplyDeadband(elevJoystick->GetY(), 0.05);
+	return ApplyDeadband(elevJoystick->GetY(), 0.05);
 }
 
 // ******************** PRIVATE ********************

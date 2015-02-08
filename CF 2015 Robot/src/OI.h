@@ -15,6 +15,7 @@ public:
 private:
 	Joystick* 		driveJoystick;
 	Joystick*		elevJoystick;
+
 	JoystickButton*	jbDriveRotate;
 	JoystickButton*	jbElevDrive;
 

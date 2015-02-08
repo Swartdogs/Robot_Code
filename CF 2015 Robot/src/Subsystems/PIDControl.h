@@ -30,6 +30,7 @@ private:
 	float	m_maximumInput;
 	float	m_minimumInput;
 	float	m_prevError;
+	bool	m_prevReset;
 	double	m_totalError;
 	float	m_setpoint;
 };

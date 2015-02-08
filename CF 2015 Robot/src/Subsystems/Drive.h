@@ -25,8 +25,9 @@ public:
 	void		InitDistance(double distance, float maxPWM, bool resetEncoders, bool useBrake, float angle, AngleFrom angleFrom);
 	void		InitRotate(float angle, AngleFrom angleFrom);
 	bool		IsOnTarget();
+	void        ResetEncoders();
 	void		SetConstant(std::string key, int32_t value);
-	void        SetDrivePID();
+	void        SetDrivePID(float dThreshold);
 	void  		SetRotatePID();
 	void		TuneDrivePID();
 	void        TuneRotatePID();

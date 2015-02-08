@@ -40,10 +40,12 @@ private:
 	void SetDashRunData();
 	void SetDashSensorData();
 
-	CommandGroup*	m_autoCommand;
-	int				m_autoDelay;
-	int				m_autoSelect;
-	char			m_log[100];
+	CommandGroup*			m_autoCommand;
+	int						m_autoDelay;
+	int						m_autoSelect;
+	Compressor*     		m_compressor;
+	char					m_log[100];
+	PowerDistributionPanel*	m_powerPanel;
 };
 
 #endif
