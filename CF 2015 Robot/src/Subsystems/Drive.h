@@ -4,6 +4,7 @@
 #include "Commands/Subsystem.h"
 #include "WPILib.h"
 #include "PIDControl.h"
+#include "../Robotmap.h"
 
 class Drive: public Subsystem {
 public:
@@ -24,6 +25,7 @@ public:
 	void 		InitDefaultCommand();
 	void		InitDistance(double distance, float maxPWM, bool resetEncoders, bool useBrake, float angle, AngleFrom angleFrom);
 	void		InitRotate(float angle, AngleFrom angleFrom);
+	void 		InitStrafeDrive();
 	bool		IsOnTarget();
 	void        ResetEncoders();
 	void		SetConstant(std::string key, int32_t value);
@@ -32,6 +34,7 @@ public:
 	void		TuneDrivePID();
 	void        TuneRotatePID();
 	void        StopMotors();
+	void		StrafeDrive(float drive, float strafe);
 
 private:
 	Encoder*	m_leftEncoder;
@@ -39,10 +42,18 @@ private:
 	Gyro*		m_gyro;
 	PIDControl*	m_drivePID;
 	PIDControl*	m_rotatePID;
-	Victor*		m_motorLF;
-	Victor*		m_motorLR;
-	Victor*		m_motorRF;
-	Victor*		m_motorRR;
+
+	#if (MY_ROBOT == 0)							// Otis
+		VictorSP*		m_motorLF;
+		VictorSP*		m_motorLR;
+		VictorSP*		m_motorRF;
+		VictorSP*		m_motorRR;
+	#else										// Schumacher
+		Victor*		m_motorLF;
+		Victor*		m_motorLR;
+		Victor*		m_motorRF;
+		Victor*		m_motorRR;
+	#endif
 
 	bool		m_onTarget;
 	bool		m_rampDone;

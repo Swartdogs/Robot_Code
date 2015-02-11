@@ -4,9 +4,22 @@
 #include <math.h>
 
 Elevator::Elevator() : Subsystem("Elevator") {
-	f_elevZeroOffset 	= 1080;
-	f_elevReadyLift 	= 1500;
-	f_elevMaxPosition	= 2650;
+	f_potCheckDown		= 1130;
+	f_potCheckUp		= 975;
+	f_potZeroOffsetL    = 0;
+	f_potZeroOffsetR   	= 1080;
+
+	f_elevMaxPosition	= 2725;
+	f_binLoad 			= 20;
+	f_feederLoad		= 2725;
+	f_liftFromTote		= 1215;
+	f_liftFromFloor		= 335;
+	f_carry				= 510;
+	f_step				= 1060;
+	f_stepUnload		= 670;
+	f_stepTote			= 1880;
+	f_stepToteUnload 	= 1605;
+	f_platform			= 490;
 	
 	m_elevPID = new PIDControl();
 
@@ -18,56 +31,122 @@ Elevator::Elevator() : Subsystem("Elevator") {
 		m_motor2 = new Victor(PWM_ELEVATOR_2);
 	#endif
 
-	m_elevPot = new AnalogInput(AI_ELEVATOR_POT);
-	m_elevPot->SetAverageBits(2);
-	m_elevPot->SetOversampleBits(0);
+	m_elevPotL = new AnalogInput(AI_ELEVATOR_POT_L);
+	m_elevPotL->SetAverageBits(2);
+	m_elevPotL->SetOversampleBits(0);
+
+	m_elevPotR = new AnalogInput(AI_ELEVATOR_POT_R);
+	m_elevPotR->SetAverageBits(2);
+	m_elevPotR->SetOversampleBits(0);
+
+	m_elevPotCheck = new DigitalInput(DI_ELEV_POT_CHECK);
+
+	m_potInUse = potRight;
+	m_potStatus[0] = m_potStatus[1] = 0;								// Pot Status Bit Map: 0=Out of Sync; 1=No Change; 2=Failed  Check
 
 	m_elevDirection = dDown;
 	m_elevPWM = 0;
-	m_elevTarget = GetPosition();
+	m_elevTarget = GetPosition(m_potInUse);
+
 	m_onTarget = true;
 	m_rampDone = false;
 
 	m_elevBrake = new Solenoid(S_ELEVATOR_BRAKE);
+	m_brakeState = sOff;
+
+	m_toteEject = new Solenoid(S_TOTE_EJECT);
+	m_toteEjectState = sOff;
+
+	m_toteCenter = new Solenoid(S_TOTE_CENTER);
+	m_toteCenterState = sOff;
 }
 
 Elevator::~Elevator() {
 	delete m_elevPID;
 	delete m_motor1;
 	delete m_motor2;
-	delete m_elevPot;
+	delete m_elevPotL;
+	delete m_elevPotR;
+	delete m_elevBrake;
+	delete m_toteEject;
+	delete m_toteCenter;
 }
-int32_t Elevator::GetPosition() {
-	return m_elevPot->GetAverageValue() - f_elevZeroOffset;
 
+int32_t Elevator::GetPosition(ElevPot pot) {
+	if (pot == potLeft) {
+		return f_potZeroOffsetL - m_elevPotL->GetAverageValue();
+	} else if (pot == potRight) {
+		return m_elevPotR->GetAverageValue() - f_potZeroOffsetR;
+	} else {
+		return 0;
+	}
+}
+
+void Elevator::IncrementSetpoint(ElevDirection direction) {
+	if (direction == dUp) {
+		if (m_elevTarget < f_elevMaxPosition) SetSetpoint(m_elevTarget + 15);
+	} else {
+		if (m_elevTarget > 0) SetSetpoint(m_elevTarget - 15);
+	}
 }
 
 void Elevator::InitDefaultCommand() {
 	SetDefaultCommand(new ElevPID());
 }
 
+void Elevator::LogPotInUse() {
+	sprintf(m_log, "Elevator: %s Pot in Use", ElevPotName(m_potInUse).c_str());
+	MyRobot::robotLog->Write(m_log);
+}
+
 void Elevator::RunWithJoystick(float joyPWM){
-	m_elevTarget = GetPosition();
-	m_onTarget = true;
+	static bool elevAtBottom = false;									// Used to prevent hunting when elevator is at Bottom
+	static bool elevAtTop = false;										// or Top
 
-//	printf("Pwm=%f\n", joyPWM);
+	if (m_potInUse == potNone) {
+		joyPWM = 0;
 
-	if (joyPWM < 0) {													// Move Elevator Down
-		if (m_elevTarget <= 60) {										// Within 1" of bottom
-			SetBrake(bOn);												// Stop
-			joyPWM = 0;
+	} else {
+		m_elevTarget = GetPosition(m_potInUse);							// Get position from pot in use
+		m_onTarget = true;
+
+//		printf("Postion=%d  Pwm=%f  atBottom=%d  atTop=%d\n", m_elevTarget, joyPWM, elevAtBottom, elevAtTop);
+
+		if (joyPWM < 0 ) {												// Move Elevator Down
+			if (elevAtBottom) {											// At bottom
+				joyPWM = 0;
+
+			} else if (m_elevTarget <= 15) {							// Reached bottom
+				elevAtBottom = true;
+				joyPWM = 0;												// Stop
+
+			} else {
+				if (elevAtTop) elevAtTop = false;
+
+				SetBrake(sOff);
+				if (m_elevTarget < 360) joyPWM *= 0.4;					// Slow down within 6" of bottom
+				ElevPotCheck(mDown);
+			}
+
+		} else if (joyPWM > 0) {										// Move Elevator Up
+			if (elevAtTop) {											// At Top
+				joyPWM = 0;
+
+			} else if (m_elevTarget >= (f_elevMaxPosition - 15)) {		// Reached Top
+				elevAtTop = true;
+				SetBrake(sOn);
+				joyPWM = 0;												// Stop
+
+			} else {
+				if (elevAtBottom) elevAtBottom = false;
+
+				SetBrake(sOff);
+				if (m_elevTarget > (f_elevMaxPosition - 360)) joyPWM *= 0.6;	// Slow down within 6" of top
+				ElevPotCheck(mUp);
+			}
+
 		} else {
-			SetBrake(bOff);
-			if (m_elevTarget < 360) joyPWM *= 0.4;						// Slow down within 6" of bottom
-		}
-
-	} else if (joyPWM > 0) {											// Move Elevator Up
-		if (m_elevTarget >= (f_elevMaxPosition - 60)) {					// Within 1" of top
-			SetBrake(bOn);												// Stop
-			joyPWM = 0;
-		} else {
-			SetBrake(bOff);
-			if (m_elevTarget > (f_elevMaxPosition - 360)) joyPWM *= 0.6;	// Slow down within 6" of top
+			ElevPotCheck(mStop);
 		}
 	}
 
@@ -78,9 +157,17 @@ void Elevator::RunWithJoystick(float joyPWM){
 void Elevator::RunWithPID(bool showPID){
 	static int 	counter = 0;
 
-	if(!m_onTarget){
+	if (m_potInUse == potNone) {
+		m_elevPWM = 0;
+		m_onTarget = true;
+
+	} else if(!m_onTarget){
+		int32_t elevPosition = GetPosition(m_potInUse);					// Get position from pot in use
+
 		if (m_elevDirection != dUp) {									// Elevator moving down
-			if (m_elevTarget - GetPosition() > 0) {						// Target above current position (Overshot target)
+			ElevPotCheck(mDown);
+
+			if (m_elevTarget - elevPosition > 0) {						// Target above current position (Overshot target)
 				if (m_elevDirection != dDownTooFar) {					// Set I coefficient high (Faster upward movement)
 					m_elevDirection = dDownTooFar;
 					m_elevPID->SetCoefficient('I', 200, 0, 0.01);
@@ -89,18 +176,20 @@ void Elevator::RunWithPID(bool showPID){
 				m_elevDirection = dDown;								// Set I coefficient low (Force downward movement if required)
 				m_elevPID->SetCoefficient('I', 100, 0, 0.0005);
 			}
+
+		} else {														// Elevator moving up
+			ElevPotCheck(mUp);
 		}
 
 		if (m_rampDone) {												// Ramp of PWM completed
-			m_elevPWM = m_elevPID->Calculate((float)GetPosition(), showPID);
+			m_elevPWM = m_elevPID->Calculate((float)elevPosition, showPID);
 		} else {														// Ramp PWM to calculated PID value to minimize sudden movement
-			m_rampDone = RampPWM(m_elevPWM, m_elevPID->Calculate((float)GetPosition(), showPID));
+			m_rampDone = RampPWM(m_elevPWM, m_elevPID->Calculate((float)elevPosition, showPID));
 		}
 
-		if (abs(m_elevTarget - GetPosition()) < 15) {					// Elevator within 0.25 inch of Target
+		if (abs(m_elevTarget - elevPosition) < 15) {					// Elevator within 0.25 inch of Target
 			counter++;
 			if (counter > 2) {											// Maintain position at least 60 ms
-				printf("Elevator on Target\n");							// Elevator on target
 				m_onTarget = true;
 				m_elevPWM = 0;
 			}
@@ -110,21 +199,45 @@ void Elevator::RunWithPID(bool showPID){
 
 	} else {															// Set PWM = 0 if on target
 		m_elevPWM = 0;
+		ElevPotCheck(mStop);
 	}
 
-	m_elevBrake->Set(m_onTarget);
+	if (m_onTarget) {
+		if (m_brakeState == sOff) SetBrake(sOn);
+	} else if (m_brakeState == sOn) {
+		SetBrake(sOff);
+	}
+
 	m_motor1->Set(-m_elevPWM);											// m_elevPWM > 0 moves Elevator UP
 	m_motor2->Set(m_elevPWM);
 }
 
-void Elevator::SetBrake(BrakeState state) {								// Turn Brake On and Off
-	m_elevBrake->Set(state == bOn);
+void Elevator::SetBrake(DeviceState state) {							// Turn Brake On and Off
+	if (m_brakeState != state) {
+		m_brakeState = state;
+		m_elevBrake->Set(state == sOn);
+	}
 }
 
 void Elevator::SetConstant(std::string key, int32_t value) {			// Set constant values read from INI file
-	if(key == "zeroOffset") {
-		f_elevZeroOffset = value;
-		sprintf(m_log, "Elevator: Set Zero Offset=%d", value);
+	if(key == "zeroOffsetL") {
+		f_potZeroOffsetL = value;
+		sprintf(m_log, "Elevator: Set Zero Offset L=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if(key == "zeroOffsetR") {
+		f_potZeroOffsetR = value;
+		sprintf(m_log, "Elevator: Set Zero Offset R=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if(key == "potCheckDown") {
+		f_potCheckDown = value;
+		sprintf(m_log, "Elevator: Set Pot Check Down=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if(key == "potCheckUp") {
+		f_potCheckUp = value;
+		sprintf(m_log, "Elevator: Set Pot Check Up=%d", value);
 		MyRobot::robotLog->Write(m_log);
 
 	} else if(key == "maxPosition") {
@@ -132,15 +245,60 @@ void Elevator::SetConstant(std::string key, int32_t value) {			// Set constant v
 		sprintf(m_log, "Elevator: Set Max Position=%d", value);
 		MyRobot::robotLog->Write(m_log);
 
-	} else if(key == "readyLift") {
-		f_elevReadyLift = value;
-		sprintf(m_log, "Elevator: Set Ready Lift=%d", value);
+	} else if(key == "binLoad") {
+		f_binLoad = value;
+		sprintf(m_log, "Elevator: Set Bin Load=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if(key == "feederLoad") {
+		f_feederLoad = value;
+		sprintf(m_log, "Elevator: Set Feeder Load=%d" , value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if(key == "liftFromTote") {
+		f_liftFromTote = value;
+		sprintf(m_log, "Elevator: Set Lift From Tote=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if(key == "liftFromFloor") {
+		f_liftFromFloor = value;
+		sprintf(m_log, "Elevator: Set Lift From Floor=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if (key == "carry") {
+		f_carry = value;
+		sprintf(m_log, "Elevator: Set Carry=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if (key == "step") {
+		f_step = value;
+		sprintf(m_log, "Elevator: Set Step=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if (key == "stepUnload") {
+		f_stepUnload = value;
+		sprintf(m_log, "Elevator: Set Step Unload=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if (key == "stepTote") {
+		f_stepTote = value;
+		sprintf(m_log, "Elevator: Set Step Tote=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if (key == "stepToteUnload") {
+		f_stepToteUnload = value;
+		sprintf(m_log, "Elevator: Set Step Tote Unload=%d", value);
+		MyRobot::robotLog->Write(m_log);
+
+	} else if (key == "platform") {
+		f_platform = value;
+		sprintf(m_log, "Elevator: Set Platform =%d", value);
 		MyRobot::robotLog->Write(m_log);
 	}
 }
 
 void Elevator::SetElevPID(ElevDirection direction) {					// Set PID coefficients based on direction of movement
-	printf("Set Elev PID=%d\n", direction);
+//	printf("Set Elev PID=%d\n", direction);
 
 	m_elevDirection = direction;
 	m_elevPID->SetInputRange(0, f_elevMaxPosition);
@@ -150,21 +308,21 @@ void Elevator::SetElevPID(ElevDirection direction) {					// Set PID coefficients
 			m_elevPID->SetCoefficient('P', 0, .003, 0);
 			m_elevPID->SetCoefficient('I', 200, 0, 0.0005);				// Add I when near target to increase PWM
 			m_elevPID->SetCoefficient('D', 100, 0, 0.02);				// Add D when near target to brake if moving too fast
-			m_elevPID->SetOutputRange(-0.4, 1.0);
+			m_elevPID->SetOutputRange(-0.4, 0.9);
 			break;
 
 		case dDown:														// Elevator moving DOWN and above target
 			m_elevPID->SetCoefficient('P', 0, .002, 0);
 			m_elevPID->SetCoefficient('I', 100, 0, 0.0005);				// Add I when near target to increase PWM
 			m_elevPID->SetCoefficient('D', 0, 0.02, 0);					// Use D to brake if moving too fast
-			m_elevPID->SetOutputRange(-0.6, 1.0);
+			m_elevPID->SetOutputRange(-0.6, 0.9);
 			break;
 
 		case dDownTooFar:												// Elevator moving DOWN but overshot target
 			m_elevPID->SetCoefficient('P', 0, .002, 0);
 			m_elevPID->SetCoefficient('I', 200, 0, 0.01);				// Add large I when near target to force upward return to target
 			m_elevPID->SetCoefficient('D', 0, 0.02, 0);
-			m_elevPID->SetOutputRange(-0.6, 1.0);
+			m_elevPID->SetOutputRange(-0.6, 0.9);
 			break;
 
 		default:;
@@ -173,28 +331,43 @@ void Elevator::SetElevPID(ElevDirection direction) {					// Set PID coefficients
 
 void Elevator::SetElevPosition(ElevPosition position) {					// Determine PID setpoint for new position
 	switch(position) {
-		case pReadyLiftBin:		SetSetpoint(f_elevReadyLift);	break;
+		case pBinLoad:			SetSetpoint(f_binLoad);			break;
+		case pFeederLoad:		SetSetpoint(f_feederLoad); 		break;
+		case pLiftFromTote: 	SetSetpoint(f_liftFromTote); 	break;
+		case pLiftFromFloor:	SetSetpoint(f_liftFromFloor); 	break;
+		case pCarry:			SetSetpoint(f_carry); 			break;
+		case pStep:				SetSetpoint(f_step); 			break;
+		case pStepUnload:		SetSetpoint(f_stepUnload);		break;
+		case pStepTote:			SetSetpoint(f_stepTote); 		break;
+		case pStepToteUnload:	SetSetpoint(f_stepToteUnload); 	break;
+		case pPlatform:			SetSetpoint(f_platform); 		break;
 		default:;
 	}
 }
 
-void Elevator::SetSetpoint(int32_t target) {							// Set PID Setpoint
-	target = (target > f_elevMaxPosition) ? f_elevMaxPosition:
-							  (target <0) ? 0: target;
-	
-	m_elevTarget = target;
-	m_onTarget = false;
-	m_rampDone = (target < GetPosition());
-	m_elevPWM = 0;
-																		// Set PID coefficients based on direction of travel
-	if (m_elevTarget > GetPosition()) {									// Moving Up
-		SetElevPID(dUp);
-	} else {															// Moving Down
-		SetElevPID(dDown);
+void Elevator::SetToteCenter(DeviceState state) {						// Turn Tote Center On and Off
+	if (m_toteCenterState != state) {
+		m_toteCenterState = state;
+		m_toteCenter->Set(state == sOn);
+	}
+}
+
+void Elevator::SetToteEject(DeviceState state) {						// Turn Tote Eject On and Off
+	if (m_toteEjectState != state) {
+		m_toteEjectState = state;
+		m_toteEject->Set(state == sOn);
+	}
+}
+
+void Elevator::StopMotors() {											// Stop Elevator Motors
+	if (!m_onTarget) {
+		m_elevTarget = GetPosition(m_potInUse);							// Get position from pot in use
+		m_onTarget = true;
 	}
 
-	m_elevPID->SetSetpoint((float)target);
-	m_elevPID->Reset();
+	m_motor1->Set(0);
+	m_motor2->Set(0);
+	SetBrake(sOn);
 }
 
 void Elevator::TuneElevPID() {
@@ -218,16 +391,157 @@ void Elevator::TuneElevPID() {
 
 // ******************** PRIVATE ********************
 
+void Elevator::ElevPotCheck(CheckMove move) {							// Pot Status Bit Map: 0=Out of Sync; 1=No Change; 2=Failed  Check
+	static CheckState		checkState[] = {cDone, cDone};				// Check State: sDone; sUnknown; sExpected; sUnexpected
+	static CheckMove	 	checkMove = mStop;							// Check Move: mStop; mDown; mUp
+	static int32_t          elevPosition[2];							// Current Elev position
+	static int32_t          elevChange[2];								// Change in Elev position from start
+	static int32_t			limitLower = 0;								// Lower Limit of Expected pot check range
+	static int32_t          limitUpper = 0;								// Upper Limit of Expected pot check range
+	static int				moveCounter = 0;							// Counter for determining pot change
+	static int32_t          startPosition[2];							// Elev position at start of movement
+
+	if (move == mStop) {												// Reset move flag when stopped
+		if (checkMove != mStop) {
+			checkMove = mStop;
+
+			if (abs(elevPosition[0] - elevPosition[1]) > 30) {			// Determine whether or not pots are in sync
+				if ((m_potStatus[0] & 1) == 0) {						// Set Sync bit if not
+					m_potStatus[0] |= 1;
+					m_potStatus[1] |= 1;
+					MyRobot::robotLog->Write("Elevator: Pots out of Sync");
+				}
+
+			} else if ((m_potStatus[0] & 1) == 1) {						// Clear Sync bit if they are
+				m_potStatus[0] ^= 1;
+				m_potStatus[1] ^= 1;
+				MyRobot::robotLog->Write("Elevator: Pots in Sync");
+			}
+		}
+		return;
+	}
+
+	elevPosition[0] = GetPosition(potLeft);								// Get current position from each pot
+	elevPosition[1] = GetPosition(potRight);
+
+	if (checkMove != move) {											// Start of new move
+		checkMove = move;
+		moveCounter = 0;												// Reset counter
+		startPosition[0] = elevPosition[0];								// Capture current position
+		startPosition[1] = elevPosition[1];
+		checkState[0] = checkState[1] = cUnknown;						// Reset Check State
+
+		if (checkMove == mDown) {										// Set Limits based on direction of movement
+			limitLower = f_potCheckDown - 60;
+			limitUpper = f_potCheckDown + 60;
+			if (elevPosition[0] < limitUpper) checkState[0] = cDone;	// Set State to done if below sensor range
+			if (elevPosition[1] < limitUpper) checkState[1] = cDone;
+
+		} else {
+			limitLower = f_potCheckUp - 60;
+			limitUpper = f_potCheckUp + 60;
+			if (elevPosition[0] > limitLower) checkState[0] = cDone;	// Set State to done if above sensor range
+			if (elevPosition[1] > limitLower) checkState[1] = cDone;
+		}
+	}
+
+	if (moveCounter < 25) {												// Look for movement in 1st 500 msec
+		elevChange[0] = abs(elevPosition[0] - startPosition[0]);		// Calculate change in position
+		elevChange[1] = abs(elevPosition[1] - startPosition[1]);
+																		// Increment counter if PWM > 0.2 or either pot has changed
+		if (fabs(m_motor1->Get()) > 0.20 || elevChange[0] > 30 || elevChange[1] > 30) moveCounter++;
+
+		if (moveCounter == 25) {										// 500 msec of movement has expired
+			if (elevChange[0] <= 30 || elevChange[0] < (int32_t)(elevChange[1] * 0.5)) {	// Left pot has not changed or change < 50% of Right pot
+				if ((m_potStatus[0] & 2) == 0) {						// Set No Change bit if not set
+					m_potStatus[0] |= 2;
+					sprintf(m_log, "Elevator: %s Pot value NOT changing", ElevPotName(0).c_str());
+					MyRobot::robotLog->Write(m_log);
+					UpdatePotStatus();
+				}
+
+			} else if ((m_potStatus[0] & 2) == 2) {						// Left Pot has changed and No Change bit is set
+				m_potStatus[0] ^= 2;									// Clear bit
+				sprintf(m_log, "Elevator: %s Pot value changing", ElevPotName(0).c_str());
+				MyRobot::robotLog->Write(m_log);
+				UpdatePotStatus();
+			}
+
+			if (elevChange[1] <= 30 || elevChange[1] < (int32_t)(elevChange[0] * 0.5)) {	// Right pot has not changed or change < 50% of Left pot
+				if ((m_potStatus[1] & 2) == 0) {						// Set No Change bit if not set
+					m_potStatus[1] |= 2;
+					sprintf(m_log, "Elevator: %s Pot value NOT changing", ElevPotName(1).c_str());
+					MyRobot::robotLog->Write(m_log);
+					UpdatePotStatus();
+				}
+
+			} else if ((m_potStatus[1] & 2) == 2) {						// Right Pot has changed and No Change bit is set
+				m_potStatus[1] ^= 2;									// Clear bit
+				sprintf(m_log, "Elevator: %s Pot value changing", ElevPotName(1).c_str());
+				MyRobot::robotLog->Write(m_log);
+				UpdatePotStatus();
+			}
+		}
+	}
+
+	for (int i = 0; i < 2; i++) {										// Use sensor to check accuracy of each pot
+		if (checkState[i] != cDone) {									// Check not done
+			CheckState newState = (elevPosition[i] >= limitLower && elevPosition[i] <= limitUpper) ? cExpected : cUnexpected;  // In range of sensor?
+
+			if (checkState[i] == cExpected && newState == cUnexpected) {	// Moved out of expected range with no sensor detection
+				if ((m_potStatus[i] & 4) == 0) {						// Set Check Fail bit if not set
+					m_potStatus[i] |= 4;
+					sprintf(m_log, "Elevator: %s Pot Failed Check (No detection within range)", ElevPotName(i).c_str());
+					MyRobot::robotLog->Write(m_log);
+					UpdatePotStatus();
+				}
+
+				checkState[i] = cDone;
+
+			} else if (!m_elevPotCheck->Get()) {						// Sensor has detected cradle
+				if (checkState[i] == cUnexpected) {						// Sensor detection outside of expected range
+					if ((m_potStatus[i] & 4) == 0) {					// Set Check Fail bit if not set
+						m_potStatus[i] |= 4;
+						sprintf(m_log, "Elevator: %s Pot Failed Check (Detection out of range)", ElevPotName(i).c_str());
+						MyRobot::robotLog->Write(m_log);
+						UpdatePotStatus();
+					}
+
+				} else if ((m_potStatus[i] & 4) == 4) {					// Sensor detection in expected range
+					m_potStatus[i] ^= 4;								// Clear Check Fail bit if set
+					sprintf(m_log, "Elevator: %s Pot Check OK", ElevPotName(i).c_str());
+					MyRobot::robotLog->Write(m_log);
+					UpdatePotStatus();
+				}
+
+				checkState[i] = cDone;
+
+			} else {													// Set current check state
+				checkState[i] = newState;
+			}
+		}
+	}
+}
+
+std::string Elevator::ElevPotName(int index) {
+	switch(index) {
+		case potLeft:	return "Left";
+		case potRight:	return "Right";
+		case potNone:   return "None";
+		default:		return "?";
+	}
+}
+
 bool Elevator::RampPWM(float& curPWM, float pidPWM) {
 	float 	myPWM;
 	bool	vReturn = false;
 
 	float direction = (pidPWM < 0 ? -1.0 : 1.0);
 
-	pidPWM = fabs(pidPWM);									// Use absolute value for PWMs
+	pidPWM = fabs(pidPWM);												// Use absolute value for PWMs
 	myPWM = fabs(curPWM);
 
-	if (myPWM == 0.0) {										// If stopped, set speed to minimum value
+	if (myPWM == 0.0) {													// If stopped, set speed to minimum value
 		if (pidPWM <= 0.2) {
 			myPWM = pidPWM;
 			vReturn = true;
@@ -235,7 +549,7 @@ bool Elevator::RampPWM(float& curPWM, float pidPWM) {
 			myPWM = 0.2;
 		}
 
-	} else {												// Ramp speed
+	} else {															// Ramp speed
 		myPWM = myPWM + 0.05;
 
 		if (myPWM >= pidPWM) {
@@ -244,8 +558,66 @@ bool Elevator::RampPWM(float& curPWM, float pidPWM) {
 		}
 	}
 
-	curPWM = myPWM * direction;								// Apply direction and set the current PWM
+	curPWM = myPWM * direction;											// Apply direction and set the current PWM
 
 	return vReturn;
+}
+
+void Elevator::SetSetpoint(int32_t target) {							// Set PID Setpoint
+	target = (target > f_elevMaxPosition) ? f_elevMaxPosition:
+							  (target <0) ? 0: target;
+
+	m_elevTarget = target;
+	m_onTarget = false;
+	m_rampDone = (target < GetPosition(m_potInUse));
+	m_elevPWM = 0;
+																		// Set PID coefficients based on direction of travel
+	if (m_elevTarget > GetPosition(m_potInUse)) {						// Moving Up
+		SetElevPID(dUp);
+		sprintf(m_log, "Elevator: Set Setpoint=%4d (Move Up)", m_elevTarget);
+		MyRobot::robotLog->Write(m_log);
+
+	} else {															// Moving Down
+		SetElevPID(dDown);
+		sprintf(m_log, "Elevator: Set Setpoint=%4d (Move Down)", m_elevTarget);
+		MyRobot::robotLog->Write(m_log);
+	}
+
+	m_elevPID->SetSetpoint((float)target);
+	m_elevPID->Reset();
+}
+
+void Elevator::UpdatePotStatus() {
+	ElevPot newInUse = m_potInUse;										// Initialize new In Use
+
+	switch (m_potInUse) {												// Current pot in use
+		case potLeft:
+			if ((m_potStatus[0] & 6) != 0) {							// If No Change or Check Fail bit is set
+				if ((m_potStatus[1] & 6) == 0) {						// Change to other pot if OK
+					newInUse = potRight;
+				} else {												// Otherwise Disable elevator
+					newInUse = potNone;
+				}
+			}
+			break;
+
+		case potRight:
+			if ((m_potStatus[1] & 6) != 0) {							// If No Change or Check Fail bit is set
+				if ((m_potStatus[0] & 6) == 0) {						// Change to other pot if OK
+					newInUse = potLeft;
+				} else {												// Otherwise Disable elevator
+					newInUse = potNone;
+				}
+			}
+			break;
+
+		default:;
+	}
+
+	if (m_potInUse != newInUse) {										// Log any change in Pot being used
+		m_potInUse = newInUse;
+		sprintf(m_log, "Elevator: Pot in Use changed to %s", ElevPotName(m_potInUse).c_str());
+		MyRobot::robotLog->Write(m_log);
+	}
 }
 

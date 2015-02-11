@@ -19,6 +19,7 @@ void PeriodicRobot::CallPeriodic(void *periodicRobot) {
 	robot->Periodic();
 }
 
+
 void PeriodicRobot::Periodic() {
 	if (IsDisabled()) {
 		if (m_mode != mDisabled) {
@@ -73,10 +74,15 @@ void PeriodicRobot::SetPeriod(double period) {
 void PeriodicRobot::StartCompetition() {
 	HALReport(HALUsageReporting::kResourceType_Framework, HALUsageReporting::kFramework_Iterative);
 
+	SmartDashboard::init();
+	NetworkTable::GetTable("LiveWindow")->GetSubTable("~STATUS~")->PutBoolean("LW Enabled", false);
+	LiveWindow *lw = LiveWindow::GetInstance();
+
 	RobotInit();
 	m_notifier->StartPeriodic(m_period);
 
 	HALNetworkCommunicationObserveUserProgramStarting();
+	lw->SetEnabled(false);
 
 	while(true) Wait(1.0);
 }

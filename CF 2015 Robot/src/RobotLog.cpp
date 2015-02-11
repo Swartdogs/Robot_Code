@@ -27,7 +27,7 @@ void RobotLog::EndPeriodic() {
 	m_periodicTotalTime += runTime;
 
 	if(runTime > 10.0) {
-		sprintf(m_log, "Mario: Long Periodic Execution Time=%5.1f (Start-to-End)", runTime);
+		sprintf(m_log, "Otis: Long Periodic Execution Time=%5.1f (Start-to-End)", runTime);
 		Write(m_log);
 	}
 }

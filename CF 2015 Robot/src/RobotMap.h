@@ -3,12 +3,13 @@
 
 #include "WPILib.h"
 
-#define MY_ROBOT 1					// 0=Otis;  1=Schumacher
+#define MY_ROBOT 0					// 0=Otis;  1=Schumacher
 
 // RoboRIO Analog Inputs
 
 #define AI_GYRO 0
-#define AI_ELEVATOR_POT 1
+#define AI_ELEVATOR_POT_L 1
+#define AI_ELEVATOR_POT_R 2
 
 // RoboRIO Digital Inputs
 
@@ -16,10 +17,13 @@
 #define DI_ENCODER_LEFT_B 1
 #define DI_ENCODER_RIGHT_A 2
 #define DI_ENCODER_RIGHT_B 3
+#define DI_ELEV_POT_CHECK 4
 
 //RoboRIO Solenoids
 
 #define S_ELEVATOR_BRAKE 0
+#define S_TOTE_EJECT 1
+#define S_TOTE_CENTER 2
 
 // RoboRIO PWM Outputs
 
@@ -74,6 +78,7 @@
 #define RV_DRIVE_ENCODER_L 14
 #define RV_DRIVE_ENCODER_R 15
 #define RV_DRIVE_GYRO 16
-#define RV_ELEV_POSITION 17
+#define RV_ELEV_POSITION_L 17
+#define RV_ELEV_POSITION_R 18
 
 #endif

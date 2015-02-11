@@ -15,7 +15,7 @@ void MyRobot::RobotInit() {
 	drive = 		new Drive();
 	elevator = 		new Elevator();
 
-	dashboard = 	new TcpHost(18, 14, 1);
+	dashboard = 	new TcpHost(19, 14, 1);
 	powerPanel = 	new PdpData();
 	oi = 			new OI();
 
@@ -32,6 +32,8 @@ void MyRobot::RobotInit() {
 
 	m_powerPanel = new PowerDistributionPanel();
 	m_powerPanel->ClearStickyFaults();
+
+	elevator->LogPotInUse();
 }
 	
 void MyRobot::DisabledInit() {
@@ -45,11 +47,13 @@ void MyRobot::DisabledInit() {
 	powerPanel->SetLogEnabled(false);
 	robotLog->Write("Otis: Disabled Periodic");
 	robotLog->Close();
+	SetDashRunData();
 }
 
 void MyRobot::DisabledPeriodic() {
 	if (dashboard->GetDashButtonPress(0, DB_READ_INI)) IniParser();
 	if (dashboard->GetDashButtonPress(0, DB_RESET_PEAKS)) powerPanel->ResetPeaks();
+//	if (dashboard->GetDashButtonPress(0, DB_RESET_PEAKS)) drive->ResetEncoders();
 
 	SetDashSensorData();
 }
@@ -123,14 +127,6 @@ void MyRobot::TestInit() {
 void MyRobot::TestPeriodic() {
 	static int tunePID = 0;
 	SetDashSensorData();
-
-//	if (dashboard->GetDashButton(0, DB_TUNE_PID)) {
-//		elevator->SetBrake(Elevator::bOn);
-//	} else {
-//		elevator->SetBrake(Elevator::bOff);
-//	}
-//
-//	return;
 
 	if (dashboard->GetDashButton(0, DB_TUNE_PID)) {
 		if (tunePID == 0) {
@@ -254,7 +250,8 @@ void MyRobot::SetDashSensorData() {
 	dashboard->SetRobotValue(RV_DRIVE_ENCODER_L, (int32_t)(drive->GetEncoderDistance(Drive::eLeft) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_ENCODER_R, (int32_t)(drive->GetEncoderDistance(Drive::eRight) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_GYRO, (int32_t)(drive->GetGyroAngle() * 10 + 0.5));
-	dashboard->SetRobotValue(RV_ELEV_POSITION, elevator->GetPosition());
+	dashboard->SetRobotValue(RV_ELEV_POSITION_L, elevator->GetPosition(Elevator::potLeft));
+	dashboard->SetRobotValue(RV_ELEV_POSITION_R, elevator->GetPosition(Elevator::potRight));
 }
 
 START_ROBOT_CLASS(MyRobot);

@@ -8,7 +8,7 @@ void ElevJoystick::Initialize() {
 }
 
 void ElevJoystick::Execute() {
-	MyRobot::elevator->RunWithJoystick(MyRobot::oi->GetElevY());
+	MyRobot::elevator->RunWithJoystick(MyRobot::oi->GetElevator());
 }
 
 bool ElevJoystick::IsFinished() {
@@ -16,9 +16,9 @@ bool ElevJoystick::IsFinished() {
 }
 
 void ElevJoystick::End() {
-	MyRobot::elevator->SetBrake(Elevator::bOn);
+	MyRobot::elevator->SetBrake(Elevator::sOn);
 }
 
 void ElevJoystick::Interrupted() {
-	MyRobot::elevator->SetBrake(Elevator::bOn);
+	MyRobot::elevator->SetBrake(Elevator::sOn);
 }

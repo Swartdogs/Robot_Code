@@ -37,7 +37,7 @@ PdpData::~PdpData() {
 }
 
 double PdpData::GetCurrent(int index) {
-	if(index < 16) return m_pdpPeakCurrent[index];
+	if(index < 16) return m_pdpCurrent[index];
 	return 0;
 }
 
