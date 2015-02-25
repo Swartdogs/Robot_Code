@@ -24,12 +24,16 @@ public:
 	float       GetGyroAngle();
 	void 		InitDefaultCommand();
 	void		InitDistance(double distance, float maxPWM, bool resetEncoders, bool useBrake, float angle, AngleFrom angleFrom);
-	void		InitRotate(float angle, AngleFrom angleFrom);
+	void		InitDistance(double distance, float maxPWM, bool resetEncoders, bool useBrake, float angle, AngleFrom angleFrom,
+			                 double triggerDistance);
+	void		InitRotate(float angle, AngleFrom angleFrom, float maxPWM);
 	void 		InitStrafeDrive();
 	bool		IsOnTarget();
+	bool		IsAtTrigger();
 	void        ResetEncoders();
 	void		SetConstant(std::string key, int32_t value);
 	void        SetDrivePID(float dThreshold);
+	void		SetMarkAngle();
 	void  		SetRotatePID();
 	void		TuneDrivePID();
 	void        TuneRotatePID();
@@ -43,18 +47,19 @@ private:
 	PIDControl*	m_drivePID;
 	PIDControl*	m_rotatePID;
 
-	#if (MY_ROBOT == 0)							// Otis
+	#if (MY_ROBOT == 0)							// Schumacher
 		VictorSP*		m_motorLF;
 		VictorSP*		m_motorLR;
 		VictorSP*		m_motorRF;
 		VictorSP*		m_motorRR;
-	#else										// Schumacher
+	#else										// Otis
 		Victor*		m_motorLF;
 		Victor*		m_motorLR;
 		Victor*		m_motorRF;
 		Victor*		m_motorRR;
 	#endif
 
+	bool		m_atTrigger;
 	bool		m_onTarget;
 	bool		m_rampDone;
 
@@ -62,6 +67,7 @@ private:
 
 	double		m_lastDistance;
 	double		m_targetDistance;
+	double		m_triggerDistance;
 
 	float		m_drivePWM;
 	float		m_markAngle;
@@ -73,7 +79,7 @@ private:
 	float		Limit(float Value);
 	void 		MecanumDrive(float drive, float strafe, float rotate, DriveWheels driveWheels);
 	bool		RampPWM(float& curPWM, float pidPWM);
-	float       RotateError();
+	float       RotateError(float target);
 };
 
 #endif

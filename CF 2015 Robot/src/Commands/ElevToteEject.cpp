@@ -5,6 +5,7 @@ ElevToteEject::ElevToteEject() {
 }
 
 void ElevToteEject::Initialize() {
+	MyRobot::elevator->SetRunPID(false);
 	MyRobot::elevator->SetToteEject(Elevator::sOn);
 }
 
@@ -18,8 +19,10 @@ bool ElevToteEject::IsFinished() {
 
 void ElevToteEject::End() {
 	MyRobot::elevator->SetToteEject(Elevator::sOff);
+	MyRobot::elevator->SetRunPID(true);
 }
 
 void ElevToteEject::Interrupted() {
 	MyRobot::elevator->SetToteEject(Elevator::sOff);
+	MyRobot::elevator->SetRunPID(true);
 }

@@ -2,58 +2,76 @@
 #include "Commands/AllCommands.h"
 
 OI::OI() {
-	driveJoystick1 = new Joystick(0);
-	driveJoystick2 = new Joystick(1);
-	elevJoystick = 	 new Joystick(2);
+	driveJoystick = new Joystick(0);
+	elevJoystick = 	new Joystick(1);
+	buttonBox = 	new Joystick(2);
 
-	jbDriveStrafe = 		new JoystickButton(driveJoystick1, 1);
+	jbDriveStrafe1= 		new JoystickButton(driveJoystick, 1);
+	jbDriveStrafe2= 		new JoystickButton(driveJoystick, 11);
+	jbDriveStrafeOnly1 =	new JoystickButton(driveJoystick, 3);
+	jbDriveStrafeOnly2 =	new JoystickButton(driveJoystick, 10);
+	jbDriveSetMark =		new JoystickButton(driveJoystick, 4);
+	jbDriveRotateToMark =	new JoystickButton(driveJoystick, 5);
 
 	jbElevDrive =  			new JoystickButton(elevJoystick, 1);
-	jbElevIncrementDown = 	new JoystickButton(elevJoystick, 8);
-	jbElevIncrementUp =		new JoystickButton(elevJoystick, 9);
-	jbElevBinLoad =			new JoystickButton(elevJoystick, 4);
-	jbElevLiftFromFloor =	new JoystickButton(elevJoystick, 3);
-//	jbElevStep =			new JoystickButton(elevJoystick, 7);
-//	jbElevStepUnload =		new JoystickButton(elevJoystick, 6);
-//	jbElevStepTote =		new JoystickButton(elevJoystick, 10);
-//	jbElevStepToteUnload =	new JoystickButton(elevJoystick, 11);
-	jbElevPlatform = 		new JoystickButton(elevJoystick, 5);
-	jbElevLiftFromTote =	new JoystickButton(elevJoystick, 11);
-	jbElevFeederLoad = 		new JoystickButton(elevJoystick, 6);
-	jbElevCarry = 			new JoystickButton(elevJoystick, 2);
-	jbToteEject =			new JoystickButton(elevJoystick, 7);
-	jbToteCenter =			new JoystickButton(elevJoystick, 10);
+	jbElevStep =			new JoystickButton(elevJoystick, 6);
+	jbElevStepUnload =		new JoystickButton(elevJoystick, 7);
+	jbToteEject1 =			new JoystickButton(elevJoystick, 8);
+	jbToteEject2 =			new JoystickButton(elevJoystick, 9);
+	jbElevStepToteUnload =	new JoystickButton(elevJoystick, 10);
+	jbElevStepTote =		new JoystickButton(elevJoystick, 11);
 
-	jbDriveStrafe->WhileHeld(new DriveStrafe());
+	jbElevFeederLoad = 		new JoystickButton(buttonBox, 1);
+	jbElevLiftFromTote =	new JoystickButton(buttonBox, 2);
+	jbElevLiftFromFloor =	new JoystickButton(buttonBox, 3);
+	jbElevBinLoad =			new JoystickButton(buttonBox, 4);
+	jbElevIncrementUp =		new JoystickButton(buttonBox, 5);
+	jbElevIncrementDown = 	new JoystickButton(buttonBox, 6);
+	jbElevBinRelease =		new JoystickButton(buttonBox, 7);
+	jbElevCarry = 			new JoystickButton(buttonBox, 9);
+	jbToteCenter =			new JoystickButton(buttonBox, 10);
 
-	jbElevDrive->WhileHeld(new ElevJoystick());
-	jbElevIncrementDown->WhenPressed(new ElevIncrement(Elevator::dDown));
-	jbElevIncrementUp->WhenPressed(new ElevIncrement(Elevator::dUp));
-	jbElevLiftFromTote->WhenPressed(new ElevSetPosition(Elevator::pLiftFromTote));
-    jbElevFeederLoad->WhenPressed(new ElevSetPosition(Elevator::pFeederLoad));
-	jbElevCarry->WhenPressed(new ElevSetPosition(Elevator::pCarry));
-	jbElevBinLoad->WhenPressed(new ElevSetPosition(Elevator::pBinLoad));
+	jbDriveStrafe1->WhileHeld		(new DriveStrafe());
+	jbDriveStrafe2->WhileHeld		(new DriveStrafe());
+	jbDriveStrafeOnly1->WhileHeld	(new DriveStrafeOnly());
+	jbDriveStrafeOnly2->WhileHeld	(new DriveStrafeOnly());
+//	jbDriveTest->WhenPressed(new AutoToteBin(0.0));
+//	jbDriveTest->WhenPressed(new Auto3Tote());
+
+	jbElevDrive->WhileHeld			(new ElevJoystick());
+	jbElevStep->WhenPressed			(new ElevSetPosition(Elevator::pStep));
+	jbElevStepUnload->WhenPressed	(new ElevSetPosition(Elevator::pStepUnload));
+	jbToteEject1->WhileHeld			(new ElevToteEject());
+	jbToteEject2->WhileHeld			(new ElevToteEject());
+	jbElevStepToteUnload->WhenPressed(new ElevSetPosition(Elevator::pStepToteUnload));
+	jbElevStepTote->WhenPressed		(new ElevSetPosition(Elevator::pStepTote));
+
+    jbElevFeederLoad->WhenPressed	(new ElevSetPosition(Elevator::pFeederLoad));
+	jbElevLiftFromTote->WhenPressed	(new ElevSetPosition(Elevator::pLiftFromTote));
 	jbElevLiftFromFloor->WhenPressed(new ElevSetPosition(Elevator::pLiftFromFloor));
-//	jbElevStep->WhenPressed(new ElevSetPosition(Elevator::pStep));
-//	jbElevStepUnload->WhenPressed(new ElevSetPosition(Elevator::pStepUnload));
-//	jbElevStepTote->WhenPressed(new ElevSetPosition(Elevator::pStepTote));
-//	jbElevStepToteUnload->WhenPressed(new ElevSetPosition(Elevator::pStepToteUnload));
-	jbElevPlatform->WhenPressed(new ElevSetPosition(Elevator::pPlatform));
+	jbElevBinLoad->WhenPressed		(new ElevSetPosition(Elevator::pBinLoad));
+	jbElevIncrementUp->WhenPressed	(new ElevIncrement(Elevator::dUp));
+	jbElevIncrementDown->WhenPressed(new ElevIncrement(Elevator::dDown));
+	jbElevBinRelease->WhenPressed	(new ElevSetPosition(Elevator::pBinRelease));
+	jbElevCarry->WhenPressed		(new ElevSetPosition(Elevator::pCarry));
+	jbToteCenter->WhileHeld			(new ElevToteCenter());
+}
 
-	jbToteEject->WhileHeld(new ElevToteEject());
-	jbToteCenter->WhileHeld(new ElevToteCenter());
+bool OI::GetCameraButton() {
+	return false;
+//	return driveJoystick->GetRawButton(11);
 }
 
 float OI::GetStrafe() {
-	return ApplyDeadband(driveJoystick1->GetX(), 0.05);
+	return ApplyDeadband(driveJoystick->GetX(), 0.05);
 }
 
 float OI::GetDrive() {
-	return -ApplyDeadband(driveJoystick1->GetY(), 0.05);
+	return -ApplyDeadband(driveJoystick->GetY(), 0.05);
 }
 
 float OI::GetRotate() {
-	float joyValue = ApplyDeadband(driveJoystick1->GetX(), 0.10);
+	float joyValue = ApplyDeadband(driveJoystick->GetX(), 0.10);
 	joyValue = (joyValue >= 0) ? joyValue * joyValue : -joyValue * joyValue;
 	return joyValue;
 }

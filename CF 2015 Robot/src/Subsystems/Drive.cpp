@@ -4,20 +4,20 @@
 #include <math.h>
 
 Drive::Drive() : Subsystem("Drive") {						// Create objects and initialize variables
-	#if (MY_ROBOT == 0)										// Otis
+	#if (MY_ROBOT == 0)										// Schumacher
 		m_motorLF = new VictorSP(PWM_DRIVE_LF);
 		m_motorLR = new VictorSP(PWM_DRIVE_LR);
 		m_motorRF = new VictorSP(PWM_DRIVE_RF);
 		m_motorRR = new VictorSP(PWM_DRIVE_RR);
-	#else													// Shumacher
+	#else													// Otis
 		m_motorLF = new Victor(PWM_DRIVE_LF);
 		m_motorLR = new Victor(PWM_DRIVE_LR);
 		m_motorRF = new Victor(PWM_DRIVE_RF);
 		m_motorRR = new Victor(PWM_DRIVE_RR);
 	#endif
 
-	m_gyro = new Gyro(AI_GYRO);
-	m_gyro->SetSensitivity(0.007);			// 0.0064
+	m_gyro = new Gyro(AI_ROTATE_GYRO);
+	m_gyro->SetSensitivity(0.0069);			//  0.0069  0.007
 
 	m_leftEncoder = new Encoder(DI_ENCODER_LEFT_A, DI_ENCODER_LEFT_B, true);
 	m_leftEncoder->SetDistancePerPulse(0.075);
@@ -30,7 +30,7 @@ Drive::Drive() : Subsystem("Drive") {						// Create objects and initialize vari
 	m_rotatePID = new PIDControl();
 	SetRotatePID();
 
-	m_onTarget = m_rampDone = false;
+	m_atTrigger = m_onTarget = m_rampDone = false;
 
 	m_drivePWM = 0;
 	m_lastDistance = 0;
@@ -38,6 +38,7 @@ Drive::Drive() : Subsystem("Drive") {						// Create objects and initialize vari
 	m_maxPWM = 0;
 	m_targetAngle = 0;
 	m_targetDistance = 0;
+	m_triggerDistance = 0;
 }
 
 Drive::~Drive() {
@@ -67,14 +68,16 @@ void Drive::ExecuteDistance(bool showPID) {
 		m_drivePWM = m_drivePID->Calculate(curDistance, showPID);
 	} else {												// Use Ramp speed until >= PID speed
 		m_rampDone = RampPWM(m_drivePWM, m_drivePID->Calculate(curDistance, showPID));
-		if (m_rampDone) printf("Drive Ramp Completed\n");
 	}
 
-	float error = RotateError();							// Use Rotate PID to maintain heading
+	float error = RotateError(m_targetAngle);				// Use Rotate PID to maintain heading
 	float rotatePWM = m_rotatePID->Calculate(error, false);
+
 	curDistance = fabs(curDistance);
 
-	if (curDistance > fabs(m_targetDistance / 2)) {			// More than half way to target
+	if (m_triggerDistance != 0) m_atTrigger = (curDistance >= m_triggerDistance);
+
+	if (curDistance > fabs(m_targetDistance * 0.5)) {		// More than half way to target
 		if (curDistance - m_lastDistance <= 0) {			// Robot has stopped or is moving in opposite direction
 			m_drivePWM = 0;
 
@@ -98,13 +101,13 @@ void Drive::ExecuteDistance(bool showPID) {
 
 void Drive::ExecuteRotate(bool showPID){
 	static int counter = 5;
-	float error = RotateError();							// Difference between current angle and target
+	float error = RotateError(m_targetAngle);						// Difference between current angle and target
 	float rotatePWM = m_rotatePID->Calculate(error, showPID);		// Get rotate speed from PID
 
 	if (fabs(error) <= 1.0 ) {								// Rotation with 1 degree of target
 		if (counter > 0){
 			counter--;
-		} else {											// Within 1 degree of target for at least 100 ms
+		} else {											// Within 1 degree of target for at least 60 ms
 			rotatePWM = 0;
 			if(!m_onTarget) {
 				m_onTarget = true;
@@ -113,7 +116,7 @@ void Drive::ExecuteRotate(bool showPID){
 			}
 		}
 	} else {
-		counter = 5;
+		counter = 3;
 	}
 
 	if (GetDriveMode() == mArcade){
@@ -147,10 +150,6 @@ void Drive::InitDistance(double distance, float maxPWM, bool resetEncoders, bool
 	m_targetDistance = distance;
 	m_maxPWM = maxPWM;
 
-	m_drivePID->Reset();									// Configure Drive PID
-	m_drivePID->SetSetpoint(m_targetDistance);
-	m_drivePID->SetOutputRange(-m_maxPWM, m_maxPWM);
-
 	if(resetEncoders) {
 		m_leftEncoder->Reset();								// Reset encoder distance measurements to 0
 		m_rightEncoder->Reset();
@@ -161,6 +160,10 @@ void Drive::InitDistance(double distance, float maxPWM, bool resetEncoders, bool
 	} else {
 		SetDrivePID(0);
 	}
+
+	m_drivePID->Reset();									// Configure Drive PID
+	m_drivePID->SetSetpoint(m_targetDistance);
+	m_drivePID->SetOutputRange(-m_maxPWM, m_maxPWM);
 
 	if (angleFrom == fNewMark) {							// Determine heading and reset Rotate PID
 		m_markAngle = GetGyroAngle();
@@ -176,13 +179,21 @@ void Drive::InitDistance(double distance, float maxPWM, bool resetEncoders, bool
 
 	m_drivePWM = 0;
 	m_lastDistance = 0;
-	m_onTarget = m_rampDone = false;
+	m_triggerDistance = 0;
+	m_atTrigger = m_onTarget = m_rampDone = false;
 
 	sprintf(m_log, "Drive:   Initiate Drive: Distance=%6.1f  Heading=%5.1f", m_targetDistance, m_targetAngle);
 	MyRobot::robotLog->Write(m_log);
 }
 
-void Drive::InitRotate(float angle, AngleFrom angleFrom) {
+void Drive::InitDistance(double distance, float maxPWM, bool resetEncoders, bool useBrake, float angle, AngleFrom angleFrom,
+		                double triggerDistance) {
+	InitDistance(distance, maxPWM, resetEncoders, useBrake, angle, angleFrom);
+	m_triggerDistance = fabs(triggerDistance);
+
+}
+
+void Drive::InitRotate(float angle, AngleFrom angleFrom, float maxPWM) {
 	if (angleFrom == fNewMark) {							// Determine angle relative to robot start position
 		m_markAngle = GetGyroAngle();
 		angle += m_markAngle;
@@ -193,6 +204,7 @@ void Drive::InitRotate(float angle, AngleFrom angleFrom) {
 	m_targetAngle = ((int)(angle * 10) % 3600) / 10.0;		// Limit angle to range of 0 to 360 degrees
 	if (m_targetAngle < 0) m_targetAngle += 360;
 
+	m_rotatePID->SetOutputRange(-maxPWM, maxPWM);
 	m_rotatePID->Reset();									// Reset Rotate PID
 	m_onTarget = false;
 
@@ -203,6 +215,10 @@ void Drive::InitRotate(float angle, AngleFrom angleFrom) {
 void Drive::InitStrafeDrive() {
 	m_targetAngle = GetGyroAngle();
 	m_rotatePID->Reset();									// Reset Rotate PID
+}
+
+bool Drive::IsAtTrigger() {
+	return m_atTrigger;
 }
 
 bool Drive::IsOnTarget() {									// Drive and/or Rotate positions are at target
@@ -220,15 +236,19 @@ void Drive::SetConstant(std::string key, int32_t value) {
 
 void Drive::SetDrivePID(float dThreshold) {
 	m_drivePID->SetCoefficient('P', 0, 0.02, 0);
-	m_drivePID->SetCoefficient('I', 6, 0, 0.001);
+	m_drivePID->SetCoefficient('I', 12, 0, 0.001);			// 6, 0, 0.001
 	m_drivePID->SetCoefficient('D', dThreshold, 0, 0.3);
 
 	m_drivePID->SetInputRange(-200, 200);
 	m_drivePID->SetOutputRange(-0.6, 0.6);
 }
 
+void Drive::SetMarkAngle() {
+	m_markAngle = GetGyroAngle();
+}
+
 void Drive::SetRotatePID() {
-	m_rotatePID->SetCoefficient('P', 0, 0.04, 0);
+	m_rotatePID->SetCoefficient('P', 0, 0.03, 0);			//	0.04
 	m_rotatePID->SetCoefficient('I', 10, 0, 0.004);
 	m_rotatePID->SetCoefficient('D', 0, 0.1, 0);
 
@@ -238,7 +258,7 @@ void Drive::SetRotatePID() {
 }
 
 void Drive::StrafeDrive(float drive, float strafe) {
-	MecanumDrive(drive, strafe, m_rotatePID->Calculate(RotateError(), false), wAll);
+	MecanumDrive(drive, strafe, m_rotatePID->Calculate(RotateError(m_targetAngle), false), wAll);
 }
 
 void Drive::TuneDrivePID() {
@@ -268,9 +288,8 @@ void Drive::TuneRotatePID() {
 									 (float)MyRobot::dashboard->GetDashValue(DV_PID_D_BELOW) / 10000);
 
 	float maxPWM = (float)MyRobot::dashboard->GetDashValue(DV_PID_MAX_PWM) / 100;
-	m_rotatePID->SetOutputRange(-maxPWM, maxPWM);
 
-	InitRotate((float)MyRobot::dashboard->GetDashValue(DV_PID_SETPOINT), fNewMark);
+	InitRotate((float)MyRobot::dashboard->GetDashValue(DV_PID_SETPOINT), fNewMark, maxPWM);
 }
 
 void Drive::StopMotors() {									// Stop drive motors
@@ -389,15 +408,11 @@ bool Drive::RampPWM(float& curPWM, float pidPWM) {			// Ramp current PWM until >
 	myPWM = fabs(curPWM);
 
 	if (myPWM == 0.0) {										// If stopped, set speed to minimum value
-		if (pidPWM <= 0.2) {
-			myPWM = pidPWM;
-			vReturn = true;
-		} else {
-			myPWM = 0.2;
-		}
+		myPWM = 0.15;
+		if (pidPWM <= 0.15) vReturn = true;
 
 	} else {												// Ramp speed
-		myPWM = myPWM + 0.01;
+		myPWM = myPWM + 0.008;								// 0.005
 
 		if (myPWM >= pidPWM) {
 			myPWM = pidPWM;
@@ -410,8 +425,8 @@ bool Drive::RampPWM(float& curPWM, float pidPWM) {			// Ramp current PWM until >
 	return vReturn;											// Return True when current PWM >= PID PWM
 }
 
-float Drive::RotateError() {								// Calculate rotation error in -180 to +180 range
-	float error = GetGyroAngle() - m_targetAngle;
+float Drive::RotateError(float target) {					// Calculate rotation error in -180 to +180 range
+	float error = GetGyroAngle() - target;
 
 	if (error > 180) {
 		error -= 360;
@@ -419,6 +434,7 @@ float Drive::RotateError() {								// Calculate rotation error in -180 to +180 
 		error += 360;
 	}
 
+//	printf("Rotate Error: target=%f  error=%f\n", target, error);
 	return error;
 }
 

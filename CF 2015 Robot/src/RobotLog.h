@@ -17,11 +17,12 @@ public:
 	RobotLog();
 	~RobotLog();
 
-	void Close();
-	void EndPeriodic();
-	void SetMode(RobotMode mode);
-	void StartPeriodic();
-	void Write(std::string entry);
+	void 		Close();
+	void 		EndPeriodic();
+	RobotMode	GetMode();
+	void 		SetMode(RobotMode mode);
+	void 		StartPeriodic();
+	void 		Write(std::string entry);
 
 private:
 	char		m_log[100];

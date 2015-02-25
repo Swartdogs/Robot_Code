@@ -10,13 +10,13 @@ OI*			MyRobot::oi = NULL;
 void MyRobot::RobotInit() {
 	robotLog = 	new RobotLog();
 	robotLog->Write("");
-	robotLog->Write("Otis: Robot Init (Build 2015)");
+	robotLog->Write("Schumacher: Robot Init (Build 2015)");
 
 	drive = 		new Drive();
 	elevator = 		new Elevator();
 
-	dashboard = 	new TcpHost(19, 14, 1);
-	powerPanel = 	new PdpData();
+	dashboard = 	new TcpHost(20, 14, 1);
+	powerPanel = 	new PdpData(63);									// Outputs 0-5 are in use
 	oi = 			new OI();
 
 	m_autoDelay = m_autoSelect = 0;
@@ -30,22 +30,22 @@ void MyRobot::RobotInit() {
 	m_compressor->ClearAllPCMStickyFaults();
 //	m_compressor->Stop();
 
-	m_powerPanel = new PowerDistributionPanel();
-	m_powerPanel->ClearStickyFaults();
-
 	elevator->LogPotInUse();
 }
 	
 void MyRobot::DisabledInit() {
 	robotLog->SetMode(RobotLog::mDisabled);
 	robotLog->Write("");
-	robotLog->Write("Otis: Disabled Init");
+	robotLog->Write("Schumacher: Disabled Init");
 
 	if (m_autoCommand != NULL) m_autoCommand->Cancel();
 
+	sprintf(m_log, "Schumacher: Total Energy=%6.1f joules (watt seconds)", powerPanel->GetTotalEnergy());
+	robotLog->Write(m_log);
+
 	dashboard->SetRobotMode(1);
 	powerPanel->SetLogEnabled(false);
-	robotLog->Write("Otis: Disabled Periodic");
+	robotLog->Write("Schumacher: Disabled Periodic");
 	robotLog->Close();
 	SetDashRunData();
 }
@@ -56,26 +56,44 @@ void MyRobot::DisabledPeriodic() {
 //	if (dashboard->GetDashButtonPress(0, DB_RESET_PEAKS)) drive->ResetEncoders();
 
 	SetDashSensorData();
+	CheckCameraButton();
 }
 
 void MyRobot::AutonomousInit() {
 	robotLog->SetMode(RobotLog::mAutonomous);
 	robotLog->Write("");
-	robotLog->Write("Otis: Autonomous Init");
+	robotLog->Write("Schumacher: Autonomous Init");
 
 	dashboard->SetRobotMode(2);
 	powerPanel->SetLogEnabled(dashboard->GetDashButton(0, DB_PDP_LOG));
+	powerPanel->ResetEnergy();
 
 	m_autoSelect = dashboard->GetDashValue(DV_AUTO_SELECT);
 	m_autoDelay = dashboard->GetDashValue(DV_AUTO_DELAY);
 
 	switch(m_autoSelect) {
+		case 1:	m_autoCommand = new AutoRobot((double)m_autoDelay / 4.0);
+				break;
+		case 2: m_autoCommand = new Auto1Tote((double)m_autoDelay / 4.0);
+				break;
+		case 3: m_autoCommand = new AutoToteBinLeft((double)m_autoDelay / 4.0);
+				break;
+		case 4: m_autoCommand = new AutoToteBinRight((double)m_autoDelay / 4.0);
+				break;
+		case 5: m_autoCommand = new Auto3Tote((double) m_autoDelay / 4.0);
+				break;
+		case 6: m_autoCommand = new AutoBinPosition((double) m_autoDelay / 4.0);
+				break;
+		case 7: m_autoCommand = new AutoBinRobot((double) m_autoDelay / 4.0);
+				break;
+		case 8: m_autoCommand = new AutoBinToFeeder((double) m_autoDelay / 4.0);
+				break;
 		default: m_autoCommand = NULL;
 	}
 
 	if (m_autoCommand != NULL) m_autoCommand->Start();
 
-	sprintf(m_log, "Otis: Autonomous Periodic  Command=%d  Delay=%d", m_autoSelect, m_autoDelay * 250);
+	sprintf(m_log, "Schumacher: Autonomous Periodic  Command=%d  Delay=%d", m_autoSelect, m_autoDelay * 250);
 	robotLog->Write(m_log);
 }
 
@@ -83,8 +101,11 @@ void MyRobot::AutonomousPeriodic() {
 	robotLog->StartPeriodic();
 
 	Scheduler::GetInstance()->Run();
+	elevator->RunPID(false);
+
 	SetDashRunData();
 	SetDashSensorData();
+	CheckCameraButton();
 
 	robotLog->EndPeriodic();
 }
@@ -92,22 +113,26 @@ void MyRobot::AutonomousPeriodic() {
 void MyRobot::TeleopInit() {
 	robotLog->SetMode(RobotLog::mTeleop);
 	robotLog->Write("");
-	robotLog->Write("Otis: Teleop Init");
+	robotLog->Write("Schumacher: Teleop Init");
 
 	if (m_autoCommand != NULL) m_autoCommand->Cancel();
 
 	dashboard->SetRobotMode(3);
 	powerPanel->SetLogEnabled(dashboard->GetDashButton(0, DB_PDP_LOG));
+	powerPanel->ResetEnergy();
 
-	robotLog->Write("Otis: Teleop Periodic");
+	robotLog->Write("Schumacher: Teleop Periodic");
 }
 
 void MyRobot::TeleopPeriodic() {
 	robotLog->StartPeriodic();
 
 	Scheduler::GetInstance()->Run();
+	elevator->RunPID(false);
+
 	SetDashRunData();
 	SetDashSensorData();
+	CheckCameraButton();
 
 	robotLog->EndPeriodic();
 }
@@ -115,13 +140,13 @@ void MyRobot::TeleopPeriodic() {
 void MyRobot::TestInit() {
 	robotLog->SetMode(RobotLog::mTest);
 	robotLog->Write("");
-	robotLog->Write("Otis: Test Init");
+	robotLog->Write("Schumacher: Test Init");
 
 	if (m_autoCommand != NULL) m_autoCommand->Cancel();
 
 	dashboard->SetRobotMode(4);
 
-	robotLog->Write("Otis: Test Periodic");
+	robotLog->Write("Schumacher: Test Periodic");
 }
 
 void MyRobot::TestPeriodic() {
@@ -148,7 +173,7 @@ void MyRobot::TestPeriodic() {
 					break;
 			case 2: drive->ExecuteRotate(true);
 					break;
-			case 3: elevator->RunWithPID(true);
+			case 3: elevator->RunPID(true);
 					break;
 			default:;
 		}
@@ -173,6 +198,17 @@ void MyRobot::TestPeriodic() {
 	}
 }
 
+void MyRobot::CheckCameraButton() {
+	static bool lastCheck = false;
+	bool 		isPressed = oi->GetCameraButton();
+
+	if (lastCheck != isPressed) {
+		lastCheck = isPressed;
+		int32_t value = isPressed ? 1 : 0;
+		dashboard->SetRobotValue(RV_CAMERA_BUTTON, value);
+	}
+}
+
 void MyRobot::IniParser() {
 	char		temp[100];
 	int			subsystemIndex;
@@ -191,6 +227,9 @@ void MyRobot::IniParser() {
 		fclose(iniFile);
 		return;
 	}
+
+	robotLog->Write("");
+
 
 	while(!feof(iniFile)) {
 		fgets(temp, 100, iniFile);
@@ -233,17 +272,17 @@ void MyRobot::SetDashRunData() {
 	dashboard->SetRobotValue(RV_VOLTAGE, (int32_t)(powerPanel->GetVoltage() * 10 + 0.5));
 	dashboard->SetRobotValue(RV_LOW_VOLTAGE, (int32_t)(powerPanel->GetLowVoltage() * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_LF_AMPS, (int32_t)(powerPanel->GetCurrent(0) * 10 + 0.5));
-	dashboard->SetRobotValue(RV_DRIVE_LF_PEAK, (int32_t)(powerPanel->GetPeak(0) * 10 + 0.5));
+	dashboard->SetRobotValue(RV_DRIVE_LF_PEAK, (int32_t)(powerPanel->GetPeakCurrent(0) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_LR_AMPS, (int32_t)(powerPanel->GetCurrent(1) * 10 + 0.5));
-	dashboard->SetRobotValue(RV_DRIVE_LR_PEAK, (int32_t)(powerPanel->GetPeak(1) * 10 + 0.5));
+	dashboard->SetRobotValue(RV_DRIVE_LR_PEAK, (int32_t)(powerPanel->GetPeakCurrent(1) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_RF_AMPS, (int32_t)(powerPanel->GetCurrent(2) * 10 + 0.5));
-	dashboard->SetRobotValue(RV_DRIVE_RF_PEAK, (int32_t)(powerPanel->GetPeak(2) * 10 + 0.5));
+	dashboard->SetRobotValue(RV_DRIVE_RF_PEAK, (int32_t)(powerPanel->GetPeakCurrent(2) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_DRIVE_RR_AMPS, (int32_t)(powerPanel->GetCurrent(3)* 10 + 0.5));
-	dashboard->SetRobotValue(RV_DRIVE_RR_PEAK, (int32_t)(powerPanel->GetPeak(3) * 10 + 0.5));
+	dashboard->SetRobotValue(RV_DRIVE_RR_PEAK, (int32_t)(powerPanel->GetPeakCurrent(3) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_ELEV1_AMPS, (int32_t)(powerPanel->GetCurrent(4) * 10 + 0.5));
-	dashboard->SetRobotValue(RV_ELEV1_PEAK, (int32_t)(powerPanel->GetPeak(4) * 10 + 0.5));
+	dashboard->SetRobotValue(RV_ELEV1_PEAK, (int32_t)(powerPanel->GetPeakCurrent(4) * 10 + 0.5));
 	dashboard->SetRobotValue(RV_ELEV2_AMPS, (int32_t)(powerPanel->GetCurrent(5) * 10 + 0.5));
-	dashboard->SetRobotValue(RV_ELEV2_PEAK, (int32_t)(powerPanel->GetPeak(5) * 10 + 0.5));
+	dashboard->SetRobotValue(RV_ELEV2_PEAK, (int32_t)(powerPanel->GetPeakCurrent(5) * 10 + 0.5));
 }
 
 void MyRobot::SetDashSensorData() {

@@ -10,7 +10,6 @@ void ElevIncrement::Initialize() {
 }
 
 void ElevIncrement::Execute() {
-	MyRobot::elevator->RunWithPID(false);
 }
 
 bool ElevIncrement::IsFinished() {

@@ -11,7 +11,6 @@ void ElevSetPosition::Initialize() {
 }
 
 void ElevSetPosition::Execute() {
-	MyRobot::elevator->RunWithPID(false);
 }
 
 bool ElevSetPosition::IsFinished() {

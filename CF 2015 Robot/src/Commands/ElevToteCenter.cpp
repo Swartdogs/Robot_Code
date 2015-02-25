@@ -9,7 +9,6 @@ void ElevToteCenter::Initialize() {
 }
 
 void ElevToteCenter::Execute() {
-	MyRobot::elevator->StopMotors();
 }
 
 bool ElevToteCenter::IsFinished() {

@@ -5,6 +5,7 @@ ElevJoystick::ElevJoystick() {
 }
 
 void ElevJoystick::Initialize() {
+	MyRobot::elevator->SetRunPID(false);
 }
 
 void ElevJoystick::Execute() {
@@ -17,8 +18,9 @@ bool ElevJoystick::IsFinished() {
 
 void ElevJoystick::End() {
 	MyRobot::elevator->SetBrake(Elevator::sOn);
+	MyRobot::elevator->SetRunPID(true);
 }
 
 void ElevJoystick::Interrupted() {
-	MyRobot::elevator->SetBrake(Elevator::sOn);
+	MyRobot::elevator->SetRunPID(true);
 }

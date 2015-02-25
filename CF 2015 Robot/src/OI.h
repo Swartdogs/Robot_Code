@@ -7,32 +7,40 @@ class OI {
 public:
 	OI();
 
-	float GetDrive();
-	float GetElevator();
-	float GetRotate();
-	float GetStrafe();
+	bool	GetCameraButton();
+	float 	GetDrive();
+	float 	GetElevator();
+	float 	GetRotate();
+	float 	GetStrafe();
 
 private:
-	Joystick* 		driveJoystick1;
-	Joystick*       driveJoystick2;
+	Joystick* 		driveJoystick;
 	Joystick*		elevJoystick;
+	Joystick*       buttonBox;
 
-	JoystickButton* jbDriveStrafe;
+	JoystickButton* jbDriveStrafe1;
+	JoystickButton* jbDriveStrafe2;
+	JoystickButton* jbDriveStrafeOnly1;
+	JoystickButton* jbDriveStrafeOnly2;
+	JoystickButton* jbDriveSetMark;
+	JoystickButton* jbDriveRotateToMark;
 
 	JoystickButton*	jbElevDrive;
-	JoystickButton* jbElevIncrementDown;
-	JoystickButton* jbElevIncrementUp;
-	JoystickButton* jbElevCarry;
-	JoystickButton* jbElevBinLoad;
-	JoystickButton* jbElevLiftFromFloor;
 	JoystickButton* jbElevStep;
 	JoystickButton* jbElevStepUnload;
-	JoystickButton* jbElevStepTote;
+	JoystickButton* jbToteEject1;
+	JoystickButton* jbToteEject2;
 	JoystickButton* jbElevStepToteUnload;
-	JoystickButton* jbElevPlatform;
+	JoystickButton* jbElevStepTote;
+
 	JoystickButton* jbElevFeederLoad;
 	JoystickButton* jbElevLiftFromTote;
-	JoystickButton* jbToteEject;
+	JoystickButton* jbElevLiftFromFloor;
+	JoystickButton* jbElevBinLoad;
+	JoystickButton* jbElevIncrementUp;
+	JoystickButton* jbElevIncrementDown;
+	JoystickButton* jbElevBinRelease;
+	JoystickButton* jbElevCarry;
 	JoystickButton* jbToteCenter;
 
 	float ApplyDeadband(float rawValue, float deadband);

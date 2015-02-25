@@ -36,16 +36,16 @@ private:
 	void TestInit();
 	void TestPeriodic();
 
+	void CheckCameraButton();
 	void IniParser();
 	void SetDashRunData();
 	void SetDashSensorData();
 
-	CommandGroup*			m_autoCommand;
-	int						m_autoDelay;
-	int						m_autoSelect;
-	Compressor*     		m_compressor;
-	char					m_log[100];
-	PowerDistributionPanel*	m_powerPanel;
+	CommandGroup*	m_autoCommand;
+	int				m_autoDelay;
+	int				m_autoSelect;
+	Compressor*     m_compressor;
+	char			m_log[100];
 };
 
 #endif

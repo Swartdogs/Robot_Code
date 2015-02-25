@@ -27,16 +27,20 @@ void RobotLog::EndPeriodic() {
 	m_periodicTotalTime += runTime;
 
 	if(runTime > 10.0) {
-		sprintf(m_log, "Otis: Long Periodic Execution Time=%5.1f (Start-to-End)", runTime);
+		sprintf(m_log, "Schumacher: Long Periodic Execution Time=%5.1f (Start-to-End)", runTime);
 		Write(m_log);
 	}
+}
+
+RobotLog::RobotMode RobotLog::GetMode() {
+	return m_robotMode;
 }
 
 void RobotLog::SetMode(RobotMode mode) {
 	m_periodicCount = 0;
 
 	if(m_robotMode == mAutonomous || m_robotMode == mTeleop) {
-		sprintf(m_log, "Mario: Periodic Usage=%5.1f %%", (m_periodicTotalTime / (GetClock() *1000 - m_periodicBeginTime)) *100);
+		sprintf(m_log, "Schumacher: Periodic Usage=%5.1f %%", (m_periodicTotalTime / (GetClock() *1000 - m_periodicBeginTime)) *100);
 		Write(m_log);
 	}
 
@@ -48,14 +52,22 @@ void RobotLog::SetMode(RobotMode mode) {
 }
 
 void RobotLog::StartPeriodic() {
+	static bool inBrownOut = false;
 	double timeNow = GetClock() *1000;
 
 	if((timeNow- m_periodicLastStart) > 100.0){
-		sprintf(m_log, "Mario: Long Periodic Interval=%5.1f (Start-to-Start)", timeNow - m_periodicLastStart);
+		sprintf(m_log, "Schumacher: Long Periodic Interval=%5.1f (Start-to-Start)", timeNow - m_periodicLastStart);
 		Write(m_log);
 	}
 
 	m_periodicLastStart = timeNow;
+
+	bool brownOut = DriverStation::GetInstance()->IsSysBrownedOut();
+
+	if (inBrownOut != brownOut) {
+		inBrownOut = brownOut;
+		if (inBrownOut) Write("Schumacher: System Brown Out");
+	}
 }
 
 void RobotLog::Write(std::string entry) {
